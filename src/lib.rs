@@ -79,6 +79,10 @@ pub enum Command {
     Overview {
         project_id: Uuid,
     },
+    Analysis {
+        project_id: Uuid,
+        analysis: String,
+    },
     Delete {
         project_id: Uuid,
     },
@@ -149,6 +153,16 @@ impl Command {
                     "vxworks" => log::debug!("VxWorks"),
                     np => log::error!("Type not supported: {}", np),
                 }
+
+                Ok(())
+            }
+            Self::Analysis {
+                project_id,
+                analysis,
+            } => {
+                let res = project_service::analysis(api_server, project_id, &analysis).await?;
+                // let key = res.iter().nth(0).unwrap().0;
+                log::debug!("analysis  {:#?}", res);
 
                 Ok(())
             }

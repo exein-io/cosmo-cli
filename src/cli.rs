@@ -81,6 +81,27 @@ where
                 ),
         )
         .subcommand(
+            SubCommand::with_name("analysis")
+                .alias("an")
+                .about("Project analysis result")
+                .arg(
+                    Arg::with_name("project_id")
+                        .help("ID of the project")
+                        .long("id")
+                        .short("i")
+                        .value_name("project_id")
+                        .required(true),
+                )
+                .arg(
+                    Arg::with_name("analysis")
+                        .help("Analysis name")
+                        .long("analysis")
+                        .short("a")
+                        .value_name("analysis")
+                        .required(true),
+                ),
+        )
+        .subcommand(
             SubCommand::with_name("delete")
                 .alias("rm")
                 .about("Delete a project")
@@ -122,6 +143,13 @@ where
             let project_id = Uuid::parse_str(project_id).expect("Failed to parse project id");
 
             Command::Overview { project_id }
+        }
+        ("analysis", Some(subcommand)) => {
+            let project_id = subcommand.value_of("project_id").unwrap();
+            let project_id = Uuid::parse_str(project_id).expect("Failed to parse project id");
+            let analysis = subcommand.value_of("analysis").unwrap().to_string();
+
+            Command::Analysis { project_id, analysis }
         }
         ("delete", Some(subcommand)) => {
             let project_id = subcommand.value_of("project_id").unwrap();

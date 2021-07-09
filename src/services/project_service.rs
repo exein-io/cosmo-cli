@@ -1,4 +1,4 @@
-use std::{error::Error, fs::File, path::Path};
+use std::{collections::HashMap, error::Error, fs::File, path::Path};
 
 use serde::Deserialize;
 use uuid::Uuid;
@@ -122,6 +122,17 @@ pub async fn overview<U: ApiServer>(
 ) -> Result<serde_json::Value, Box<dyn Error>> {
     let overview = api_server.overview(&project_id).await?;
     Ok(overview)
+}
+
+// TODO : no dyn error
+// Analysis result
+pub async fn analysis<U: ApiServer>(
+    api_server: &mut U,
+    project_id: Uuid,
+    analysis: &str,
+) -> Result<HashMap<String, serde_json::Value>, Box<dyn Error>> {
+    let res = api_server.analysis(&project_id, analysis).await?;
+    Ok(res)
 }
 
 // TODO : no dyn error

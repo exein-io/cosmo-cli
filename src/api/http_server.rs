@@ -7,8 +7,7 @@ use crate::{
 use async_trait::async_trait;
 use lazy_static::lazy_static;
 use reqwest::header::{AUTHORIZATION, USER_AGENT};
-use serde_json::Value;
-use std::path::Path;
+use std::{collections::HashMap, path::Path};
 use uuid::Uuid;
 
 lazy_static! {
@@ -174,7 +173,7 @@ impl<U: AuthSystem> HttpApiServer<U> {
             .send()
             .await?;
         if response.status() == http::StatusCode::OK {
-            let overview: Value = response.json().await?;
+            let overview = response.json().await?;
             Ok(overview)
         } else {
             let body = response.text().await?;
@@ -182,11 +181,28 @@ impl<U: AuthSystem> HttpApiServer<U> {
         }
     }
 
-
-    pub async fn delete(
+    pub async fn analysis(
         &mut self,
         project_id: &Uuid,
-    ) -> Result<(), ApiServerError> {
+        analysis: &str,
+    ) -> Result<HashMap<String, serde_json::Value>, ApiServerError> {
+        let path = format!("{}/{}/analysis/{}", PROJECT_ROUTE_V1, project_id, analysis).to_string();
+
+        let response = self
+            .authenticated_request(&path, reqwest::Method::GET)
+            .await?
+            .send()
+            .await?;
+        if response.status() == http::StatusCode::OK {
+            let res: HashMap<String, serde_json::Value> = response.json().await?;
+            Ok(res)
+        } else {
+            let body = response.text().await?;
+            Err(ApiServerError::ApiError(body))
+        }
+    }
+
+    pub async fn delete(&mut self, project_id: &Uuid) -> Result<(), ApiServerError> {
         let path = format!("{}/{}", PROJECT_ROUTE_V1, project_id).to_string();
 
         let response = self
@@ -239,6 +255,14 @@ impl<U: AuthSystem> ApiServer for HttpApiServer<U> {
 
     async fn overview(&mut self, project_id: &Uuid) -> Result<serde_json::Value, ApiServerError> {
         self.overview(project_id).await
+    }
+
+    async fn analysis(
+        &mut self,
+        project_id: &Uuid,
+        analysis: &str,
+    ) -> Result<HashMap<String, serde_json::Value>, ApiServerError> {
+        self.analysis(project_id, analysis).await
     }
 
     async fn delete(&mut self, project_id: &Uuid) -> Result<(), ApiServerError> {
