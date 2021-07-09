@@ -125,6 +125,16 @@ pub async fn overview<U: ApiServer>(
 }
 
 // TODO : no dyn error
+// Delete a project
+pub async fn delete<U: ApiServer>(
+    api_server: &mut U,
+    project_id: Uuid,
+) -> Result<(), Box<dyn Error>> {
+    api_server.delete(&project_id).await?;
+    Ok(())
+}
+
+// TODO : no dyn error
 // Create a new project
 pub async fn create<U: ApiServer>(
     fw_filepath: &str,

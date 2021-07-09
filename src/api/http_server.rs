@@ -182,6 +182,26 @@ impl<U: AuthSystem> HttpApiServer<U> {
         }
     }
 
+
+    pub async fn delete(
+        &mut self,
+        project_id: &Uuid,
+    ) -> Result<(), ApiServerError> {
+        let path = format!("{}/{}", PROJECT_ROUTE_V1, project_id).to_string();
+
+        let response = self
+            .authenticated_request(&path, reqwest::Method::DELETE)
+            .await?
+            .send()
+            .await?;
+        if response.status() == http::StatusCode::OK {
+            Ok(())
+        } else {
+            let body = response.text().await?;
+            Err(ApiServerError::ApiError(body))
+        }
+    }
+
     pub async fn list_projects(&mut self) -> Result<Vec<Project>, ApiServerError> {
         let response = self
             .authenticated_request(WORKSPACE_PROJECT_ROUTE_V1, reqwest::Method::GET)
@@ -219,6 +239,10 @@ impl<U: AuthSystem> ApiServer for HttpApiServer<U> {
 
     async fn overview(&mut self, project_id: &Uuid) -> Result<serde_json::Value, ApiServerError> {
         self.overview(project_id).await
+    }
+
+    async fn delete(&mut self, project_id: &Uuid) -> Result<(), ApiServerError> {
+        self.delete(project_id).await
     }
 
     async fn list_projects(&mut self) -> Result<Vec<Project>, ApiServerError> {

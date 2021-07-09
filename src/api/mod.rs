@@ -67,6 +67,7 @@ pub trait ApiServer {
         description: Option<&str>,
     ) -> Result<Uuid, ApiServerError>;
     async fn overview(&mut self, project_id: &Uuid) -> Result<serde_json::Value, ApiServerError>;
+    async fn delete(&mut self, project_id: &Uuid) -> Result<(), ApiServerError>;
     async fn list_projects(&mut self) -> Result<Vec<Project>, ApiServerError>;
     async fn logout(&mut self) -> Result<(), AuthError>;
 }

@@ -17,6 +17,7 @@ where
         .setting(AppSettings::SubcommandRequired)
         .subcommand(
             SubCommand::with_name("create")
+                .alias("new")
                 .about("Create project")
                 .arg(
                     Arg::with_name("file")
@@ -60,11 +61,29 @@ where
                 ),
         )
         .subcommand(SubCommand::with_name("status").about("Check models status"))
-        .subcommand(SubCommand::with_name("list").about("List all projects"))
+        .subcommand(
+            SubCommand::with_name("list")
+                .alias("ls")
+                .about("List all projects"),
+        )
         .subcommand(SubCommand::with_name("logout").about("Logout"))
         .subcommand(
             SubCommand::with_name("overview")
+                .alias("show")
                 .about("Project overview")
+                .arg(
+                    Arg::with_name("project_id")
+                        .help("ID of the project")
+                        .long("id")
+                        .short("i")
+                        .value_name("project_id")
+                        .required(true),
+                ),
+        )
+        .subcommand(
+            SubCommand::with_name("delete")
+                .alias("rm")
+                .about("Delete a project")
                 .arg(
                     Arg::with_name("project_id")
                         .help("ID of the project")
@@ -103,6 +122,12 @@ where
             let project_id = Uuid::parse_str(project_id).expect("Failed to parse project id");
 
             Command::Overview { project_id }
+        }
+        ("delete", Some(subcommand)) => {
+            let project_id = subcommand.value_of("project_id").unwrap();
+            let project_id = Uuid::parse_str(project_id).expect("Failed to parse project id");
+
+            Command::Delete { project_id }
         }
         _ => panic!("This shouldn't happen {:?}", matches),
     };

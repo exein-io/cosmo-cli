@@ -79,6 +79,9 @@ pub enum Command {
     Overview {
         project_id: Uuid,
     },
+    Delete {
+        project_id: Uuid,
+    },
 }
 
 impl Command {
@@ -147,6 +150,11 @@ impl Command {
                     np => log::error!("Type not supported: {}", np),
                 }
 
+                Ok(())
+            }
+            Self::Delete { project_id } => {
+                project_service::delete(api_server, project_id).await?;
+                log::debug!("deleted {:#?}", project_id);
                 Ok(())
             }
         }
