@@ -1,13 +1,13 @@
 use super::*;
 use crate::{
-    project_service::{Project, ProjectIdDTO},
+    project_service::{Project, ProjectAnalysis, ProjectIdDTO},
     security::{AuthData, AuthError, AuthSystem},
     CLI_VERSION,
 };
 use async_trait::async_trait;
 use lazy_static::lazy_static;
 use reqwest::header::{AUTHORIZATION, USER_AGENT};
-use std::{collections::HashMap, path::Path};
+use std::path::Path;
 use uuid::Uuid;
 
 lazy_static! {
@@ -17,9 +17,9 @@ lazy_static! {
     );
 }
 
+const PROJECT_ROUTE_V0: &'static str = "/api/v0/projects";
 const PROJECT_ROUTE_V1: &'static str = "/api/v1/projects";
 const UPDATES_ROUTE: &'static str = "/api/updates_check";
-const WORKSPACE_PROJECT_ROUTE_V1: &'static str = "/api/v1/workspaces/personal/projects";
 
 #[derive(Debug)]
 pub struct HttpApiServer<U: AuthSystem> {
@@ -144,7 +144,7 @@ impl<U: AuthSystem> HttpApiServer<U> {
         }
 
         let response = self
-            .authenticated_request(WORKSPACE_PROJECT_ROUTE_V1, reqwest::Method::POST)
+            .authenticated_request(PROJECT_ROUTE_V0, reqwest::Method::POST)
             .await?
             .multipart(form)
             .send()
@@ -185,7 +185,8 @@ impl<U: AuthSystem> HttpApiServer<U> {
         &mut self,
         project_id: &Uuid,
         analysis: &str,
-    ) -> Result<HashMap<String, serde_json::Value>, ApiServerError> {
+        //    ) -> Result<HashMap<String, serde_json::Value>, ApiServerError> {
+    ) -> Result<ProjectAnalysis, ApiServerError> {
         let path = format!("{}/{}/analysis/{}", PROJECT_ROUTE_V1, project_id, analysis).to_string();
 
         let response = self
@@ -194,7 +195,7 @@ impl<U: AuthSystem> HttpApiServer<U> {
             .send()
             .await?;
         if response.status() == http::StatusCode::OK {
-            let res: HashMap<String, serde_json::Value> = response.json().await?;
+            let res = response.json().await?;
             Ok(res)
         } else {
             let body = response.text().await?;
@@ -220,7 +221,7 @@ impl<U: AuthSystem> HttpApiServer<U> {
 
     pub async fn list_projects(&mut self) -> Result<Vec<Project>, ApiServerError> {
         let response = self
-            .authenticated_request(WORKSPACE_PROJECT_ROUTE_V1, reqwest::Method::GET)
+            .authenticated_request(PROJECT_ROUTE_V0, reqwest::Method::GET)
             .await?
             .send()
             .await?;
@@ -261,7 +262,7 @@ impl<U: AuthSystem> ApiServer for HttpApiServer<U> {
         &mut self,
         project_id: &Uuid,
         analysis: &str,
-    ) -> Result<HashMap<String, serde_json::Value>, ApiServerError> {
+    ) -> Result<ProjectAnalysis, ApiServerError> {
         self.analysis(project_id, analysis).await
     }
 

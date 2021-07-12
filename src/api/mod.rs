@@ -1,11 +1,12 @@
 use crate::{
     project_service::Project,
     security::{AuthData, AuthError},
+    services::project_service::ProjectAnalysis,
 };
 use async_trait::async_trait;
 use semver::Version;
 use serde::Deserialize;
-use std::{collections::HashMap, fmt::Display};
+use std::fmt::Display;
 use uuid::Uuid;
 
 mod http_server;
@@ -67,7 +68,11 @@ pub trait ApiServer {
         description: Option<&str>,
     ) -> Result<Uuid, ApiServerError>;
     async fn overview(&mut self, project_id: &Uuid) -> Result<serde_json::Value, ApiServerError>;
-    async fn analysis(&mut self, project_id: &Uuid, analysis: &str) -> Result<HashMap<String, serde_json::Value>, ApiServerError>;
+    async fn analysis(
+        &mut self,
+        project_id: &Uuid,
+        analysis: &str,
+    ) -> Result<ProjectAnalysis, ApiServerError>;
     async fn delete(&mut self, project_id: &Uuid) -> Result<(), ApiServerError>;
     async fn list_projects(&mut self) -> Result<Vec<Project>, ApiServerError>;
     async fn logout(&mut self) -> Result<(), AuthError>;

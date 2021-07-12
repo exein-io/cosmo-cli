@@ -1,4 +1,4 @@
-use std::{collections::HashMap, error::Error, fs::File, path::Path};
+use std::{error::Error, fs::File, path::Path};
 
 use serde::Deserialize;
 use uuid::Uuid;
@@ -104,6 +104,51 @@ pub struct LinuxProjectOverviewSeverity {
     high: u16,
 }
 
+
+// Analisys
+#[derive(Debug, Deserialize)]
+pub struct ProjectAnalysis {
+    pub(crate) name: String,
+    pub(crate) fw_type: String,
+    pub(crate) error: Option<String>,
+    pub(crate) result: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct LinuxHardeningAnalysis {
+    filename: String,
+    r#type: String,
+    score: u8,
+    compiler: Option<String>,
+    stripped: bool,
+    suid: bool,
+    execstack: bool,
+    canary: bool,
+    fortify: bool,
+    nx: bool,
+    pie: String,
+    relro: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct LinuxCveCheckAnalysis {
+    product: String,
+    cveid: String,
+    severity: String,
+    patch: String,
+}
+
+
+#[derive(Debug, Deserialize)]
+pub struct LinuxSecurityScanAnalysis {
+    filename: String,
+    r#type: Vec<String>,
+    desc: String,
+}
+
+
+
+
 /////////////////////////////////////////////////////////////////////7
 // TODO : no dyn error
 // List projects in personal workspace
@@ -130,7 +175,7 @@ pub async fn analysis<U: ApiServer>(
     api_server: &mut U,
     project_id: Uuid,
     analysis: &str,
-) -> Result<HashMap<String, serde_json::Value>, Box<dyn Error>> {
+) -> Result<ProjectAnalysis, Box<dyn Error>> {
     let res = api_server.analysis(&project_id, analysis).await?;
     Ok(res)
 }

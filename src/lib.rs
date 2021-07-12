@@ -16,7 +16,9 @@ use std::{
 };
 use uuid::Uuid;
 
-use crate::services::project_service::LinuxProjectOverview;
+use crate::services::project_service::{
+    LinuxCveCheckAnalysis, LinuxHardeningAnalysis, LinuxProjectOverview, LinuxSecurityScanAnalysis,
+};
 
 #[cfg(debug_assertions)]
 lazy_static! {
@@ -144,13 +146,12 @@ impl Command {
                     .ok_or("Error extracting string")?;
                 log::debug!("project type {}", fw_type);
                 match fw_type {
-                    "linux" => {
+                    "LINUX" | "CONAINER" => {
                         let lpo: LinuxProjectOverview = serde_json::from_value(overview).unwrap();
                         log::info!("Overview: {:#?}", lpo);
                     }
-                    "container" => log::debug!("Container"),
-                    "uefi" => log::debug!("Uefi"),
-                    "vxworks" => log::debug!("VxWorks"),
+                    "UEFI" => log::debug!("Uefi"),
+                    "VXWORKS" => log::debug!("VxWorks"),
                     np => log::error!("Type not supported: {}", np),
                 }
 
@@ -161,8 +162,36 @@ impl Command {
                 analysis,
             } => {
                 let res = project_service::analysis(api_server, project_id, &analysis).await?;
-                // let key = res.iter().nth(0).unwrap().0;
-                log::debug!("analysis  {:#?}", res);
+
+                match res.error {
+                    None => {
+                        let name = res.name.as_str();
+                        let fw_type = res.fw_type;
+                        let result = res.result.unwrap();
+                        log::debug!("Linux {} analysis {}", fw_type, name);
+                        log::debug!("res:: {:#?}", result);
+
+                        match name {
+                            "Hardening" => {
+                                let an: Vec<LinuxHardeningAnalysis> =
+                                    serde_json::from_value(result).unwrap();
+                                log::info!("Hardening: {:#?}", an);
+                            }
+                            "CveCheck" => {
+                                let an: Vec<LinuxCveCheckAnalysis> =
+                                    serde_json::from_value(result).unwrap();
+                                log::info!("CveCheck: {:#?}", an);
+                            }
+                            "SecurityScan" => {
+                                let an: Vec<LinuxSecurityScanAnalysis> =
+                                    serde_json::from_value(result).unwrap();
+                                log::info!("SecurityScan: {:#?}", an);
+                            }
+                            an => log::error!("Analysis not supported: {}", an),
+                        }
+                    }
+                    e => log::debug!("Analysis {} error: {}", analysis, e.unwrap()),
+                }
 
                 Ok(())
             }
