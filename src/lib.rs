@@ -9,16 +9,10 @@ use api::ApiServer;
 use lazy_static::lazy_static;
 use project_service::Project;
 use services::*;
-use std::{
-    error::Error,
-    fs::File,
-    io::{self, prelude::*, BufRead, BufReader, Write},
-};
+use std::{error::Error, fs::File, io::{self, prelude::*, BufRead, BufReader, Write}};
 use uuid::Uuid;
 
-use crate::services::project_service::{
-    LinuxCveCheckAnalysis, LinuxHardeningAnalysis, LinuxProjectOverview, LinuxSecurityScanAnalysis,
-};
+use crate::services::project_service::*;
 
 #[cfg(debug_assertions)]
 lazy_static! {
@@ -186,6 +180,63 @@ impl Command {
                                 let an: Vec<LinuxSecurityScanAnalysis> =
                                     serde_json::from_value(result).unwrap();
                                 log::info!("SecurityScan: {:#?}", an);
+                            }
+                            "PasswordHash" => {
+                                let an: Vec<LinuxPasswordHashAnalysis> =
+                                    serde_json::from_value(result).unwrap();
+                                log::info!("PasswordHash: {:#?}", an);
+                            }
+                            "Crypto" => {
+                                let an: Vec<LinuxCryptoAnalysis> =
+                                    serde_json::from_value(result).unwrap();
+                                log::info!("Crypto: {:#?}", an);
+                            }
+                            "Nvram" => {
+                                let an: Vec<LinuxNvramAnalysis> =
+                                    serde_json::from_value(result).unwrap();
+                                log::info!("Nvram: {:#?}", an);
+                            }
+                            "Kernel" => {
+                                let an: Vec<LinuxKernelAnalysis> =
+                                    serde_json::from_value(result).unwrap();
+                                log::info!("Kernel: {:#?}", an);
+                            }
+                            "StaticCode" => {
+                                let analysis_result: Vec<LinuxStaticCodeAnalysis> =
+                                    serde_json::from_value(result).unwrap();
+                                let analysis_parsed: Result<Vec<LinuxStaticCode>, String> =
+                                    analysis_result
+                                        .into_iter()
+                                        .map(|executable_flaw| {
+                                            let flaw_str = executable_flaw
+                                                .flaws
+                                                .as_str()
+                                                .ok_or(format!("failed to access flaw string"));
+
+                                            let flaw_parsed: Result<
+                                                LinuxStaticCodeAnalysisFlaws,
+                                                String,
+                                            > = flaw_str.and_then(|flaw| {
+                                                let flaw_parsed = serde_json::from_str::<
+                                                    LinuxStaticCodeAnalysisFlaws,
+                                                >(
+                                                    flaw
+                                                )
+                                                .map_err(|_| format!("failed to parse flaw"));
+                                                flaw_parsed
+                                            });
+
+                                            flaw_parsed.map(|flaw| LinuxStaticCode {
+                                                line: flaw.line.trim().to_string(),
+                                                descr: flaw.descr.trim().to_string(),
+                                                flaw_type: flaw.flaw_type.trim().to_string(),
+                                                filename: executable_flaw.filename,
+                                            })
+                                        })
+                                        .collect();
+                                let analysis_parsed = analysis_parsed?;
+
+                                log::info!("{:#?}", analysis_parsed);
                             }
                             an => log::error!("Analysis not supported: {}", an),
                         }

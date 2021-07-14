@@ -149,7 +149,10 @@ where
             let project_id = Uuid::parse_str(project_id).expect("Failed to parse project id");
             let analysis = subcommand.value_of("analysis").unwrap().to_string();
 
-            Command::Analysis { project_id, analysis }
+            Command::Analysis {
+                project_id,
+                analysis,
+            }
         }
         ("delete", Some(subcommand)) => {
             let project_id = subcommand.value_of("project_id").unwrap();

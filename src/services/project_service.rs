@@ -104,7 +104,6 @@ pub struct LinuxProjectOverviewSeverity {
     high: u16,
 }
 
-
 // Analisys
 #[derive(Debug, Deserialize)]
 pub struct ProjectAnalysis {
@@ -138,7 +137,6 @@ pub struct LinuxCveCheckAnalysis {
     patch: String,
 }
 
-
 #[derive(Debug, Deserialize)]
 pub struct LinuxSecurityScanAnalysis {
     filename: String,
@@ -146,10 +144,55 @@ pub struct LinuxSecurityScanAnalysis {
     desc: String,
 }
 
+#[derive(Debug, Deserialize)]
+pub struct LinuxPasswordHashAnalysis {
+    username: String,
+    password: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct LinuxCryptoAnalysis {
+    filename: String,
+    r#type: String,
+    subtype: String,
+    pubsz: u16,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct LinuxNvramAnalysis {
+    exe: String,
+    fun: String,
+    name: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct LinuxStaticCodeAnalysis {
+    pub(crate) filename: String,
+    pub(crate) flaws: serde_json::Value,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct LinuxStaticCodeAnalysisFlaws {
+    pub(crate) line: String,
+    pub(crate) descr: String,
+    pub(crate) flaw_type: String,
+}
+
+#[derive(Debug)]
+pub struct LinuxStaticCode {
+    pub(crate) filename: String,
+    pub(crate) line: String,
+    pub(crate) descr: String,
+    pub(crate) flaw_type: String,
+}
 
 
-
-/////////////////////////////////////////////////////////////////////7
+#[derive(Debug, Deserialize)]
+pub struct LinuxKernelAnalysis {
+    name: String,
+    enabled: bool,
+}
+/////////////////////////////////////////////////////////////////////
 // TODO : no dyn error
 // List projects in personal workspace
 pub async fn list_projects<U: ApiServer>(
