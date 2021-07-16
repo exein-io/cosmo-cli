@@ -142,7 +142,7 @@ impl Command {
                     .ok_or("Error extracting string")?;
                 log::debug!("project type {}", fw_type);
                 match fw_type {
-                    "LINUX" | "CONAINER" => {
+                    "LINUX" | "CONTAINER" => {
                         let lpo: LinuxProjectOverview = serde_json::from_value(overview).unwrap();
                         log::info!("Overview: {:#?}", lpo);
                     }
@@ -164,7 +164,7 @@ impl Command {
                         let name = res.name.as_str();
                         let fw_type = res.fw_type;
                         let result = res.result.unwrap();
-                        log::debug!("Linux {} analysis {}", fw_type, name);
+                        log::debug!("{} analysis {}", fw_type, name);
                         log::debug!("res:: {:#?}", result);
 
                         match name {

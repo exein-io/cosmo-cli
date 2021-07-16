@@ -121,7 +121,7 @@ where
             let fw_filepath = subcommand.value_of("file").unwrap().to_string();
             let fw_type = subcommand.value_of("type").unwrap().to_string();
             let fw_subtype = subcommand
-                .value_of("fw_subtype")
+                .value_of("subtype")
                 .unwrap_or("generic")
                 .to_string();
             let name = subcommand.value_of("name").unwrap().to_string();

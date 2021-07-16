@@ -73,7 +73,7 @@ impl Project {
 // WIP
 #[derive(Debug, Deserialize)]
 pub struct LinuxProjectOverview {
-    kernel_security: u16,
+    kernel_security: Option<u16>,
     password_hash: u16,
     security_scan: u16,
     cve_check: LinuxProjectOverviewCveCheck,
