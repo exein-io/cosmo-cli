@@ -9,7 +9,11 @@ use api::ApiServer;
 use lazy_static::lazy_static;
 use project_service::Project;
 use services::*;
-use std::{error::Error, fs::File, io::{self, prelude::*, BufRead, BufReader, Write}};
+use std::{
+    error::Error,
+    fs::File,
+    io::{self, prelude::*, BufRead, BufReader, Write},
+};
 use uuid::Uuid;
 
 use crate::services::project_service::*;
@@ -125,6 +129,8 @@ impl Command {
             Self::List => {
                 let projects: Vec<Project> = project_service::list_projects(api_server).await?;
                 let table = Project::get_table_from_list(&projects);
+                log::debug!("res: {:#?}", projects);
+
                 println!("{}", table);
                 Ok(())
             }
@@ -146,7 +152,10 @@ impl Command {
                         let lpo: LinuxProjectOverview = serde_json::from_value(overview).unwrap();
                         log::info!("Overview: {:#?}", lpo);
                     }
-                    "UEFI" => log::debug!("Uefi"),
+                    "UEFI" => {
+                        let upo: UefiProjectOverview = serde_json::from_value(overview).unwrap();
+                        log::info!("Overview: {:#?}", upo);
+                    }
                     "VXWORKS" => log::debug!("VxWorks"),
                     np => log::error!("Type not supported: {}", np),
                 }

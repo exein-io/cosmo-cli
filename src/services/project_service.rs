@@ -1,5 +1,6 @@
 use std::{error::Error, fs::File, path::Path};
 
+use chrono::{DateTime, Utc};
 use serde::Deserialize;
 use uuid::Uuid;
 
@@ -25,6 +26,7 @@ pub struct Project {
     workspace_id: Uuid,
     project_type: String,
     project_subtype: String,
+    creation_date: DateTime<Utc>,
 }
 
 impl Project {
@@ -70,7 +72,7 @@ impl Project {
     }
 }
 
-// WIP
+// Linux Analysis
 #[derive(Debug, Deserialize)]
 pub struct LinuxProjectOverview {
     kernel_security: Option<u16>,
@@ -79,6 +81,17 @@ pub struct LinuxProjectOverview {
     cve_check: LinuxProjectOverviewCveCheck,
     code: LinuxProjectOverviewCode,
     binary: LinuxProjectOverviewBinary,
+    project: Project,
+    info: LinuxInfo,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct LinuxInfo {
+    arch: String,
+    banner: Option<String>,
+    kernel: String,
+    kernelc: String,
+    libc: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -186,7 +199,6 @@ pub struct LinuxStaticCode {
     pub(crate) flaw_type: String,
 }
 
-
 #[derive(Debug, Deserialize)]
 pub struct LinuxKernelAnalysis {
     name: String,
@@ -198,7 +210,23 @@ pub struct LinuxSoftwareBOMAnalysis {
     filename: String,
     license: Option<String>,
     occurrences: u16,
-    resolve: String
+    resolve: String,
+}
+
+// UEFI Analysis
+
+#[derive(Debug, Deserialize)]
+pub struct UefiProjectOverview {
+    info: UefiInfo,
+    project: Project,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct UefiInfo {
+    dxe_no: u32,
+    pei_no: u32,
+    manufacturer: String,
+    s3mit: String,
 }
 
 /////////////////////////////////////////////////////////////////////
