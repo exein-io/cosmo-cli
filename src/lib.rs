@@ -135,6 +135,8 @@ impl Command {
             }
             Self::Overview { project_id } => {
                 let overview = project_service::overview(api_server, project_id).await?;
+                log::debug!("res:: {:#?}", overview);
+
                 let fw_type = overview["project"]["project_type"]
                     .as_str()
                     .ok_or("Error extracting string")?;
@@ -200,6 +202,11 @@ impl Command {
                                 let an: Vec<LinuxKernelAnalysis> =
                                     serde_json::from_value(result).unwrap();
                                 log::info!("Kernel: {:#?}", an);
+                            }
+                            "SoftwareBOM" => {
+                                let an: Vec<LinuxSoftwareBOMAnalysis> =
+                                    serde_json::from_value(result).unwrap();
+                                log::info!("SoftwareBOM: {:#?}", an);
                             }
                             "StaticCode" => {
                                 let analysis_result: Vec<LinuxStaticCodeAnalysis> =

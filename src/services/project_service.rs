@@ -192,6 +192,15 @@ pub struct LinuxKernelAnalysis {
     name: String,
     enabled: bool,
 }
+
+#[derive(Debug, Deserialize)]
+pub struct LinuxSoftwareBOMAnalysis {
+    filename: String,
+    license: Option<String>,
+    occurrences: u16,
+    resolve: String
+}
+
 /////////////////////////////////////////////////////////////////////
 // TODO : no dyn error
 // List projects in personal workspace
