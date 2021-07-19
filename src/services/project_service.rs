@@ -286,6 +286,23 @@ pub struct UefiSecureBootData {
     second: String,
 }
 
+#[derive(Debug, Deserialize)]
+pub struct UefiSecurityScan {
+    guid: Uuid,
+    module: String,
+    name: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct UefiPeimDxe {
+    name: String,
+    filetype: String,
+    format: String,
+    machine: String,
+    r#type: String,
+    sign: Option<bool>,
+    dependencies: Option<Vec<String>>,
+}
 /////////////////////////////////////////////////////////////////////
 // TODO : no dyn error
 // List projects in personal workspace

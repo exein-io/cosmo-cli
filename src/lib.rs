@@ -273,7 +273,15 @@ impl Command {
                                 let an: UefiSecureBoot = serde_json::from_value(result).unwrap();
                                 log::info!("SecureBoot: {:#?}", an);
                             }
-
+                            "UefiSecurityScan" => {
+                                let an: Vec<UefiSecurityScan> = serde_json::from_value(result).unwrap();
+                                log::info!("UefiSecurityScan: {:#?}", an);
+                            }
+                            "PeimDxe" => {
+                                let an: Vec<UefiPeimDxe> = serde_json::from_value(result).unwrap();
+                                log::info!("PeimDxe: {:#?}", an);
+                            }
+                            
                             an => log::error!("Analysis not supported: {}", an),
                         }
                     }
