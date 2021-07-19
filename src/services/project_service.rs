@@ -72,7 +72,7 @@ impl Project {
     }
 }
 
-// Linux Analysis
+// Linux/Container Analysis
 #[derive(Debug, Deserialize)]
 pub struct LinuxProjectOverview {
     kernel_security: Option<u16>,
@@ -117,7 +117,6 @@ pub struct LinuxProjectOverviewSeverity {
     high: u16,
 }
 
-// Analisys
 #[derive(Debug, Deserialize)]
 pub struct ProjectAnalysis {
     pub(crate) name: String,
@@ -227,6 +226,64 @@ pub struct UefiInfo {
     pei_no: u32,
     manufacturer: String,
     s3mit: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct UefiAccess {
+    read: String,
+    region: String,
+    write: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct UefiIntelBootGuard {
+    acm: String,
+    rsa: Vec<UefiIntelBootGuardRsa>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct UefiIntelBootGuardRsa {
+    name: String,
+    value: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct UefiSurface {
+    name: String,
+    r#type: String,
+    value: String,
+    guid: Uuid,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct UefiSecureBoot {
+    certs: UefiSecureBootCerts,
+    databases: UefiSecureBootDatabases,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "UPPERCASE")]
+pub struct UefiSecureBootCerts {
+    kek: Vec<UefiSecureBootData>,
+    pk: UefiSecureBootData,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct UefiSecureBootDatabases {
+    certs: UefiSecureBootDatabasesData,
+    hashes: UefiSecureBootDatabasesData,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct UefiSecureBootDatabasesData {
+    db: Vec<UefiSecureBootData>,
+    dbx: Vec<UefiSecureBootData>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct UefiSecureBootData {
+    first: String,
+    second: String,
 }
 
 /////////////////////////////////////////////////////////////////////

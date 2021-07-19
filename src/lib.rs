@@ -177,6 +177,7 @@ impl Command {
                         log::debug!("res:: {:#?}", result);
 
                         match name {
+                            // Linux/Container Analysis
                             "Hardening" => {
                                 let an: Vec<LinuxHardeningAnalysis> =
                                     serde_json::from_value(result).unwrap();
@@ -254,6 +255,25 @@ impl Command {
 
                                 log::info!("{:#?}", analysis_parsed);
                             }
+                            // UEFI Analysis
+                            "Access" => {
+                                let an: Vec<UefiAccess> = serde_json::from_value(result).unwrap();
+                                log::info!("Access: {:#?}", an);
+                            }
+                            "IntelBootGuard" => {
+                                let an: UefiIntelBootGuard =
+                                    serde_json::from_value(result).unwrap();
+                                log::info!("IntelBootGuard: {:#?}", an);
+                            }
+                            "Surface" => {
+                                let an: Vec<UefiSurface> = serde_json::from_value(result).unwrap();
+                                log::info!("Surface: {:#?}", an);
+                            }
+                            "SecureBoot" => {
+                                let an: UefiSecureBoot = serde_json::from_value(result).unwrap();
+                                log::info!("SecureBoot: {:#?}", an);
+                            }
+
                             an => log::error!("Analysis not supported: {}", an),
                         }
                     }
