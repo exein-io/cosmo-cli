@@ -38,6 +38,7 @@ cargo build --release
 - List personal projects: `$ efa list` or `$ efa ls`
 - Create a new analysis:  `$ efa create -f <fw-path> -t <fw-type> -n <project-name>` or `$ efa new -f <fw-path> -t <fw-type> -n <project-name>`
 - View project results overview: `$ efa overview -i <uuid-project>` or `$ efa show -i <uuid-project>`
+- View analysis results: `$ efa analysis -i <uuid-project> -a PeimDxe`
 - Delete project: `$ efa delete -i <uuid-project>` or `$ efa rm -i <uuid-project>`
 - Log out: `$ efa logout`
 
@@ -49,5 +50,6 @@ cargo build --release
 - [x] Delete project
 - [x] Create project
 - [x] Logout
-- [ ] Get analyses
+- [x] Get analyses
+- [ ] API key
  

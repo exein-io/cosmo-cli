@@ -303,6 +303,44 @@ pub struct UefiPeimDxe {
     sign: Option<bool>,
     dependencies: Option<Vec<String>>,
 }
+
+//VxWorks
+#[derive(Debug, Deserialize)]
+pub struct VxworksProjectOverview {
+    info: VxworksInfo,
+    project: Project,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct VxworksInfo {
+    functions_no: u32,
+    symbols_no: u32,
+    word_size: u32,
+    arch: String,
+    endianness: String,
+    kernel: Option<String>,
+    os: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct VxworksData {
+    offset: u32,
+    size: u32,
+    name: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct VxworksTask {
+    task_name: String,
+    task_addr: u32,
+    fcn_name: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct VxworksCapability {
+    name: String,
+    caps: Vec<String>,
+}
 /////////////////////////////////////////////////////////////////////
 // TODO : no dyn error
 // List projects in personal workspace

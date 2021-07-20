@@ -17,7 +17,6 @@ lazy_static! {
     );
 }
 
-const PROJECT_ROUTE_V0: &'static str = "/api/v0/projects";
 const PROJECT_ROUTE_V1: &'static str = "/api/v1/projects";
 const UPDATES_ROUTE: &'static str = "/api/updates_check";
 
@@ -144,7 +143,7 @@ impl<U: AuthSystem> HttpApiServer<U> {
         }
 
         let response = self
-            .authenticated_request(PROJECT_ROUTE_V0, reqwest::Method::POST)
+            .authenticated_request(PROJECT_ROUTE_V1, reqwest::Method::POST)
             .await?
             .multipart(form)
             .send()
@@ -221,7 +220,7 @@ impl<U: AuthSystem> HttpApiServer<U> {
 
     pub async fn list_projects(&mut self) -> Result<Vec<Project>, ApiServerError> {
         let response = self
-            .authenticated_request(PROJECT_ROUTE_V0, reqwest::Method::GET)
+            .authenticated_request(PROJECT_ROUTE_V1, reqwest::Method::GET)
             .await?
             .send()
             .await?;

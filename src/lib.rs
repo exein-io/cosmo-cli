@@ -156,7 +156,10 @@ impl Command {
                         let upo: UefiProjectOverview = serde_json::from_value(overview).unwrap();
                         log::info!("Overview: {:#?}", upo);
                     }
-                    "VXWORKS" => log::debug!("VxWorks"),
+                    "VXWORKS" => {
+                        let vpo: VxworksProjectOverview = serde_json::from_value(overview).unwrap();
+                        log::info!("Overview: {:#?}", vpo);
+                    }
                     np => log::error!("Type not supported: {}", np),
                 }
 
@@ -274,14 +277,33 @@ impl Command {
                                 log::info!("SecureBoot: {:#?}", an);
                             }
                             "UefiSecurityScan" => {
-                                let an: Vec<UefiSecurityScan> = serde_json::from_value(result).unwrap();
+                                let an: Vec<UefiSecurityScan> =
+                                    serde_json::from_value(result).unwrap();
                                 log::info!("UefiSecurityScan: {:#?}", an);
                             }
                             "PeimDxe" => {
                                 let an: Vec<UefiPeimDxe> = serde_json::from_value(result).unwrap();
                                 log::info!("PeimDxe: {:#?}", an);
                             }
-                            
+                            // Vxworks Analysis
+                            "Functions" => {
+                                let an: Vec<VxworksData> = serde_json::from_value(result).unwrap();
+                                log::info!("Function: {:#?}", an);
+                            }
+                            "Symbols" => {
+                                let an: Vec<VxworksData> = serde_json::from_value(result).unwrap();
+                                log::info!("Symbols: {:#?}", an);
+                            }
+                            "Tasks" => {
+                                let an: Vec<VxworksTask> = serde_json::from_value(result).unwrap();
+                                log::info!("Tasks: {:#?}", an);
+                            }
+                            "Capabilities" => {
+                                let an: Vec<VxworksCapability> =
+                                    serde_json::from_value(result).unwrap();
+                                log::info!("Capabilities: {:#?}", an);
+                            }
+
                             an => log::error!("Analysis not supported: {}", an),
                         }
                     }
