@@ -1,4 +1,5 @@
 pub mod project_service;
+pub mod apikey_service;
 
 use std::{error::Error, fmt::Display};
 

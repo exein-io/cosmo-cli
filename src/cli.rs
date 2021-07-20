@@ -114,6 +114,19 @@ where
                         .required(true),
                 ),
         )
+        .subcommand(
+            SubCommand::with_name("apikey")
+                .about("API key handler")
+                .arg(
+                    Arg::with_name("action")
+                        .help("Action to perform")
+                        .long("action")
+                        .short("a")
+                        .value_name("action")
+                        .required(true)
+                        .possible_values(&["create", "list", "delete"]),
+                ),
+        )
         .get_matches_from_safe(args)?;
 
     let command = match matches.subcommand() {
@@ -159,6 +172,11 @@ where
             let project_id = Uuid::parse_str(project_id).expect("Failed to parse project id");
 
             Command::Delete { project_id }
+        }
+        ("apikey", Some(subcommand)) => {
+            let action = subcommand.value_of("action").unwrap().to_string();
+
+            Command::Apikey { action }
         }
         _ => panic!("This shouldn't happen {:?}", matches),
     };

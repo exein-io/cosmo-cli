@@ -86,6 +86,9 @@ pub enum Command {
     Delete {
         project_id: Uuid,
     },
+    Apikey {
+        action: String,
+    },
 }
 
 impl Command {
@@ -315,6 +318,25 @@ impl Command {
             Self::Delete { project_id } => {
                 project_service::delete(api_server, project_id).await?;
                 log::debug!("deleted {:#?}", project_id);
+                Ok(())
+            }
+            Self::Apikey { action } => {
+                match action.as_str() {
+                    "create" => {
+                        let apikey = apikey_service::create(api_server).await?;
+                        log::debug!("api key create: {:#?}", apikey);
+                    }
+                    "list" => {
+                        let apikey = apikey_service::list(api_server).await?;
+                        log::debug!("api key list: {:#?}", apikey);
+                    }
+                    "delete" => {
+                        apikey_service::delete(api_server).await?;
+                        log::debug!("api key deleted");
+                    }
+                    _ => log::debug!("Action not supported"),
+                }
+
                 Ok(())
             }
         }

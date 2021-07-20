@@ -41,6 +41,9 @@ cargo build --release
 - View analysis results: `$ efa analysis -i <uuid-project> -a PeimDxe`
 - Delete project: `$ efa delete -i <uuid-project>` or `$ efa rm -i <uuid-project>`
 - Log out: `$ efa logout`
+- Create an API key: `$ efa apikey -a create`
+- List API key: `$ efa apikey -a list`
+- Delete API key: `$ efa apikey -a delete`
 
 
 ## Features
@@ -51,5 +54,5 @@ cargo build --release
 - [x] Create project
 - [x] Logout
 - [x] Get analyses
-- [ ] API key
+- [x] API key
  

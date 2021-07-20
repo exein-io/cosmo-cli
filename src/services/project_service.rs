@@ -304,7 +304,8 @@ pub struct UefiPeimDxe {
     dependencies: Option<Vec<String>>,
 }
 
-//VxWorks
+// VxWorks Analysis
+
 #[derive(Debug, Deserialize)]
 pub struct VxworksProjectOverview {
     info: VxworksInfo,

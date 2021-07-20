@@ -18,6 +18,7 @@ lazy_static! {
 }
 
 const PROJECT_ROUTE_V1: &'static str = "/api/v1/projects";
+const APIKEY_ROUTE_V1: &'static str = "/api/v1/api_key";
 const UPDATES_ROUTE: &'static str = "/api/updates_check";
 
 #[derive(Debug)]
@@ -233,6 +234,59 @@ impl<U: AuthSystem> HttpApiServer<U> {
             Err(ApiServerError::ApiError(body))
         }
     }
+
+    pub async fn apikey_create(&mut self) -> Result<ApiKeyData, ApiServerError> {
+        let response = self
+            .authenticated_request(APIKEY_ROUTE_V1, reqwest::Method::POST)
+            .await?
+            .send()
+            .await?;
+
+        if response.status() == http::StatusCode::OK {
+            let apikey = response.json().await?;
+            Ok(apikey)
+        } else if response.status() == http::StatusCode::BAD_REQUEST {
+            Err(ApiServerError::ApiError(
+                "API key already present!".to_string(),
+            ))
+        } else {
+            let body = response.text().await?;
+            Err(ApiServerError::ApiError(body))
+        }
+    }
+
+    pub async fn apikey_list(&mut self) -> Result<ApiKeyData, ApiServerError> {
+        let response = self
+            .authenticated_request(APIKEY_ROUTE_V1, reqwest::Method::GET)
+            .await?
+            .send()
+            .await?;
+
+        if response.status() == http::StatusCode::OK {
+            let apikey = response.json().await?;
+            Ok(apikey)
+        } else if response.status() == http::StatusCode::NO_CONTENT {
+            Err(ApiServerError::ApiError("No API key found!".to_string()))
+        } else {
+            let body = response.text().await?;
+            Err(ApiServerError::ApiError(body))
+        }
+    }
+
+    pub async fn apikey_delete(&mut self) -> Result<(), ApiServerError> {
+        let response = self
+            .authenticated_request(APIKEY_ROUTE_V1, reqwest::Method::DELETE)
+            .await?
+            .send()
+            .await?;
+
+        if response.status() == http::StatusCode::OK {
+            Ok(())
+        } else {
+            let body = response.text().await?;
+            Err(ApiServerError::ApiError(body))
+        }
+    }
 }
 
 #[async_trait(?Send)]
@@ -280,4 +334,17 @@ impl<U: AuthSystem> ApiServer for HttpApiServer<U> {
     async fn logout(&mut self) -> Result<(), AuthError> {
         self.logout().await
     }
+
+    async fn apikey_create(&mut self) -> Result<ApiKeyData, ApiServerError> {
+        self.apikey_create().await
+    }
+
+    async fn apikey_list(&mut self) -> Result<ApiKeyData, ApiServerError> {
+        self.apikey_list().await
+    }
+
+    async fn apikey_delete(&mut self) -> Result<(), ApiServerError> {
+        self.apikey_delete().await
+    }
+
 }

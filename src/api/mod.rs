@@ -1,7 +1,7 @@
 use crate::{
     project_service::Project,
     security::{AuthData, AuthError},
-    services::project_service::ProjectAnalysis,
+    services::{apikey_service::ApiKeyData, project_service::ProjectAnalysis},
 };
 use async_trait::async_trait;
 use semver::Version;
@@ -76,4 +76,7 @@ pub trait ApiServer {
     async fn delete(&mut self, project_id: &Uuid) -> Result<(), ApiServerError>;
     async fn list_projects(&mut self) -> Result<Vec<Project>, ApiServerError>;
     async fn logout(&mut self) -> Result<(), AuthError>;
+    async fn apikey_create(&mut self) -> Result<ApiKeyData, ApiServerError>;
+    async fn apikey_list(&mut self) -> Result<ApiKeyData, ApiServerError>;
+    async fn apikey_delete(&mut self) -> Result<(), ApiServerError>;
 }
