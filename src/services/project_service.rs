@@ -45,7 +45,7 @@ impl Project {
             TableCell::new("ORIGINAL NAME"),
             TableCell::new("SCORE"),
             TableCell::new("TYPE"),
-            TableCell::new("SUNTYPE"),
+            TableCell::new("SUBTYPE"),
         ]));
 
         let rows: Vec<Row> = list
@@ -149,21 +149,21 @@ pub struct LinuxHardeningAnalysis {
 impl LinuxHardeningAnalysis {
     pub fn get_table_from_list(list: &[LinuxHardeningAnalysis]) -> String {
         let mut table = Table::new();
-        table.max_column_width = 30;
+        table.max_column_width = 50;
         table.style = TableStyle::simple();
         table.add_row(Row::new(vec![
-            TableCell::new(""),
+            TableCell::new("NAME"),
             TableCell::new_with_alignment("HARDENING", 5, Alignment::Center),
-            TableCell::new(""),
+            TableCell::new("SCORE"),
         ]));
         table.add_row(Row::new(vec![
-            TableCell::new("NAME"),
+            TableCell::new(""),
             TableCell::new("CANARY"),
             TableCell::new("FORTIFY"),
             TableCell::new("NX"),
             TableCell::new("PIE"),
             TableCell::new("RELRO"),
-            TableCell::new("SCORE"),
+            TableCell::new(""),
         ]));
 
         let rows: Vec<Row> = list
