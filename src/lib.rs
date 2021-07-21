@@ -73,7 +73,6 @@ pub enum Command {
         fw_type: String,
         fw_subtype: String,
     },
-    Status,
     List,
     Logout,
     Overview {
@@ -127,10 +126,6 @@ impl Command {
                 )
                 .await?;
                 log::info!("Project created successfull. Project id: {}", project_id);
-                Ok(())
-            }
-            Self::Status => {
-                println!("Status");
                 Ok(())
             }
             Self::List => {
@@ -191,42 +186,58 @@ impl Command {
                             "Hardening" => {
                                 let an: Vec<LinuxHardeningAnalysis> =
                                     serde_json::from_value(result).unwrap();
-                                log::info!("Hardening: {:#?}", an);
+                                log::debug!("Hardening: {:#?}", an);
+                                let table = LinuxHardeningAnalysis::get_table_from_list(&an);
+                                println!("{}", table);
                             }
                             "CveCheck" => {
                                 let an: Vec<LinuxCveCheckAnalysis> =
                                     serde_json::from_value(result).unwrap();
-                                log::info!("CveCheck: {:#?}", an);
+                                log::debug!("CveCheck: {:#?}", an);
+                                let table = LinuxCveCheckAnalysis::get_table_from_list(&an);
+                                println!("{}", table);
                             }
                             "SecurityScan" => {
                                 let an: Vec<LinuxSecurityScanAnalysis> =
                                     serde_json::from_value(result).unwrap();
-                                log::info!("SecurityScan: {:#?}", an);
+                                log::debug!("SecurityScan: {:#?}", an);
+                                let table = LinuxSecurityScanAnalysis::get_table_from_list(&an);
+                                println!("{}", table);
                             }
                             "PasswordHash" => {
                                 let an: Vec<LinuxPasswordHashAnalysis> =
                                     serde_json::from_value(result).unwrap();
-                                log::info!("PasswordHash: {:#?}", an);
+                                log::debug!("PasswordHash: {:#?}", an);
+                                let table = LinuxPasswordHashAnalysis::get_table_from_list(&an);
+                                println!("{}", table);
                             }
                             "Crypto" => {
                                 let an: Vec<LinuxCryptoAnalysis> =
                                     serde_json::from_value(result).unwrap();
-                                log::info!("Crypto: {:#?}", an);
+                                log::debug!("Crypto: {:#?}", an);
+                                let table = LinuxCryptoAnalysis::get_table_from_list(&an);
+                                println!("{}", table);
                             }
                             "Nvram" => {
                                 let an: Vec<LinuxNvramAnalysis> =
                                     serde_json::from_value(result).unwrap();
-                                log::info!("Nvram: {:#?}", an);
+                                log::debug!("Nvram: {:#?}", an);
+                                let table = LinuxNvramAnalysis::get_table_from_list(&an);
+                                println!("{}", table);
                             }
                             "Kernel" => {
                                 let an: Vec<LinuxKernelAnalysis> =
                                     serde_json::from_value(result).unwrap();
-                                log::info!("Kernel: {:#?}", an);
+                                log::debug!("Kernel: {:#?}", an);
+                                let table = LinuxKernelAnalysis::get_table_from_list(&an);
+                                println!("{}", table);
                             }
                             "SoftwareBOM" => {
                                 let an: Vec<LinuxSoftwareBOMAnalysis> =
                                     serde_json::from_value(result).unwrap();
-                                log::info!("SoftwareBOM: {:#?}", an);
+                                log::debug!("SoftwareBOM: {:#?}", an);
+                                let table = LinuxSoftwareBOMAnalysis::get_table_from_list(&an);
+                                println!("{}", table);
                             }
                             "StaticCode" => {
                                 let analysis_result: Vec<LinuxStaticCodeAnalysis> =
@@ -263,7 +274,9 @@ impl Command {
                                         .collect();
                                 let analysis_parsed = analysis_parsed?;
 
-                                log::info!("{:#?}", analysis_parsed);
+                                log::debug!("{:#?}", analysis_parsed);
+                                let table = LinuxStaticCode::get_table_from_list(&analysis_parsed);
+                                println!("{}", table);
                             }
                             // UEFI Analysis
                             "Access" => {

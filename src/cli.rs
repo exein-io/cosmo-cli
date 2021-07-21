@@ -60,7 +60,6 @@ where
                         .required(false),
                 ),
         )
-        .subcommand(SubCommand::with_name("status").about("Check models status"))
         .subcommand(
             SubCommand::with_name("list")
                 .alias("ls")
@@ -168,7 +167,6 @@ where
                 description,
             }
         }
-        ("status", Some(_)) => Command::Status,
         ("list", Some(_)) => Command::List,
         ("logout", Some(_)) => Command::Logout,
         ("overview", Some(subcommand)) => {
