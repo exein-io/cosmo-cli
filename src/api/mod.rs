@@ -6,7 +6,7 @@ use crate::{
 use async_trait::async_trait;
 use semver::Version;
 use serde::Deserialize;
-use std::fmt::Display;
+use std::{fmt::Display, path::Path};
 use uuid::Uuid;
 
 mod http_server;
@@ -74,6 +74,7 @@ pub trait ApiServer {
         analysis: &str,
     ) -> Result<ProjectAnalysis, ApiServerError>;
     async fn delete(&mut self, project_id: &Uuid) -> Result<(), ApiServerError>;
+    async fn report(&mut self, project_id: &Uuid, savepath: &Path) -> Result<(), ApiServerError>;
     async fn list_projects(&mut self) -> Result<Vec<Project>, ApiServerError>;
     async fn logout(&mut self) -> Result<(), AuthError>;
     async fn apikey_create(&mut self) -> Result<ApiKeyData, ApiServerError>;

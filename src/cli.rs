@@ -13,7 +13,7 @@ where
     T: Into<OsString> + Clone,
 {
     let matches = App::new("")
-        .about("Easy Exein pipeline helper")
+        .about("Easy EFA pipeline helper")
         .setting(AppSettings::SubcommandRequired)
         .subcommand(
             SubCommand::with_name("create")
@@ -115,6 +115,26 @@ where
                 ),
         )
         .subcommand(
+            SubCommand::with_name("report")
+                .about("Project report")
+                .arg(
+                    Arg::with_name("project_id")
+                        .help("ID of the project")
+                        .long("id")
+                        .short("i")
+                        .value_name("project_id")
+                        .required(true),
+                )
+                .arg(
+                    Arg::with_name("savepath")
+                        .help("PDF report path")
+                        .long("output")
+                        .short("o")
+                        .value_name("savepath")
+                        .required(false),
+                ),
+        )
+        .subcommand(
             SubCommand::with_name("apikey")
                 .about("API key handler")
                 .arg(
@@ -156,6 +176,19 @@ where
             let project_id = Uuid::parse_str(project_id).expect("Failed to parse project id");
 
             Command::Overview { project_id }
+        }
+        ("report", Some(subcommand)) => {
+            let project_id = subcommand.value_of("project_id").unwrap();
+            let project_id = Uuid::parse_str(project_id).expect("Failed to parse project id");
+            let savepath = subcommand
+                .value_of("savepath")
+                .unwrap_or(format!("/tmp/{}.pdf", project_id).as_str())
+                .to_string();
+
+            Command::Report {
+                project_id,
+                savepath,
+            }
         }
         ("analysis", Some(subcommand)) => {
             let project_id = subcommand.value_of("project_id").unwrap();

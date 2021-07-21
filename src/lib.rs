@@ -86,6 +86,10 @@ pub enum Command {
     Delete {
         project_id: Uuid,
     },
+    Report {
+        project_id: Uuid,
+        savepath: String,
+    },
     Apikey {
         action: String,
     },
@@ -318,6 +322,15 @@ impl Command {
             Self::Delete { project_id } => {
                 project_service::delete(api_server, project_id).await?;
                 log::debug!("deleted {:#?}", project_id);
+                Ok(())
+            }
+            Self::Report {
+                project_id,
+                savepath,
+            } => {
+                let report = project_service::report(api_server, project_id, savepath).await?;
+                log::info!("Report saved to {}", report);
+
                 Ok(())
             }
             Self::Apikey { action } => {

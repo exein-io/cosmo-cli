@@ -44,6 +44,7 @@ cargo build --release
 - Create an API key: `$ efa apikey -a create`
 - List API key: `$ efa apikey -a list`
 - Delete API key: `$ efa apikey -a delete`
+- Save PDF report: `$ efa report -i <uuid-project>`
 
 
 ## Features

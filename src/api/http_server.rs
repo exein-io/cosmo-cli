@@ -7,7 +7,7 @@ use crate::{
 use async_trait::async_trait;
 use lazy_static::lazy_static;
 use reqwest::header::{AUTHORIZATION, USER_AGENT};
-use std::path::Path;
+use std::{fs::File, io::Write, path::Path};
 use uuid::Uuid;
 
 lazy_static! {
@@ -181,6 +181,45 @@ impl<U: AuthSystem> HttpApiServer<U> {
         }
     }
 
+    pub async fn report(
+        &mut self,
+        project_id: &Uuid,
+        savepath: &Path,
+    ) -> Result<(), ApiServerError> {
+        let path = format!("{}/{}/report", PROJECT_ROUTE_V1, project_id).to_string();
+
+        let response = self
+            .authenticated_request(&path, reqwest::Method::GET)
+            .await?
+            .send()
+            .await?;
+
+        let status = response.status();
+
+        if status == http::StatusCode::OK {
+            let bytes = response.bytes().await?;
+            let mut f = File::create(&savepath).map_err(|err| {
+                ApiServerError::RequestError(format!(
+                    "Error creating file to: {}. Reason: {}",
+                    savepath.display(),
+                    err
+                ))
+            })?;
+            f.write_all(bytes.as_ref()).map_err(|err| {
+                ApiServerError::RequestError(format!(
+                    "Error writing data to file: {}. Reason: {}",
+                    savepath.display(),
+                    err
+                ))
+            })?;
+            Ok(())
+        } else {
+            let body = response.text().await?;
+
+            Err(ApiServerError::ApiError(body))
+        }
+    }
+
     pub async fn analysis(
         &mut self,
         project_id: &Uuid,
@@ -311,6 +350,10 @@ impl<U: AuthSystem> ApiServer for HttpApiServer<U> {
         self.overview(project_id).await
     }
 
+    async fn report(&mut self, project_id: &Uuid, savepath: &Path) -> Result<(), ApiServerError> {
+        self.report(project_id, savepath).await
+    }
+
     async fn analysis(
         &mut self,
         project_id: &Uuid,
@@ -346,5 +389,4 @@ impl<U: AuthSystem> ApiServer for HttpApiServer<U> {
     async fn apikey_delete(&mut self) -> Result<(), ApiServerError> {
         self.apikey_delete().await
     }
-
 }

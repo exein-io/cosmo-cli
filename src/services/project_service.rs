@@ -362,6 +362,25 @@ pub async fn overview<U: ApiServer>(
     Ok(overview)
 }
 
+// Project overview
+pub async fn report<U: ApiServer>(
+    api_server: &mut U,
+    project_id: Uuid,
+    savepath: String,
+) -> Result<String, Box<dyn Error>> {
+    let report_path = Path::new(&savepath);
+
+    if report_path.exists() {
+        Err(GenericError(format!(
+            "File {} already exists",
+            report_path.display()
+        )))?;
+    }
+    api_server.report(&project_id, &report_path).await?;
+
+    Ok(savepath)
+}
+
 // TODO : no dyn error
 // Analysis result
 pub async fn analysis<U: ApiServer>(
