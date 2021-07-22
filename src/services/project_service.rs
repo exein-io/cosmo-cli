@@ -535,16 +535,76 @@ pub struct UefiAccess {
     write: String,
 }
 
+impl UefiAccess {
+    pub fn get_table_from_list(list: &[UefiAccess]) -> String {
+        let mut table = Table::new();
+        table.style = TableStyle::simple();
+        table.max_column_width = 30;
+        table.add_row(Row::new(vec![
+            TableCell::new("REGION"),
+            TableCell::new("READ"),
+            TableCell::new("WRITE"),
+        ]));
+
+        let rows: Vec<Row> = list
+            .into_iter()
+            .map(|project| {
+                vec![
+                    TableCell::new(&project.region),
+                    TableCell::new(&project.read),
+                    TableCell::new(&project.write),
+                ]
+            })
+            .map(|rtc| Row::new(rtc))
+            .collect();
+
+        for row in rows {
+            table.add_row(row);
+        }
+
+        table.render()
+    }
+}
+
 #[derive(Debug, Deserialize)]
 pub struct UefiIntelBootGuard {
-    acm: String,
-    rsa: Vec<UefiIntelBootGuardRsa>,
+    pub(crate) acm: String,
+    pub(crate) rsa: Vec<UefiIntelBootGuardRsa>,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct UefiIntelBootGuardRsa {
     name: String,
     value: String,
+}
+
+impl UefiIntelBootGuardRsa {
+    pub fn get_table_from_list(list: &[UefiIntelBootGuardRsa]) -> String {
+        let mut table = Table::new();
+        table.style = TableStyle::simple();
+        table.max_column_width = 70;
+        table.add_row(Row::new(vec![
+            TableCell::new("NAME"),
+            TableCell::new("VALUE"),
+        ]));
+
+        let rows: Vec<Row> = list
+            .into_iter()
+            .map(|project| {
+                vec![
+                    TableCell::new(&project.name),
+                    TableCell::new(&project.value),
+                ]
+            })
+            .map(|rtc| Row::new(rtc))
+            .collect();
+
+        for row in rows {
+            table.add_row(row);
+        }
+
+        table.render()
+    }
 }
 
 #[derive(Debug, Deserialize)]
@@ -555,29 +615,67 @@ pub struct UefiSurface {
     guid: Uuid,
 }
 
+impl UefiSurface {
+    pub fn get_table_from_list(list: &[UefiSurface]) -> String {
+        let mut table = Table::new();
+        table.style = TableStyle::simple();
+        table.max_column_width = 40;
+        table.add_row(Row::new(vec![
+            TableCell::new("NAME"),
+            TableCell::new("TYPE"),
+            TableCell::new("GUID"),
+        ]));
+
+        let rows: Vec<Row> = list
+            .into_iter()
+            .map(|project| {
+                vec![
+                    TableCell::new(&project.name),
+                    TableCell::new(&project.r#type),
+                    TableCell::new(&project.guid),
+                ]
+            })
+            .map(|rtc| Row::new(rtc))
+            .collect();
+
+        for row in rows {
+            table.add_row(row);
+        }
+
+        table.render()
+    }
+}
+
 #[derive(Debug, Deserialize)]
 pub struct UefiSecureBoot {
-    certs: UefiSecureBootCerts,
-    databases: UefiSecureBootDatabases,
+    pub(crate) certs: UefiSecureBootCerts,
+    pub(crate) databases: UefiSecureBootDatabases,
 }
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "UPPERCASE")]
 pub struct UefiSecureBootCerts {
-    kek: Vec<UefiSecureBootData>,
-    pk: UefiSecureBootData,
+    pub(crate) kek: Vec<UefiSecureBootData>,
+    pub(crate) pk: UefiSecureBootData,
+}
+
+impl UefiSecureBootCerts {
+    pub fn get_table_from_list(list: &[UefiSecureBootData], db: &str) -> String {
+        let table = UefiSecureBootData::get_table_from_list(&list, db);
+        table.render()
+    }
 }
 
 #[derive(Debug, Deserialize)]
 pub struct UefiSecureBootDatabases {
-    certs: UefiSecureBootDatabasesData,
-    hashes: UefiSecureBootDatabasesData,
+    pub(crate) certs: UefiSecureBootDatabasesData,
+    pub(crate) hashes: UefiSecureBootDatabasesData,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct UefiSecureBootDatabasesData {
-    db: Vec<UefiSecureBootData>,
-    dbx: Vec<UefiSecureBootData>,
+    pub(crate) db: Vec<UefiSecureBootData>,
+    pub(crate) dbx: Vec<UefiSecureBootData>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -586,11 +684,72 @@ pub struct UefiSecureBootData {
     second: String,
 }
 
+impl UefiSecureBootData {
+    pub fn get_table_from_list<'a>(list: &'a [UefiSecureBootData], db: &'a str) -> Table<'a> {
+        let mut table = Table::new();
+        table.style = TableStyle::simple();
+        table.max_column_width = 50;
+        table.add_row(Row::new(vec![
+            TableCell::new("NAME"),
+            TableCell::new("ISSUED BY"),
+            TableCell::new("ISSUED TO"),
+        ]));
+
+        let rows: Vec<Row> = list
+            .into_iter()
+            .map(|project| {
+                vec![
+                    TableCell::new(db),
+                    TableCell::new(&project.first),
+                    TableCell::new(&project.second),
+                ]
+            })
+            .map(|rtc| Row::new(rtc))
+            .collect();
+
+        for row in rows {
+            table.add_row(row);
+        }
+        table
+        //table.render()
+    }
+}
+
 #[derive(Debug, Deserialize)]
 pub struct UefiSecurityScan {
     guid: Uuid,
     module: String,
     name: String,
+}
+
+impl UefiSecurityScan {
+    pub fn get_table_from_list(list: &[UefiSecurityScan]) -> String {
+        let mut table = Table::new();
+        table.style = TableStyle::simple();
+        table.max_column_width = 50;
+        table.add_row(Row::new(vec![
+            TableCell::new("NAME"),
+            TableCell::new("MODULE"),
+            TableCell::new("GUID"),
+        ]));
+
+        let rows: Vec<Row> = list
+            .into_iter()
+            .map(|project| {
+                vec![
+                    TableCell::new(&project.name),
+                    TableCell::new(&project.module),
+                    TableCell::new(&project.guid),
+                ]
+            })
+            .map(|rtc| Row::new(rtc))
+            .collect();
+
+        for row in rows {
+            table.add_row(row);
+        }
+        table.render()
+    }
 }
 
 #[derive(Debug, Deserialize)]
@@ -602,6 +761,40 @@ pub struct UefiPeimDxe {
     r#type: String,
     sign: Option<bool>,
     dependencies: Option<Vec<String>>,
+}
+
+impl UefiPeimDxe {
+    pub fn get_table_from_list(list: &[UefiPeimDxe]) -> String {
+        let mut table = Table::new();
+        table.style = TableStyle::simple();
+        table.max_column_width = 50;
+        table.add_row(Row::new(vec![
+            TableCell::new("NAME"),
+            TableCell::new("FILETYPE"),
+            TableCell::new("FORMAT"),
+            TableCell::new("MACHINE"),
+            TableCell::new("TYPE"),
+        ]));
+
+        let rows: Vec<Row> = list
+            .into_iter()
+            .map(|project| {
+                vec![
+                    TableCell::new(&project.name),
+                    TableCell::new(&project.filetype),
+                    TableCell::new(&project.format),
+                    TableCell::new(&project.machine),
+                    TableCell::new(&project.r#type),
+                ]
+            })
+            .map(|rtc| Row::new(rtc))
+            .collect();
+
+        for row in rows {
+            table.add_row(row);
+        }
+        table.render()
+    }
 }
 
 // VxWorks Analysis
@@ -630,6 +823,36 @@ pub struct VxworksData {
     name: String,
 }
 
+impl VxworksData {
+    pub fn get_table_from_list(list: &[VxworksData]) -> String {
+        let mut table = Table::new();
+        table.style = TableStyle::simple();
+        table.max_column_width = 50;
+        table.add_row(Row::new(vec![
+            TableCell::new("NAME"),
+            TableCell::new("OFFSET"),
+            TableCell::new("SIZE"),
+        ]));
+
+        let rows: Vec<Row> = list
+            .into_iter()
+            .map(|project| {
+                vec![
+                    TableCell::new(&project.name),
+                    TableCell::new(&project.offset),
+                    TableCell::new(&project.size),
+                ]
+            })
+            .map(|rtc| Row::new(rtc))
+            .collect();
+
+        for row in rows {
+            table.add_row(row);
+        }
+        table.render()
+    }
+}
+
 #[derive(Debug, Deserialize)]
 pub struct VxworksTask {
     task_name: String,
@@ -637,10 +860,69 @@ pub struct VxworksTask {
     fcn_name: String,
 }
 
+impl VxworksTask {
+    pub fn get_table_from_list(list: &[VxworksTask]) -> String {
+        let mut table = Table::new();
+        table.style = TableStyle::simple();
+        table.max_column_width = 50;
+        table.add_row(Row::new(vec![
+            TableCell::new("TASK NAME"),
+            TableCell::new("TASK ADDRESS"),
+            TableCell::new("FUNCTION NAME"),
+        ]));
+
+        let rows: Vec<Row> = list
+            .into_iter()
+            .map(|project| {
+                vec![
+                    TableCell::new(&project.task_name),
+                    TableCell::new(&project.task_addr),
+                    TableCell::new(&project.fcn_name),
+                ]
+            })
+            .map(|rtc| Row::new(rtc))
+            .collect();
+
+        for row in rows {
+            table.add_row(row);
+        }
+        table.render()
+    }
+}
+
 #[derive(Debug, Deserialize)]
 pub struct VxworksCapability {
     name: String,
     caps: Vec<String>,
+}
+
+
+impl VxworksCapability {
+    pub fn get_table_from_list(list: &[VxworksCapability]) -> String {
+        let mut table = Table::new();
+        table.style = TableStyle::simple();
+        table.max_column_width = 50;
+        table.add_row(Row::new(vec![
+            TableCell::new("NAME"),
+            TableCell::new("CAPABILITIES"),
+        ]));
+
+        let rows: Vec<Row> = list
+            .into_iter()
+            .map(|project| {
+                vec![
+                    TableCell::new(&project.name),
+                    TableCell::new(&project.caps.join(", ")),
+                ]
+            })
+            .map(|rtc| Row::new(rtc))
+            .collect();
+
+        for row in rows {
+            table.add_row(row);
+        }
+        table.render()
+    }
 }
 
 // List projects in personal workspace

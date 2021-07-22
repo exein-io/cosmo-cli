@@ -31,7 +31,7 @@ lazy_static! {
 lazy_static! {
     pub static ref LOGO: String = format!(
         r#"
-                       .__        
+                        __        
     ____ ___  ___ ____ |__| ____  
   _/ __ \\  \/  // __ \|  |/    \ 
   \  ___/ >    <\  ___/|  |   |  \
@@ -132,7 +132,6 @@ impl Command {
                 let projects: Vec<Project> = project_service::list_projects(api_server).await?;
                 let table = Project::get_table_from_list(&projects);
                 log::debug!("res: {:#?}", projects);
-
                 println!("{}", table);
                 Ok(())
             }
@@ -179,7 +178,7 @@ impl Command {
                         let fw_type = res.fw_type;
                         let result = res.result.unwrap();
                         log::debug!("{} analysis {}", fw_type, name);
-                        log::debug!("res:: {:#?}", result);
+                        //log::debug!("res:: {:#?}", result);
 
                         match name {
                             // Linux/Container Analysis
@@ -281,47 +280,83 @@ impl Command {
                             // UEFI Analysis
                             "Access" => {
                                 let an: Vec<UefiAccess> = serde_json::from_value(result).unwrap();
-                                log::info!("Access: {:#?}", an);
+                                log::debug!("Access: {:#?}", an);
+                                let table = UefiAccess::get_table_from_list(&an);
+                                println!("{}", table);
                             }
                             "IntelBootGuard" => {
                                 let an: UefiIntelBootGuard =
                                     serde_json::from_value(result).unwrap();
-                                log::info!("IntelBootGuard: {:#?}", an);
+                                log::debug!("IntelBootGuard: {:#?}", an);
+                                let table = UefiIntelBootGuardRsa::get_table_from_list(&an.rsa);
+                                println!("{}", table);
+                                println!("ACM: {}", an.acm);
                             }
                             "Surface" => {
                                 let an: Vec<UefiSurface> = serde_json::from_value(result).unwrap();
-                                log::info!("Surface: {:#?}", an);
+                                log::debug!("Surface: {:#?}", an);
+                                let table = UefiSurface::get_table_from_list(&an);
+                                println!("{}", table);
                             }
                             "SecureBoot" => {
                                 let an: UefiSecureBoot = serde_json::from_value(result).unwrap();
                                 log::info!("SecureBoot: {:#?}", an);
+                                let table =
+                                    UefiSecureBootCerts::get_table_from_list(&an.certs.kek, "kek");
+                                println!("{}", table);
+                                let table =
+                                    UefiSecureBootCerts::get_table_from_list(&[an.certs.pk], "pk");
+                                println!("{}", table);
+                                let table = UefiSecureBootCerts::get_table_from_list(
+                                    &an.databases.certs.db,
+                                    "db",
+                                );
+                                println!("{}", table);
+                                let table = UefiSecureBootCerts::get_table_from_list(
+                                    &an.databases.certs.dbx,
+                                    "dbx",
+                                );
+                                println!("{}", table);
                             }
+
                             "UefiSecurityScan" => {
                                 let an: Vec<UefiSecurityScan> =
                                     serde_json::from_value(result).unwrap();
-                                log::info!("UefiSecurityScan: {:#?}", an);
+                                log::debug!("UefiSecurityScan: {:#?}", an);
+                                let table = UefiSecurityScan::get_table_from_list(&an);
+                                println!("{}", table);
                             }
                             "PeimDxe" => {
                                 let an: Vec<UefiPeimDxe> = serde_json::from_value(result).unwrap();
-                                log::info!("PeimDxe: {:#?}", an);
+                                log::debug!("PeimDxe: {:#?}", an);
+                                let table = UefiPeimDxe::get_table_from_list(&an);
+                                println!("{}", table);
                             }
                             // Vxworks Analysis
                             "Functions" => {
                                 let an: Vec<VxworksData> = serde_json::from_value(result).unwrap();
-                                log::info!("Function: {:#?}", an);
+                                log::debug!("Function: {:#?}", an);
+                                let table = VxworksData::get_table_from_list(&an);
+                                println!("{}", table);
                             }
                             "Symbols" => {
                                 let an: Vec<VxworksData> = serde_json::from_value(result).unwrap();
-                                log::info!("Symbols: {:#?}", an);
+                                log::debug!("Symbols: {:#?}", an);
+                                let table = VxworksData::get_table_from_list(&an);
+                                println!("{}", table);
                             }
                             "Tasks" => {
                                 let an: Vec<VxworksTask> = serde_json::from_value(result).unwrap();
-                                log::info!("Tasks: {:#?}", an);
+                                log::debug!("Tasks: {:#?}", an);
+                                let table = VxworksTask::get_table_from_list(&an);
+                                println!("{}", table);
                             }
                             "Capabilities" => {
                                 let an: Vec<VxworksCapability> =
                                     serde_json::from_value(result).unwrap();
-                                log::info!("Capabilities: {:#?}", an);
+                                log::debug!("Capabilities: {:#?}", an);
+                                let table = VxworksCapability::get_table_from_list(&an);
+                                println!("{}", table);
                             }
 
                             an => log::error!("Analysis not supported: {}", an),
