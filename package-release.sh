@@ -8,7 +8,7 @@ PACKAGING_DIR=$BASEDIR/release_include_files
 cd $BASEDIR
 
 # Statically build the executable in release mode
-cargo build --target x86_64-unknown-linux-musl --release --features "vendored-openssl"
+cargo build --target x86_64-unknown-linux-musl --release 
 # Strip the executable
 strip target/x86_64-unknown-linux-musl/release/efa
 

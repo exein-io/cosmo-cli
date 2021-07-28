@@ -25,11 +25,15 @@ lazy_static = "1.4.0"
 log = "0.4.14"
 env_logger = "0.9.0"
 openssl-probe = "0.1.2"
+openssl = { version = '0.10', features = ["vendored"] }
 semver = { version = "1.0.3", features = ["serde"] }
 nom = "6.2.1"
 async-trait = "0.1.50"
 human-panic = "1.0.3"
 
+[features]
+vendored-openssl = ['openssl/vendored'] # Statically include openssl
+static-filters = []                     # Enable filters
 
 [profile.release]
 opt-level = 's' # Optimize for size

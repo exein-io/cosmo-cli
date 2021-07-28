@@ -94,8 +94,8 @@ pub struct LinuxProjectOverview {
 pub struct LinuxInfo {
     arch: String,
     banner: Option<String>,
-    kernel: String,
-    kernelc: String,
+    kernel: Option<String>,
+    kernelc: Option<String>,
     libc: String,
 }
 
