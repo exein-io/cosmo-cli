@@ -13,7 +13,7 @@ use term_table::{
     Table, TableStyle,
 };
 
-pub const FILE_SIZE_LIMIT: usize = 104857600; // 100 Mb
+pub const FILE_SIZE_LIMIT: usize = 536870912; // 512 Mb
 
 #[derive(Deserialize, Debug)]
 pub struct ProjectIdDTO {
