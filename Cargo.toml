@@ -11,6 +11,7 @@ name = "efa"
 [dependencies]
 clap = "2.33.3"
 rpassword = "5.0.1"
+lexical-core = "0.7.6"
 serde = { version = "1.0.126", features = ["derive"] }
 reqwest = { version = "0.11.4", features = ["json", "multipart"] }
 http = "0.2.4"
