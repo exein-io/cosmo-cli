@@ -96,7 +96,7 @@ pub struct LinuxInfo {
     banner: Option<String>,
     kernel: Option<String>,
     kernelc: Option<String>,
-    libc: String,
+    libc: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
