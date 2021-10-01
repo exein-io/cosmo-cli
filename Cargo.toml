@@ -1,12 +1,12 @@
 [package]
-name = "efa_cli"
+name = "cosmo_cli"
 version = "0.0.1"
 authors = ["banditopazzo <banditopazzo@gmail.com>", "Gianluigi <gianluigi@exein.io>"]
 edition = "2018"
 
 [[bin]]
 path = "src/main.rs"
-name = "efa"
+name = "cosmo"
 
 [dependencies]
 clap = "2.33.3"

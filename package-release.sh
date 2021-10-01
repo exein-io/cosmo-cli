@@ -10,12 +10,12 @@ cd $BASEDIR
 # Statically build the executable in release mode
 cargo build --target x86_64-unknown-linux-musl --release 
 # Strip the executable
-strip target/x86_64-unknown-linux-musl/release/efa
+strip target/x86_64-unknown-linux-musl/release/cosmo
 
 # Prepare package source folder
 TMP_DIR=$(mktemp -d)
 cp -r $PACKAGING_DIR/* $TMP_DIR
-cp target/x86_64-unknown-linux-musl/release/efa $TMP_DIR
+cp target/x86_64-unknown-linux-musl/release/ecosmofa $TMP_DIR
 
 # Create the self-extractable archive
 TMP_INSTALLER_FILE=/tmp/$INSTALLER_NAME

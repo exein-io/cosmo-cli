@@ -4,7 +4,7 @@
 [ "$UID" -eq 0 ] || exec sudo "$0" "$@"
 
 EXEIN_INSTALL_DIR=/opt/exein
-EXEIN_CLI_NAME=efa
+EXEIN_CLI_NAME=cosmo
 
 # Remove previous version if present
 rm -rf $EXEIN_INSTALL_DIR

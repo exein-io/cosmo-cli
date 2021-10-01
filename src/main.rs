@@ -3,15 +3,15 @@ use std::alloc::System;
 #[global_allocator]
 static GLOBAL: System = System;
 
-use efa_cli::{
+use cosmo_cli::{
     api::HttpApiServer,
     cli,
     security::{firebase::Firebase, token_cacher::TokenCacher},
     LOGO,
 };
 
-const TOKEN_CACHE_FILE: &str = "efa-cli-token";
-const TOKEN_CACHE_DIR: &str = "efa-cli";
+const TOKEN_CACHE_FILE: &str = "cosmo-cli-token";
+const TOKEN_CACHE_DIR: &str = "cosmo-cli";
 
 #[tokio::main]
 async fn main() {

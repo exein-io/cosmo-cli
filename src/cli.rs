@@ -13,7 +13,7 @@ where
     T: Into<OsString> + Clone,
 {
     let matches = App::new("")
-        .about("Easy EFA pipeline helper")
+        .about("Easy Cosmo pipeline helper")
         .setting(AppSettings::SubcommandRequired)
         .subcommand(
             SubCommand::with_name("create")

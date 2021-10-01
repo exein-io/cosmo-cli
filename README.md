@@ -5,7 +5,7 @@
 ### Usage
 
 ```bash
-efa [command] [arguments]
+cosmo [command] [arguments]
 ```
 
 ### How to build
@@ -40,16 +40,16 @@ cargo build --release
 
 ## Examples
 
-- List personal projects: `$ efa list` or `$ efa ls`
-- Create a new analysis:  `$ efa create -f <fw-path> -t <fw-type> -n <project-name>` or `$ efa new -f <fw-path> -t <fw-type> -n <project-name>`
-- View project results overview: `$ efa overview -i <uuid-project>` or `$ efa show -i <uuid-project>`
-- View analysis results: `$ efa analysis -i <uuid-project> -a PeimDxe`
-- Delete project: `$ efa delete -i <uuid-project>` or `$ efa rm -i <uuid-project>`
-- Log out: `$ efa logout`
-- Create an API key: `$ efa apikey -a create`
-- List API key: `$ efa apikey -a list`
-- Delete API key: `$ efa apikey -a delete`
-- Save PDF report: `$ efa report -i <uuid-project>`
+- List personal projects: `$ cosmo list` or `$ cosmo ls`
+- Create a new analysis:  `$ cosmo create -f <fw-path> -t <fw-type> -n <project-name>` or `$ cosmo new -f <fw-path> -t <fw-type> -n <project-name>`
+- View project results overview: `$ cosmo overview -i <uuid-project>` or `$ cosmo show -i <uuid-project>`
+- View analysis results: `$ cosmo analysis -i <uuid-project> -a PeimDxe`
+- Delete project: `$ cosmo delete -i <uuid-project>` or `$ cosmo rm -i <uuid-project>`
+- Log out: `$ cosmo logout`
+- Create an API key: `$ cosmo apikey -a create`
+- List API key: `$ cosmo apikey -a list`
+- Delete API key: `$ cosmo apikey -a delete`
+- Save PDF report: `$ cosmo report -i <uuid-project>`
 
 
 ## Features

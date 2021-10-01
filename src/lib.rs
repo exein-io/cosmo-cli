@@ -48,6 +48,7 @@ fn read_bytes_from_file(filename: &str) -> Result<Vec<u8>, std::io::Error> {
     reader.bytes().collect()
 }
 
+#[allow(dead_code)]
 async fn check_version<U: ApiServer>(api_server: &U) -> Result<(), Box<dyn Error>> {
     let current_version = semver::Version::parse(&CLI_VERSION)?;
     let latest_version = api_server.updates_check().await?;
@@ -55,8 +56,8 @@ async fn check_version<U: ApiServer>(api_server: &U) -> Result<(), Box<dyn Error
     if current_version < latest_version.version {
         println!(
             r#"
-A new version of Exein is available! Download it at https://beta.exein.io/static/exein-installer-current.run
-and install it by running ./exein-installer-current.run in your terminal.
+A new version of Exein Cosmo is available! Download it at https://cosmo.exein.io/static/exein-analyzer-cli-installer.run
+and install it by running ./exein-analyzer-cli-installer.run in your terminal.
 "#
         );
         println!("{}", latest_version.changelog);
