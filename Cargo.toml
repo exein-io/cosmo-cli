@@ -33,8 +33,12 @@ async-trait = "0.1.50"
 human-panic = "1.0.3"
 
 [features]
+default = ["aws"]
 vendored-openssl = ['openssl/vendored'] # Statically include openssl
-static-filters = []                     # Enable filters
+# ENVs
+aws = []
+staging = []
+development = []
 
 [profile.release]
 opt-level = 's' # Optimize for size

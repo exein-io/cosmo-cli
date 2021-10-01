@@ -12,10 +12,15 @@ efa [command] [arguments]
   
 Development environment:  
 ```bash
-cargo build
+cargo build --no-default-features --features "development"
 ```
 
-Release environment:
+Staging environment:  
+```bash
+cargo build --no-default-features --features "staging"
+```
+
+Release (AWS) environment:
 ```bash
 cargo build --release
 ```

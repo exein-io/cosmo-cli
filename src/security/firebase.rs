@@ -355,8 +355,11 @@ mod test {
 
     #[tokio::test]
     async fn test_login() {
+        #[cfg(any(feature = "aws", feature = "staging"))]
         let mut firebase = Firebase::new("AIzaSyBbu0Q_aIz5g1jxA4f_1WR55sFaUmlnpxY".into(), true);
-
+        #[cfg(feature = "development")]
+        let mut firebase = Firebase::new("AIzaSyBjkvSnROm_v5fJh4x1OEki3t7LlGJQFWM".into(), true);
+    
         let login_response = firebase.login("giovanni@exein.io", "pw123456").await;
         assert!(login_response.is_ok());
         println!("{:#?}", login_response);
