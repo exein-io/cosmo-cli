@@ -72,6 +72,8 @@ pub trait ApiServer {
         &mut self,
         project_id: &Uuid,
         analysis: &str,
+        page: &str,
+        per_page: &str,
     ) -> Result<ProjectAnalysis, ApiServerError>;
     async fn delete(&mut self, project_id: &Uuid) -> Result<(), ApiServerError>;
     async fn report(&mut self, project_id: &Uuid, savepath: &Path) -> Result<(), ApiServerError>;

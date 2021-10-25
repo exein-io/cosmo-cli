@@ -896,7 +896,6 @@ pub struct VxworksCapability {
     caps: Vec<String>,
 }
 
-
 impl VxworksCapability {
     pub fn get_table_from_list(list: &[VxworksCapability]) -> String {
         let mut table = Table::new();
@@ -966,8 +965,12 @@ pub async fn analysis<U: ApiServer>(
     api_server: &mut U,
     project_id: Uuid,
     analysis: &str,
+    page: &str,
+    per_page: &str,
 ) -> Result<ProjectAnalysis, Box<dyn Error>> {
-    let res = api_server.analysis(&project_id, analysis).await?;
+    let res = api_server
+        .analysis(&project_id, analysis, page, per_page)
+        .await?;
     Ok(res)
 }
 

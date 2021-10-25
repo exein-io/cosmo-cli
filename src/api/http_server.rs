@@ -68,11 +68,14 @@ impl<U: AuthSystem> HttpApiServer<U> {
         &mut self,
         path: &str,
         method: reqwest::Method,
+        query: Option<&[(&str, &str)]>,
     ) -> Result<reqwest::RequestBuilder, ApiServerError> {
         let auth_data = self.authenticate().await?;
         let req = self
             .request(path, method)
+            .query(&query)
             .header(AUTHORIZATION, format!("Bearer {}", auth_data.token));
+
         Ok(req)
     }
 }
@@ -144,7 +147,7 @@ impl<U: AuthSystem> HttpApiServer<U> {
         }
 
         let response = self
-            .authenticated_request(PROJECT_ROUTE_V1, reqwest::Method::POST)
+            .authenticated_request(PROJECT_ROUTE_V1, reqwest::Method::POST, None)
             .await?
             .multipart(form)
             .send()
@@ -168,7 +171,7 @@ impl<U: AuthSystem> HttpApiServer<U> {
         let path = format!("{}/{}/overview", PROJECT_ROUTE_V1, project_id).to_string();
 
         let response = self
-            .authenticated_request(&path, reqwest::Method::GET)
+            .authenticated_request(&path, reqwest::Method::GET, None)
             .await?
             .send()
             .await?;
@@ -189,7 +192,7 @@ impl<U: AuthSystem> HttpApiServer<U> {
         let path = format!("{}/{}/report", PROJECT_ROUTE_V1, project_id).to_string();
 
         let response = self
-            .authenticated_request(&path, reqwest::Method::GET)
+            .authenticated_request(&path, reqwest::Method::GET, None)
             .await?
             .send()
             .await?;
@@ -224,12 +227,13 @@ impl<U: AuthSystem> HttpApiServer<U> {
         &mut self,
         project_id: &Uuid,
         analysis: &str,
-        //    ) -> Result<HashMap<String, serde_json::Value>, ApiServerError> {
+        page: &str,
+        per_page: &str,
     ) -> Result<ProjectAnalysis, ApiServerError> {
         let path = format!("{}/{}/analysis/{}", PROJECT_ROUTE_V1, project_id, analysis).to_string();
-
+        let query = [("page", page), ("per_page", per_page)];
         let response = self
-            .authenticated_request(&path, reqwest::Method::GET)
+            .authenticated_request(&path, reqwest::Method::GET, Some(&query))
             .await?
             .send()
             .await?;
@@ -246,7 +250,7 @@ impl<U: AuthSystem> HttpApiServer<U> {
         let path = format!("{}/{}", PROJECT_ROUTE_V1, project_id).to_string();
 
         let response = self
-            .authenticated_request(&path, reqwest::Method::DELETE)
+            .authenticated_request(&path, reqwest::Method::DELETE, None)
             .await?
             .send()
             .await?;
@@ -260,7 +264,7 @@ impl<U: AuthSystem> HttpApiServer<U> {
 
     pub async fn list_projects(&mut self) -> Result<Vec<Project>, ApiServerError> {
         let response = self
-            .authenticated_request(PROJECT_ROUTE_V1, reqwest::Method::GET)
+            .authenticated_request(PROJECT_ROUTE_V1, reqwest::Method::GET, None)
             .await?
             .send()
             .await?;
@@ -276,7 +280,7 @@ impl<U: AuthSystem> HttpApiServer<U> {
 
     pub async fn apikey_create(&mut self) -> Result<ApiKeyData, ApiServerError> {
         let response = self
-            .authenticated_request(APIKEY_ROUTE_V1, reqwest::Method::POST)
+            .authenticated_request(APIKEY_ROUTE_V1, reqwest::Method::POST, None)
             .await?
             .send()
             .await?;
@@ -296,7 +300,7 @@ impl<U: AuthSystem> HttpApiServer<U> {
 
     pub async fn apikey_list(&mut self) -> Result<ApiKeyData, ApiServerError> {
         let response = self
-            .authenticated_request(APIKEY_ROUTE_V1, reqwest::Method::GET)
+            .authenticated_request(APIKEY_ROUTE_V1, reqwest::Method::GET, None)
             .await?
             .send()
             .await?;
@@ -314,7 +318,7 @@ impl<U: AuthSystem> HttpApiServer<U> {
 
     pub async fn apikey_delete(&mut self) -> Result<(), ApiServerError> {
         let response = self
-            .authenticated_request(APIKEY_ROUTE_V1, reqwest::Method::DELETE)
+            .authenticated_request(APIKEY_ROUTE_V1, reqwest::Method::DELETE, None)
             .await?
             .send()
             .await?;
@@ -358,8 +362,10 @@ impl<U: AuthSystem> ApiServer for HttpApiServer<U> {
         &mut self,
         project_id: &Uuid,
         analysis: &str,
+        page: &str,
+        per_page: &str,
     ) -> Result<ProjectAnalysis, ApiServerError> {
-        self.analysis(project_id, analysis).await
+        self.analysis(project_id, analysis, page, per_page).await
     }
 
     async fn delete(&mut self, project_id: &Uuid) -> Result<(), ApiServerError> {

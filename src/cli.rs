@@ -98,6 +98,22 @@ where
                         .short("a")
                         .value_name("analysis")
                         .required(true),
+                )
+                .arg(
+                    Arg::with_name("page")
+                        .help("Page number")
+                        .long("page")
+                        .short("p")
+                        .value_name("page")
+                        .required(false),
+                )
+                .arg(
+                    Arg::with_name("per_page")
+                        .help("Per page results")
+                        .long("per_page")
+                        .short("l")
+                        .value_name("per_page")
+                        .required(false),
                 ),
         )
         .subcommand(
@@ -192,10 +208,14 @@ where
             let project_id = subcommand.value_of("project_id").unwrap();
             let project_id = Uuid::parse_str(project_id).expect("Failed to parse project id");
             let analysis = subcommand.value_of("analysis").unwrap().to_string();
+            let page = subcommand.value_of("page").unwrap_or("0").to_string();
+            let per_page = subcommand.value_of("per_page").unwrap_or("10").to_string();
 
             Command::Analysis {
                 project_id,
                 analysis,
+                page,
+                per_page,
             }
         }
         ("delete", Some(subcommand)) => {

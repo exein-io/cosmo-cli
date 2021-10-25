@@ -82,6 +82,8 @@ pub enum Command {
     Analysis {
         project_id: Uuid,
         analysis: String,
+        page: String,
+        per_page: String,
     },
     Delete {
         project_id: Uuid,
@@ -170,8 +172,12 @@ impl Command {
             Self::Analysis {
                 project_id,
                 analysis,
+                page,
+                per_page,
             } => {
-                let res = project_service::analysis(api_server, project_id, &analysis).await?;
+                let res =
+                    project_service::analysis(api_server, project_id, &analysis, &page, &per_page)
+                        .await?;
 
                 match res.error {
                     None => {
