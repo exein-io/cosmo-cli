@@ -809,10 +809,12 @@ pub struct VxworksProjectOverview {
 pub struct VxworksInfo {
     functions_no: u32,
     symbols_no: u32,
+    tasks_no: u32,
     word_size: u32,
     arch: String,
     endianness: String,
     kernel: Option<String>,
+    capabilities: Option<serde_json::Value>,
     os: String,
 }
 
