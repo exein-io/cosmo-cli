@@ -106,7 +106,7 @@ pub struct LinuxProjectOverviewCveCheck {
 
 #[derive(Debug, Deserialize)]
 pub struct LinuxProjectOverviewCode {
-    vunerabilities: u16,
+    vulnerabilities: u16,
     files_affected: u16,
 }
 
