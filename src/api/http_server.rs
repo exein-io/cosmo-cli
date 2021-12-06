@@ -380,6 +380,10 @@ impl<U: AuthSystem> ApiServer for HttpApiServer<U> {
         self.authenticate().await
     }
 
+    async fn login(&mut self) -> Result<(), AuthError> {
+        self.login().await
+    }
+    
     async fn logout(&mut self) -> Result<(), AuthError> {
         self.logout().await
     }

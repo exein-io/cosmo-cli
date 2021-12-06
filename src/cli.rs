@@ -66,6 +66,7 @@ where
                 .about("List all projects"),
         )
         .subcommand(SubCommand::with_name("logout").about("Logout"))
+        .subcommand(SubCommand::with_name("login").about("Login"))
         .subcommand(
             SubCommand::with_name("overview")
                 .alias("show")
@@ -184,6 +185,7 @@ where
             }
         }
         ("list", Some(_)) => Command::List,
+        ("login", Some(_)) => Command::Login,
         ("logout", Some(_)) => Command::Logout,
         ("overview", Some(subcommand)) => {
             let project_id = subcommand.value_of("project_id").unwrap();

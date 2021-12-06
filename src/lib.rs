@@ -75,6 +75,7 @@ pub enum Command {
         fw_subtype: String,
     },
     List,
+    Login,
     Logout,
     Overview {
         project_id: Uuid,
@@ -129,6 +130,10 @@ impl Command {
                 )
                 .await?;
                 log::info!("Project created successfull. Project id: {}", project_id);
+                log::info!(
+                    "Dashboard URL: https://cosmo.exein.io/reports/{}",
+                    project_id
+                );
                 Ok(())
             }
             Self::List => {
@@ -136,6 +141,9 @@ impl Command {
                 let table = Project::get_table_from_list(&projects);
                 log::debug!("res: {:#?}", projects);
                 println!("{}", table);
+                Ok(())
+            }
+            Self::Login => {
                 Ok(())
             }
             Self::Logout => {

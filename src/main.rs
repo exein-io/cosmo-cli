@@ -63,9 +63,9 @@ async fn main() {
     );
     #[cfg(feature = "aws")]
     let mut api_server = HttpApiServer::new(
-        "18.157.92.27".into(),
-        "80".to_string(),
-        false,
+        "cosmo.exein.io".into(),
+        "443".to_string(),
+        true,
         token_cacher,
     );
 
