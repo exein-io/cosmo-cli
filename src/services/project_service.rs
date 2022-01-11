@@ -153,7 +153,7 @@ impl LinuxHardeningAnalysis {
         table.style = TableStyle::simple();
         table.add_row(Row::new(vec![
             TableCell::new("NAME"),
-            TableCell::new_with_alignment("HARDENING", 5, Alignment::Center),
+            TableCell::new_with_alignment("HARDENING", 8, Alignment::Center),
             TableCell::new("SCORE"),
         ]));
         table.add_row(Row::new(vec![
@@ -163,6 +163,9 @@ impl LinuxHardeningAnalysis {
             TableCell::new("NX"),
             TableCell::new("PIE"),
             TableCell::new("RELRO"),
+            TableCell::new("EXEC STACK"),
+            TableCell::new("SUID"),
+            TableCell::new("STRIPPED"),
             TableCell::new(""),
         ]));
 
@@ -176,6 +179,9 @@ impl LinuxHardeningAnalysis {
                     TableCell::new(&project.nx),
                     TableCell::new(&project.pie),
                     TableCell::new(&project.relro),
+                    TableCell::new(&project.execstack),
+                    TableCell::new(&project.suid),
+                    TableCell::new(&project.stripped),
                     TableCell::new(&project.score),
                 ]
             })
