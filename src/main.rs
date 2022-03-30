@@ -36,6 +36,7 @@ async fn main() {
     logger_builder.filter_level(log::LevelFilter::Info);
     logger_builder.init();
 
+    // TODO: Move Firebase API key to configuration file
     #[cfg(any(feature = "aws", feature = "staging"))]
     let firebase = Firebase::new("AIzaSyBbu0Q_aIz5g1jxA4f_1WR55sFaUmlnpxY".into(), true);
     #[cfg(feature = "development")]
@@ -55,7 +56,6 @@ async fn main() {
         HttpApiServer::new("localhost".into(), "8000".to_string(), false, token_cacher);
     #[cfg(feature = "staging")]
     let mut api_server = HttpApiServer::new(
-            //"172.20.20.170".into(),
             "cosmo-staging.exein.io".into(),
             "443".to_string(),
             true,

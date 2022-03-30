@@ -73,14 +73,6 @@ pub struct FirebaseClaims {
     pub exp: u64,    // Expiration time (seconds since Unix epochs)
     pub email: String,
     pub email_verified: bool,
-    //   "firebase": {
-    //     "identities": {
-    //       "email": [
-    //         "giovanni@exein.io"
-    //       ]
-    //     },
-    //     "sign_in_provider": "password"
-    //   }
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -355,12 +347,13 @@ mod test {
 
     #[tokio::test]
     async fn test_login() {
+        // TODO: Move Firebase API key to configuration file
         #[cfg(any(feature = "aws", feature = "staging"))]
         let mut firebase = Firebase::new("AIzaSyBbu0Q_aIz5g1jxA4f_1WR55sFaUmlnpxY".into(), true);
         #[cfg(feature = "development")]
         let mut firebase = Firebase::new("AIzaSyBjkvSnROm_v5fJh4x1OEki3t7LlGJQFWM".into(), true);
-    
-        let login_response = firebase.login("giovanni@exein.io", "pw123456").await;
+
+        let login_response = firebase.login("username@example.com", "qwerty").await;
         assert!(login_response.is_ok());
         println!("{:#?}", login_response);
     }

@@ -11,7 +11,6 @@ pub enum TokenCacherError {
     WriteError(String),
     DeleteError(String),
     VerifyError(jsonwebtoken::errors::Error),
-    // FirebaseError(FirebaseError),
 }
 
 impl From<jsonwebtoken::errors::Error> for TokenCacherError {
