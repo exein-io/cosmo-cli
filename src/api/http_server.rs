@@ -298,7 +298,7 @@ impl<U: AuthSystem> HttpApiServer<U> {
         }
     }
 
-    pub async fn apikey_list(&mut self) -> Result<ApiKeyData, ApiServerError> {
+    pub async fn apikey_list(&mut self) -> Result<Option<ApiKeyData>, ApiServerError> {
         let response = self
             .authenticated_request(APIKEY_ROUTE_V1, reqwest::Method::GET, None)
             .await?
@@ -307,9 +307,9 @@ impl<U: AuthSystem> HttpApiServer<U> {
 
         if response.status() == http::StatusCode::OK {
             let apikey = response.json().await?;
-            Ok(apikey)
+            Ok(Some(apikey))
         } else if response.status() == http::StatusCode::NO_CONTENT {
-            Err(ApiServerError::ApiError("No API key found!".to_string()))
+            Ok(None)
         } else {
             let body = response.text().await?;
             Err(ApiServerError::ApiError(body))
@@ -392,7 +392,7 @@ impl<U: AuthSystem> ApiServer for HttpApiServer<U> {
         self.apikey_create().await
     }
 
-    async fn apikey_list(&mut self) -> Result<ApiKeyData, ApiServerError> {
+    async fn apikey_list(&mut self) -> Result<Option<ApiKeyData>, ApiServerError> {
         self.apikey_list().await
     }
 

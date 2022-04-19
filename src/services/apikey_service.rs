@@ -9,12 +9,12 @@ use super::super::ApiServer;
 #[serde(rename_all = "camelCase")]
 
 pub struct ApiKeyData {
-    api_key: Uuid,
-    creation_date: DateTime<Utc>,
+    pub api_key: Uuid,
+    pub creation_date: DateTime<Utc>,
 }
 
 //List API key
-pub async fn list<U: ApiServer>(api_server: &mut U) -> Result<ApiKeyData> {
+pub async fn list<U: ApiServer>(api_server: &mut U) -> Result<Option<ApiKeyData>> {
     let ak = api_server.apikey_list().await?;
     Ok(ak)
 }

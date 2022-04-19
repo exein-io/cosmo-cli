@@ -397,16 +397,24 @@ impl Command {
             Self::Apikey { action } => {
                 match action.as_str() {
                     "create" => {
-                        let apikey = apikey_service::create(api_server).await?;
-                        log::debug!("api key create: {:#?}", apikey);
+                        let apikey_data = apikey_service::create(api_server).await?;
+                        log::info!("api key created: {}", apikey_data.api_key);
                     }
                     "list" => {
-                        let apikey = apikey_service::list(api_server).await?;
-                        log::debug!("api key list: {:#?}", apikey);
+                        let apikey_data = apikey_service::list(api_server).await?;
+                        if let Some(apikey_data) = apikey_data {
+                            log::info!(
+                                "api key: {} created on {}",
+                                apikey_data.api_key,
+                                apikey_data.creation_date
+                            );
+                        } else {
+                            log::info!("No API key found!")
+                        }
                     }
                     "delete" => {
                         apikey_service::delete(api_server).await?;
-                        log::debug!("api key deleted");
+                        log::info!("api key deleted");
                     }
                     _ => log::debug!("Action not supported"),
                 }

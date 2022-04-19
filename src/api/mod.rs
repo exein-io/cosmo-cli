@@ -81,6 +81,6 @@ pub trait ApiServer {
     async fn login(&mut self) -> Result<(), AuthError>;
     async fn logout(&mut self) -> Result<(), AuthError>;
     async fn apikey_create(&mut self) -> Result<ApiKeyData, ApiServerError>;
-    async fn apikey_list(&mut self) -> Result<ApiKeyData, ApiServerError>;
+    async fn apikey_list(&mut self) -> Result<Option<ApiKeyData>, ApiServerError>;
     async fn apikey_delete(&mut self) -> Result<(), ApiServerError>;
 }
