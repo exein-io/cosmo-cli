@@ -1,10 +1,9 @@
-use std::{error::Error, fs::File, path::Path};
+use std::{fs::File, path::Path};
 
+use anyhow::{anyhow, Result};
 use chrono::{DateTime, Utc};
 use serde::Deserialize;
 use uuid::Uuid;
-
-use crate::services::GenericError;
 
 use super::super::ApiServer;
 use term_table::{
@@ -933,9 +932,7 @@ impl VxworksCapability {
 }
 
 // List projects in personal workspace
-pub async fn list_projects<U: ApiServer>(
-    api_server: &mut U,
-) -> Result<Vec<Project>, Box<dyn Error>> {
+pub async fn list_projects<U: ApiServer>(api_server: &mut U) -> Result<Vec<Project>> {
     let projects = api_server.list_projects().await?;
     Ok(projects)
 }
@@ -944,7 +941,7 @@ pub async fn list_projects<U: ApiServer>(
 pub async fn overview<U: ApiServer>(
     api_server: &mut U,
     project_id: Uuid,
-) -> Result<serde_json::Value, Box<dyn Error>> {
+) -> Result<serde_json::Value> {
     let overview = api_server.overview(&project_id).await?;
     Ok(overview)
 }
@@ -954,14 +951,14 @@ pub async fn report<U: ApiServer>(
     api_server: &mut U,
     project_id: Uuid,
     savepath: String,
-) -> Result<String, Box<dyn Error>> {
+) -> Result<String> {
     let report_path = Path::new(&savepath);
 
     if report_path.exists() {
-        Err(GenericError(format!(
+        Err(anyhow!(
             "File {} already exists",
             report_path.display()
-        )))?;
+        ))?;
     }
     api_server.report(&project_id, &report_path).await?;
 
@@ -975,7 +972,7 @@ pub async fn analysis<U: ApiServer>(
     analysis: &str,
     page: &str,
     per_page: &str,
-) -> Result<ProjectAnalysis, Box<dyn Error>> {
+) -> Result<ProjectAnalysis> {
     let res = api_server
         .analysis(&project_id, analysis, page, per_page)
         .await?;
@@ -983,10 +980,7 @@ pub async fn analysis<U: ApiServer>(
 }
 
 // Delete a project
-pub async fn delete<U: ApiServer>(
-    api_server: &mut U,
-    project_id: Uuid,
-) -> Result<(), Box<dyn Error>> {
+pub async fn delete<U: ApiServer>(api_server: &mut U, project_id: Uuid) -> Result<()> {
     api_server.delete(&project_id).await?;
     Ok(())
 }
@@ -999,35 +993,29 @@ pub async fn create<U: ApiServer>(
     name: &str,
     description: Option<&str>,
     api_server: &mut U,
-) -> Result<Uuid, Box<dyn Error>> {
+) -> Result<Uuid> {
     let fw_file = Path::new(fw_filepath);
 
     if !fw_file.exists() {
-        return Err(Box::new(GenericError(format!(
-            "File not exists: {}",
-            fw_filepath
-        ))));
+        return Err(anyhow!("File not exists: {}", fw_filepath));
     }
 
     if !fw_file.is_file() {
-        return Err(Box::new(GenericError(format!(
-            "Not a file: {}",
-            fw_filepath
-        ))));
+        return Err(anyhow!("Not a file: {}", fw_filepath));
     }
 
     let fw_file = File::open(fw_file)
-        .map_err(|_| GenericError(format!("Error opening file {}", fw_filepath)))?;
+        .map_err(|_| anyhow!("Error opening file {}", fw_filepath))?;
 
     let fw_file_metadata = fw_file
         .metadata()
-        .map_err(|_| GenericError(format!("Error accessing file metadata {}", fw_filepath)))?;
+        .map_err(|_| anyhow!("Error accessing file metadata {}", fw_filepath))?;
 
     if fw_file_metadata.len() as usize > FILE_SIZE_LIMIT {
-        return Err(Box::new(GenericError(format!(
+        return Err(anyhow!(
             "File size exceeds maximum file size of {} bytes",
             FILE_SIZE_LIMIT
-        ))));
+        ));
     }
 
     let model_id = api_server

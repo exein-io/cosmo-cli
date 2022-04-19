@@ -5,11 +5,14 @@ pub mod cli;
 pub mod security;
 pub mod services;
 
+use anyhow::{anyhow, Context};
 use api::ApiServer;
+use core::fmt;
 use lazy_static::lazy_static;
 use project_service::Project;
 use services::*;
 use std::{
+    env,
     error::Error,
     fs::File,
     io::{self, prelude::*, BufRead, BufReader, Write},
@@ -99,7 +102,7 @@ pub enum Command {
 }
 
 impl Command {
-    pub async fn run<U: ApiServer>(self, api_server: &mut U) -> Result<(), Box<dyn Error>> {
+    pub async fn run<U: ApiServer>(self, api_server: &mut U) -> Result<(), anyhow::Error> {
         //check_version(api_server).await?;
 
         // Authentication
@@ -143,9 +146,7 @@ impl Command {
                 println!("{}", table);
                 Ok(())
             }
-            Self::Login => {
-                Ok(())
-            }
+            Self::Login => Ok(()),
             Self::Logout => {
                 api_server.logout().await?;
                 log::info!("Logout successfully");
@@ -157,7 +158,7 @@ impl Command {
 
                 let fw_type = overview["project"]["project_type"]
                     .as_str()
-                    .ok_or("Error extracting string")?;
+                    .context("Error extracting string")?;
                 log::debug!("project type {}", fw_type);
                 match fw_type {
                     "LINUX" | "CONTAINER" => {
@@ -256,25 +257,22 @@ impl Command {
                             "StaticCode" => {
                                 let analysis_result: Vec<LinuxStaticCodeAnalysis> =
                                     serde_json::from_value(result).unwrap();
-                                let analysis_parsed: Result<Vec<LinuxStaticCode>, String> =
+                                let analysis_parsed: Result<Vec<LinuxStaticCode>, anyhow::Error> =
                                     analysis_result
                                         .into_iter()
                                         .map(|executable_flaw| {
                                             let flaw_str = executable_flaw
                                                 .flaws
                                                 .as_str()
-                                                .ok_or(format!("failed to access flaw string"));
+                                                .ok_or(anyhow!("failed to access flaw string"));
 
-                                            let flaw_parsed: Result<
-                                                LinuxStaticCodeAnalysisFlaws,
-                                                String,
-                                            > = flaw_str.and_then(|flaw| {
+                                            let flaw_parsed = flaw_str.and_then(|flaw| {
                                                 let flaw_parsed = serde_json::from_str::<
                                                     LinuxStaticCodeAnalysisFlaws,
                                                 >(
                                                     flaw
                                                 )
-                                                .map_err(|_| format!("failed to parse flaw"));
+                                                .map_err(|_| anyhow!("failed to parse flaw"));
                                                 flaw_parsed
                                             });
 
@@ -417,6 +415,25 @@ impl Command {
             }
         }
     }
+}
+
+#[derive(Debug)]
+pub struct CommandOutput<T> {
+    print_mode: PrintMode,
+    inner_output: T,
+}
+
+impl<T> fmt::Display for CommandOutput<T> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        // write!(f, "({}, {})", self.x, self.y)
+        todo!()
+    }
+}
+
+#[derive(Debug)]
+enum PrintMode {
+    Raw,
+    Json,
 }
 
 fn read_username_and_password_from_stdin() -> (String, String) {

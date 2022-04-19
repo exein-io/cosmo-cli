@@ -31,6 +31,7 @@ semver = { version = "1.0.3", features = ["serde"] }
 nom = "6.2.1"
 async-trait = "0.1.50"
 human-panic = "1.0.3"
+anyhow = "1.0"
 
 [features]
 default = ["aws"]
@@ -41,7 +42,6 @@ staging = []
 development = []
 
 [profile.release]
-opt-level = 's' # Optimize for size
-lto = true # Enable Link Time Optimization
-codegen-units = 1 # Reduce number of codegen units to increase optimizations
-panic = 'abort' # Abort on panic
+lto = true          # Enable Link Time Optimization
+codegen-units = 1   # Reduce number of codegen units to increase optimizations
+panic = 'abort'     # Abort on panic

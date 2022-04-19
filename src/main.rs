@@ -72,6 +72,7 @@ async fn main() {
     // Start
     let cmd = cli::parse_command();
     if let Err(e) = cmd.run(&mut api_server).await {
-        log::error!("{}", e)
+        cli::report_error(&e);
+        std::process::exit(1)
     }
 }
