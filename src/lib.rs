@@ -7,6 +7,8 @@ pub mod services;
 
 use anyhow::{anyhow, Context};
 use api::ApiServer;
+use clap::{ArgEnum, Subcommand};
+use cli::PrintMode;
 use core::fmt;
 use lazy_static::lazy_static;
 use project_service::Project;
@@ -69,12 +71,24 @@ and install it by running ./exein-analyzer-cli-installer.run in your terminal.
     Ok(())
 }
 
+#[derive(Debug, Clone, Subcommand)]
 pub enum Command {
+    /// Create project
     CreateProject {
+        /// Firmware path to analyze
+        #[clap(short = 'f', long = "file", value_name = "FILE")]
         fw_filepath: String,
+        /// Project name
+        #[clap(short, long)]
         name: String,
+        /// Project description
+        #[clap(short, long)]
         description: Option<String>,
+        /// Type of your firmware
+        #[clap(short = 't', long = "type", value_name = "TYPE")]
         fw_type: String,
+        /// Subtype of your firmware
+        #[clap(short = 's', long = "subtype", value_name = "SUBTYPE")]
         fw_subtype: String,
     },
     List,
@@ -97,8 +111,16 @@ pub enum Command {
         savepath: String,
     },
     Apikey {
-        action: String,
+        #[clap(short, long, arg_enum)]
+        action: ApiKeyAction,
     },
+}
+
+#[derive(Debug, Clone, ArgEnum)]
+pub enum ApiKeyAction {
+    List,
+    Create,
+    Delete,
 }
 
 impl Command {
@@ -395,12 +417,12 @@ impl Command {
                 Ok(())
             }
             Self::Apikey { action } => {
-                match action.as_str() {
-                    "create" => {
+                match action {
+                    ApiKeyAction::Create => {
                         let apikey_data = apikey_service::create(api_server).await?;
                         log::info!("api key created: {}", apikey_data.api_key);
                     }
-                    "list" => {
+                    ApiKeyAction::List => {
                         let apikey_data = apikey_service::list(api_server).await?;
                         if let Some(apikey_data) = apikey_data {
                             log::info!(
@@ -412,11 +434,10 @@ impl Command {
                             log::info!("No API key found!")
                         }
                     }
-                    "delete" => {
+                    ApiKeyAction::Delete => {
                         apikey_service::delete(api_server).await?;
                         log::info!("api key deleted");
                     }
-                    _ => log::debug!("Action not supported"),
                 }
 
                 Ok(())
@@ -436,12 +457,6 @@ impl<T> fmt::Display for CommandOutput<T> {
         // write!(f, "({}, {})", self.x, self.y)
         todo!()
     }
-}
-
-#[derive(Debug)]
-enum PrintMode {
-    Raw,
-    Json,
 }
 
 fn read_username_and_password_from_stdin() -> (String, String) {

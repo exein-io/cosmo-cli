@@ -1,7 +1,11 @@
 [package]
 name = "cosmo_cli"
 version = "0.0.1"
-authors = ["banditopazzo <banditopazzo@gmail.com>", "Gianluigi <gianluigi@exein.io>"]
+description = "Easy Cosmo pipeline helper"
+authors = [
+    "banditopazzo <banditopazzo@gmail.com>",
+    "Gianluigi <gianluigi@exein.io>",
+]
 edition = "2018"
 
 [[bin]]
@@ -9,7 +13,7 @@ path = "src/main.rs"
 name = "cosmo"
 
 [dependencies]
-clap = "2.33.3"
+clap = { version = "3.1.9", features = ["derive"] }
 rpassword = "5.0.1"
 lexical-core = "0.7.6"
 serde = { version = "1.0.126", features = ["derive"] }
@@ -26,10 +30,10 @@ lazy_static = "1.4.0"
 log = "0.4.14"
 env_logger = "0.9.0"
 openssl-probe = "0.1.2"
-openssl = { version = '0.10', features = ["vendored"] }
+openssl = { version = '0.10' }
 semver = { version = "1.0.3", features = ["serde"] }
 nom = "6.2.1"
-async-trait = "0.1.50"
+async-trait = "0.1.53"
 human-panic = "1.0.3"
 anyhow = "1.0"
 
@@ -42,6 +46,6 @@ staging = []
 development = []
 
 [profile.release]
-lto = true          # Enable Link Time Optimization
-codegen-units = 1   # Reduce number of codegen units to increase optimizations
-panic = 'abort'     # Abort on panic
+lto = true        # Enable Link Time Optimization
+codegen-units = 1 # Reduce number of codegen units to increase optimizations
+panic = 'abort'   # Abort on panic

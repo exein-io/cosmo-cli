@@ -56,10 +56,10 @@ async fn main() {
         HttpApiServer::new("localhost".into(), "8000".to_string(), false, token_cacher);
     #[cfg(feature = "staging")]
     let mut api_server = HttpApiServer::new(
-            "cosmo-staging.exein.io".into(),
-            "443".to_string(),
-            true,
-            token_cacher,
+        "cosmo-staging.exein.io".into(),
+        "443".to_string(),
+        true,
+        token_cacher,
     );
     #[cfg(feature = "aws")]
     let mut api_server = HttpApiServer::new(
@@ -70,8 +70,8 @@ async fn main() {
     );
 
     // Start
-    let cmd = cli::parse_command();
-    if let Err(e) = cmd.run(&mut api_server).await {
+    let cli_opts = cli::parse_from(&mut std::env::args_os()).unwrap_or_else(|e| e.exit());
+    if let Err(e) = cli_opts.command.run(&mut api_server).await {
         cli::report_error(&e);
         std::process::exit(1)
     }
