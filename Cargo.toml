@@ -36,6 +36,7 @@ nom = "6.2.1"
 async-trait = "0.1.53"
 human-panic = "1.0.3"
 anyhow = "1.0"
+clap-verbosity-flag = "1.0.0"
 
 [features]
 default = ["aws"]
