@@ -74,6 +74,7 @@ and install it by running ./exein-analyzer-cli-installer.run in your terminal.
 #[derive(Debug, Clone, Subcommand)]
 pub enum Command {
     /// Create project
+    #[clap(visible_alias = "new")]
     CreateProject {
         /// Firmware path to analyze
         #[clap(short = 'f', long = "file", value_name = "FILE")]
@@ -91,26 +92,55 @@ pub enum Command {
         #[clap(short = 's', long = "subtype", value_name = "SUBTYPE")]
         fw_subtype: String,
     },
+    /// List all projects
+    #[clap(visible_alias = "ls")]
     List,
+    /// Login to Cosmo
     Login,
+    /// Logout
     Logout,
+    /// Project overview
+    #[clap(visible_alias = "show")]
     Overview {
+        /// ID of the project
+        #[clap(short = 'i', long = "id")]
         project_id: Uuid,
     },
+    /// Project analysis result
+    #[clap(visible_alias = "an")]
     Analysis {
+        /// ID of the project
+        #[clap(short = 'i', long = "id")]
         project_id: Uuid,
-        analysis: String,
-        page: String,
-        per_page: String,
+        /// Analysis name
+        #[clap(short, long)]
+        analysis: String, // TODO: enum
+        /// Page number
+        #[clap(short = 'p', long)]
+        page: String,  // TODO: int
+        /// Per page results
+        #[clap(short = 'l', long)]
+        per_page: String,  // TODO: int
     },
+    /// Delete a project
+    #[clap(visible_alias = "rm")]
     Delete {
+        /// ID of the project
+        #[clap(short = 'i', long = "id")]
         project_id: Uuid,
     },
+    /// Project report
     Report {
+        /// ID of the project
+        #[clap(short = 'i', long = "id")]
         project_id: Uuid,
+        /// PDF report path
+        #[clap(short = 'o', long = "output")]
         savepath: String,
     },
+    /// Manage API key
     Apikey {
+        /// Action to perform
         #[clap(short, long, arg_enum)]
         action: ApiKeyAction,
     },
