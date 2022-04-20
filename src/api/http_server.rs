@@ -68,7 +68,7 @@ impl<U: AuthSystem> HttpApiServer<U> {
         &mut self,
         path: &str,
         method: reqwest::Method,
-        query: Option<&[(&str, &str)]>,
+        query: Option<&[(&str, &String)]>,
     ) -> Result<reqwest::RequestBuilder, ApiServerError> {
         let auth_data = self.authenticate().await?;
         let req = self
@@ -227,11 +227,14 @@ impl<U: AuthSystem> HttpApiServer<U> {
         &mut self,
         project_id: &Uuid,
         analysis: &str,
-        page: &str,
-        per_page: &str,
+        page: i32,
+        per_page: i32,
     ) -> Result<ProjectAnalysis, ApiServerError> {
         let path = format!("{}/{}/analysis/{}", PROJECT_ROUTE_V1, project_id, analysis).to_string();
-        let query = [("page", page), ("per_page", per_page)];
+        let query = [
+            ("page", &page.to_string()),
+            ("per_page", &per_page.to_string()),
+        ];
         let response = self
             .authenticated_request(&path, reqwest::Method::GET, Some(&query))
             .await?
@@ -362,8 +365,8 @@ impl<U: AuthSystem> ApiServer for HttpApiServer<U> {
         &mut self,
         project_id: &Uuid,
         analysis: &str,
-        page: &str,
-        per_page: &str,
+        page: i32,
+        per_page: i32,
     ) -> Result<ProjectAnalysis, ApiServerError> {
         self.analysis(project_id, analysis, page, per_page).await
     }
@@ -383,7 +386,7 @@ impl<U: AuthSystem> ApiServer for HttpApiServer<U> {
     async fn login(&mut self) -> Result<(), AuthError> {
         self.login().await
     }
-    
+
     async fn logout(&mut self) -> Result<(), AuthError> {
         self.logout().await
     }

@@ -955,10 +955,7 @@ pub async fn report<U: ApiServer>(
     let report_path = Path::new(&savepath);
 
     if report_path.exists() {
-        Err(anyhow!(
-            "File {} already exists",
-            report_path.display()
-        ))?;
+        Err(anyhow!("File {} already exists", report_path.display()))?;
     }
     api_server.report(&project_id, &report_path).await?;
 
@@ -970,8 +967,8 @@ pub async fn analysis<U: ApiServer>(
     api_server: &mut U,
     project_id: Uuid,
     analysis: &str,
-    page: &str,
-    per_page: &str,
+    page: i32,
+    per_page: i32,
 ) -> Result<ProjectAnalysis> {
     let res = api_server
         .analysis(&project_id, analysis, page, per_page)
@@ -1004,8 +1001,7 @@ pub async fn create<U: ApiServer>(
         return Err(anyhow!("Not a file: {}", fw_filepath));
     }
 
-    let fw_file = File::open(fw_file)
-        .map_err(|_| anyhow!("Error opening file {}", fw_filepath))?;
+    let fw_file = File::open(fw_file).map_err(|_| anyhow!("Error opening file {}", fw_filepath))?;
 
     let fw_file_metadata = fw_file
         .metadata()

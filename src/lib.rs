@@ -89,7 +89,12 @@ pub enum Command {
         #[clap(short = 't', long = "type", value_name = "TYPE")]
         fw_type: String,
         /// Subtype of your firmware
-        #[clap(short = 's', long = "subtype", value_name = "SUBTYPE")]
+        #[clap(
+            short = 's',
+            long = "subtype",
+            value_name = "SUBTYPE",
+            default_value_t = String::from("generic")
+        )]
         fw_subtype: String,
     },
     /// List all projects
@@ -116,11 +121,11 @@ pub enum Command {
         #[clap(short, long)]
         analysis: String, // TODO: enum
         /// Page number
-        #[clap(short = 'p', long)]
-        page: String,  // TODO: int
+        #[clap(short = 'p', long, default_value_t = 0)]
+        page: i32,
         /// Per page results
-        #[clap(short = 'l', long)]
-        per_page: String,  // TODO: int
+        #[clap(short = 'l', long, default_value_t = 10)]
+        per_page: i32,
     },
     /// Delete a project
     #[clap(visible_alias = "rm")]
@@ -136,7 +141,7 @@ pub enum Command {
         project_id: Uuid,
         /// PDF report path
         #[clap(short = 'o', long = "output")]
-        savepath: String,
+        savepath: String, //TODO: default format!("/tmp/{}.pdf", project_id).as_str()
     },
     /// Manage API key
     Apikey {
@@ -237,7 +242,7 @@ impl Command {
                 per_page,
             } => {
                 let res =
-                    project_service::analysis(api_server, project_id, &analysis, &page, &per_page)
+                    project_service::analysis(api_server, project_id, &analysis, page, per_page)
                         .await?;
 
                 match res.error {

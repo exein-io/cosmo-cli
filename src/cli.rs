@@ -46,8 +46,6 @@ where
 
     let mut app = Command::augment_subcommands(app);
 
-    // let app = DerivedArgs::augment_args(app);
-
     for a in app.get_subcommands_mut() {
         *a = DerivedArgs::augment_args(a.clone())
     }
@@ -106,88 +104,6 @@ where
 //             .takes_value(false)
 //             .help("Pass many times for a more verbose output. Passing `-v` adds debug logs, `-vv` enables trace logging"),
 //     )
-// }
-
-// fn parse_command_from<'a, I, T>(args: I) -> Result<Command, clap::Error>
-// where
-//     I: Iterator<Item = T>,
-//     T: Into<OsString> + Clone,
-// {
-//     let matches = App::new("")
-//         .about("Easy Cosmo pipeline helper")
-//         .setting(AppSettings::SubcommandRequired)
-
-
-//     let command = match matches.subcommand() {
-//         ("create", Some(subcommand)) => {
-//             let fw_filepath = subcommand.value_of("file").unwrap().to_string();
-//             let fw_type = subcommand.value_of("type").unwrap().to_string();
-//             let fw_subtype = subcommand
-//                 .value_of("subtype")
-//                 .unwrap_or("generic")
-//                 .to_string();
-//             let name = subcommand.value_of("name").unwrap().to_string();
-//             let description = subcommand.value_of("description").map(|d| d.to_string());
-
-//             Command::CreateProject {
-//                 fw_filepath,
-//                 fw_type,
-//                 fw_subtype,
-//                 name,
-//                 description,
-//             }
-//         }
-//         ("list", Some(_)) => Command::List,
-//         ("login", Some(_)) => Command::Login,
-//         ("logout", Some(_)) => Command::Logout,
-//         ("overview", Some(subcommand)) => {
-//             let project_id = subcommand.value_of("project_id").unwrap();
-//             let project_id = Uuid::parse_str(project_id).expect("Failed to parse project id");
-
-//             Command::Overview { project_id }
-//         }
-//         ("report", Some(subcommand)) => {
-//             let project_id = subcommand.value_of("project_id").unwrap();
-//             let project_id = Uuid::parse_str(project_id).expect("Failed to parse project id");
-//             let savepath = subcommand
-//                 .value_of("savepath")
-//                 .unwrap_or(format!("/tmp/{}.pdf", project_id).as_str())
-//                 .to_string();
-
-//             Command::Report {
-//                 project_id,
-//                 savepath,
-//             }
-//         }
-//         ("analysis", Some(subcommand)) => {
-//             let project_id = subcommand.value_of("project_id").unwrap();
-//             let project_id = Uuid::parse_str(project_id).expect("Failed to parse project id");
-//             let analysis = subcommand.value_of("analysis").unwrap().to_string();
-//             let page = subcommand.value_of("page").unwrap_or("0").to_string();
-//             let per_page = subcommand.value_of("per_page").unwrap_or("10").to_string();
-
-//             Command::Analysis {
-//                 project_id,
-//                 analysis,
-//                 page,
-//                 per_page,
-//             }
-//         }
-//         ("delete", Some(subcommand)) => {
-//             let project_id = subcommand.value_of("project_id").unwrap();
-//             let project_id = Uuid::parse_str(project_id).expect("Failed to parse project id");
-
-//             Command::Delete { project_id }
-//         }
-//         ("apikey", Some(subcommand)) => {
-//             let action = subcommand.value_of("action").unwrap().to_string();
-
-//             Command::Apikey { action }
-//         }
-//         _ => panic!("This shouldn't happen {:?}", matches),
-//     };
-
-//     Ok(command)
 // }
 
 fn show_backtrace() -> bool {
