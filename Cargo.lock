@@ -228,7 +228,6 @@ dependencies = [
  "human-panic",
  "jsonwebtoken",
  "lazy_static",
- "lexical-core",
  "log",
  "nom",
  "openssl",
