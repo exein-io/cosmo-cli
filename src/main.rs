@@ -52,9 +52,9 @@ async fn main() {
 
     human_panic::setup_panic!(Metadata {
         name: env!("CARGO_PKG_NAME").into(),
-        version: env!("CARGO_PKG_VERSION").into(),
+        version: cosmo_cli::version().into(),
         authors: "Exein <support@exein.io>".into(),
-        homepage: "cosmo.exein.io".into(),
+        homepage: "https://cosmo.exein.io".into(),
     });
 
     // Uses Firebase behind a token cache layer

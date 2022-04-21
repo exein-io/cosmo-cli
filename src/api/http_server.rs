@@ -2,7 +2,6 @@ use super::*;
 use crate::{
     project_service::{Project, ProjectAnalysis, ProjectIdDTO},
     security::{AuthData, AuthError, AuthSystem},
-    CLI_VERSION,
 };
 use async_trait::async_trait;
 use lazy_static::lazy_static;
@@ -13,7 +12,7 @@ use uuid::Uuid;
 lazy_static! {
     pub static ref CLI_USER_AGENT: String = format!(
         "ExeinCLI/{}", // TODO: possibile estrarre la distribuzione
-        *CLI_VERSION
+        crate::version()
     );
 }
 

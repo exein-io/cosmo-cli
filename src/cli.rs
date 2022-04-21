@@ -24,7 +24,7 @@ where
     T: Into<OsString> + Clone,
 {
     #[derive(Parser, Debug, Clone)]
-    #[clap(about, version = crate::CLI_VERSION.as_str())]
+    #[clap(about, version = crate::version())]
     struct BaseCosmoCliOpts {
         /// Specify custom api server
         #[clap(long)]

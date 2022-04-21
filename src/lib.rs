@@ -21,14 +21,17 @@ use uuid::Uuid;
 
 use crate::services::project_service::*;
 
-#[cfg(debug_assertions)]
-lazy_static! {
-    pub static ref CLI_VERSION: String = format!("{}+dev", env!("CARGO_PKG_VERSION"));
-}
+pub fn version() -> &'static str {
+    #[cfg(debug_assertions)]
+    lazy_static! {
+        static ref VERSION: String = format!("{}+dev", env!("CARGO_PKG_VERSION"));
+    }
 
-#[cfg(not(debug_assertions))]
-lazy_static! {
-    pub static ref CLI_VERSION: String = env!("CARGO_PKG_VERSION").to_string();
+    #[cfg(not(debug_assertions))]
+    lazy_static! {
+        static ref VERSION: String = env!("CARGO_PKG_VERSION").to_string();
+    }
+    &VERSION
 }
 
 fn read_bytes_from_file(filename: &str) -> Result<Vec<u8>, std::io::Error> {
@@ -39,7 +42,7 @@ fn read_bytes_from_file(filename: &str) -> Result<Vec<u8>, std::io::Error> {
 
 #[allow(dead_code)]
 async fn check_version<U: ApiServer>(api_server: &U) -> Result<(), Box<dyn Error>> {
-    let current_version = semver::Version::parse(&CLI_VERSION)?;
+    let current_version = semver::Version::parse(version())?;
     let latest_version = api_server.updates_check().await?;
 
     if current_version < latest_version.version {
