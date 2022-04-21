@@ -31,20 +31,6 @@ lazy_static! {
     pub static ref CLI_VERSION: String = env!("CARGO_PKG_VERSION").to_string();
 }
 
-lazy_static! {
-    pub static ref LOGO: String = format!(
-        r#"
-                        __        
-    ____ ___  ___ ____ |__| ____  
-  _/ __ \\  \/  // __ \|  |/    \ 
-  \  ___/ >    <\  ___/|  |   |  \
-   \___  >__/\_ \\___  >__|___|  /
-       \/      \/    \/        \/ Analyzer v{}
-"#,
-        *CLI_VERSION
-    );
-}
-
 fn read_bytes_from_file(filename: &str) -> Result<Vec<u8>, std::io::Error> {
     let f = File::open(filename)?;
     let reader = BufReader::new(f);
@@ -496,7 +482,7 @@ impl<T> fmt::Display for CommandOutput<T> {
 fn read_username_and_password_from_stdin() -> (String, String) {
     let stdin = io::stdin();
     let mut iterator = stdin.lock().lines();
-    println!("If you haven’t registered an account with Exein yet, visit hub.exein.io/signup to continue\n");
+    println!("If you haven't registered an account with Exein yet, visit hub.exein.io/signup to continue\n");
     print!("Email: ");
     io::stdout().flush().unwrap();
     let username = iterator.next().unwrap().unwrap();

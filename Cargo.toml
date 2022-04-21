@@ -36,12 +36,8 @@ anyhow = "1.0"
 clap-verbosity-flag = "1.0.0"
 
 [features]
-default = ["aws"]
+default = []
 vendored-openssl = ['openssl/vendored'] # Statically include openssl
-# ENVs
-aws = []
-staging = []
-development = []
 
 [profile.release]
 lto = true        # Enable Link Time Optimization
