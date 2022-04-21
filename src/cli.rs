@@ -55,16 +55,8 @@ where
 
     let base = BaseCosmoCliOpts::from_arg_matches(&matches)?;
 
-    // let override_log_level;
     let print_mode = match matches.subcommand() {
-        Some((_, matches)) => {
-            // Handle verbosity flag
-            // override_log_level = log_level_from_verbosity_flag_count(matches.occurrences_of("v"));
-
-            let derived_matches = DerivedArgs::from_arg_matches(&matches)?;
-
-            derived_matches.print_mode
-        }
+        Some((_, matches)) => DerivedArgs::from_arg_matches(&matches)?.print_mode,
         None => unreachable!("Subcommand should be specified"),
     };
 
