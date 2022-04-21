@@ -5,6 +5,8 @@ use chrono::{DateTime, Utc};
 use serde::Deserialize;
 use uuid::Uuid;
 
+use crate::Analysis;
+
 use super::super::ApiServer;
 use term_table::{
     row::Row,
@@ -966,7 +968,7 @@ pub async fn report<U: ApiServer>(
 pub async fn analysis<U: ApiServer>(
     api_server: &mut U,
     project_id: Uuid,
-    analysis: &str,
+    analysis: &Analysis,
     page: i32,
     per_page: i32,
 ) -> Result<ProjectAnalysis> {

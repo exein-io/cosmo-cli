@@ -1,7 +1,7 @@
 use crate::{
     project_service::Project,
     security::{AuthData, AuthError},
-    services::{apikey_service::ApiKeyData, project_service::ProjectAnalysis},
+    services::{apikey_service::ApiKeyData, project_service::ProjectAnalysis}, Analysis,
 };
 use async_trait::async_trait;
 use semver::Version;
@@ -71,7 +71,7 @@ pub trait ApiServer {
     async fn analysis(
         &mut self,
         project_id: &Uuid,
-        analysis: &str,
+        analysis: &Analysis,
         page: i32,
         per_page: i32,
     ) -> Result<ProjectAnalysis, ApiServerError>;

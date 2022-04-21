@@ -212,7 +212,7 @@ impl<U: AuthSystem> HttpApiServer<U> {
     pub async fn analysis(
         &mut self,
         project_id: &Uuid,
-        analysis: &str,
+        analysis: &Analysis,
         page: i32,
         per_page: i32,
     ) -> Result<ProjectAnalysis, ApiServerError> {
@@ -350,7 +350,7 @@ impl<U: AuthSystem> ApiServer for HttpApiServer<U> {
     async fn analysis(
         &mut self,
         project_id: &Uuid,
-        analysis: &str,
+        analysis: &Analysis,
         page: i32,
         per_page: i32,
     ) -> Result<ProjectAnalysis, ApiServerError> {

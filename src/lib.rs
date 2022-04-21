@@ -48,7 +48,7 @@ async fn check_version<U: ApiServer>(api_server: &U) -> Result<(), Box<dyn Error
     // TODO: fix repo path
     if current_version < latest_version.version {
         println!(
-r#"
+            r#"
 A new version of Exein Cosmo is available! Download it at path/to/repo/releases/latest
 and install it by running ./exein-analyzer-cli-installer.run in your terminal.
 "#
@@ -106,8 +106,8 @@ pub enum Command {
         #[clap(short = 'i', long = "id")]
         project_id: Uuid,
         /// Analysis name
-        #[clap(short, long)]
-        analysis: String, // TODO: enum
+        #[clap(short, long, arg_enum)]
+        analysis: Analysis,
         /// Page number
         #[clap(short = 'p', long, default_value_t = 0)]
         page: i32,
@@ -137,13 +137,6 @@ pub enum Command {
         #[clap(short, long, arg_enum)]
         action: ApiKeyAction,
     },
-}
-
-#[derive(Debug, Clone, ArgEnum)]
-pub enum ApiKeyAction {
-    List,
-    Create,
-    Delete,
 }
 
 impl Command {
@@ -233,194 +226,188 @@ impl Command {
                     project_service::analysis(api_server, project_id, &analysis, page, per_page)
                         .await?;
 
-                match res.error {
-                    None => {
-                        let name = res.name.as_str();
-                        let fw_type = res.fw_type;
-                        let result = res.result.unwrap();
-                        log::debug!("{} analysis {}", fw_type, name);
-                        //log::debug!("res:: {:#?}", result);
+                if let Some(err) = res.error {
+                    println!("Analysis {} error: {}", analysis, err)
+                    // TODO:
+                } else {
+                    let result = res.result.unwrap(); // Safe to unwrap
 
-                        match name {
-                            // Linux/Container Analysis
-                            "Hardening" => {
-                                let an: Vec<LinuxHardeningAnalysis> =
-                                    serde_json::from_value(result).unwrap();
-                                log::debug!("Hardening: {:#?}", an);
-                                let table = LinuxHardeningAnalysis::get_table_from_list(&an);
-                                println!("{}", table);
-                            }
-                            "CveCheck" => {
-                                let an: Vec<LinuxCveCheckAnalysis> =
-                                    serde_json::from_value(result).unwrap();
-                                log::debug!("CveCheck: {:#?}", an);
-                                let table = LinuxCveCheckAnalysis::get_table_from_list(&an);
-                                println!("{}", table);
-                            }
-                            "SecurityScan" => {
-                                let an: Vec<LinuxSecurityScanAnalysis> =
-                                    serde_json::from_value(result).unwrap();
-                                log::debug!("SecurityScan: {:#?}", an);
-                                let table = LinuxSecurityScanAnalysis::get_table_from_list(&an);
-                                println!("{}", table);
-                            }
-                            "PasswordHash" => {
-                                let an: Vec<LinuxPasswordHashAnalysis> =
-                                    serde_json::from_value(result).unwrap();
-                                log::debug!("PasswordHash: {:#?}", an);
-                                let table = LinuxPasswordHashAnalysis::get_table_from_list(&an);
-                                println!("{}", table);
-                            }
-                            "Crypto" => {
-                                let an: Vec<LinuxCryptoAnalysis> =
-                                    serde_json::from_value(result).unwrap();
-                                log::debug!("Crypto: {:#?}", an);
-                                let table = LinuxCryptoAnalysis::get_table_from_list(&an);
-                                println!("{}", table);
-                            }
-                            "Nvram" => {
-                                let an: Vec<LinuxNvramAnalysis> =
-                                    serde_json::from_value(result).unwrap();
-                                log::debug!("Nvram: {:#?}", an);
-                                let table = LinuxNvramAnalysis::get_table_from_list(&an);
-                                println!("{}", table);
-                            }
-                            "Kernel" => {
-                                let an: Vec<LinuxKernelAnalysis> =
-                                    serde_json::from_value(result).unwrap();
-                                log::debug!("Kernel: {:#?}", an);
-                                let table = LinuxKernelAnalysis::get_table_from_list(&an);
-                                println!("{}", table);
-                            }
-                            "SoftwareBOM" => {
-                                let an: Vec<LinuxSoftwareBOMAnalysis> =
-                                    serde_json::from_value(result).unwrap();
-                                log::debug!("SoftwareBOM: {:#?}", an);
-                                let table = LinuxSoftwareBOMAnalysis::get_table_from_list(&an);
-                                println!("{}", table);
-                            }
-                            "StaticCode" => {
-                                let analysis_result: Vec<LinuxStaticCodeAnalysis> =
-                                    serde_json::from_value(result).unwrap();
-                                let analysis_parsed: Result<Vec<LinuxStaticCode>, anyhow::Error> =
-                                    analysis_result
-                                        .into_iter()
-                                        .map(|executable_flaw| {
-                                            let flaw_str = executable_flaw
-                                                .flaws
-                                                .as_str()
-                                                .ok_or(anyhow!("failed to access flaw string"));
+                    log::info!("{} analysis {}", res.fw_type, res.name);
 
-                                            let flaw_parsed = flaw_str.and_then(|flaw| {
-                                                let flaw_parsed = serde_json::from_str::<
-                                                    LinuxStaticCodeAnalysisFlaws,
-                                                >(
-                                                    flaw
-                                                )
-                                                .map_err(|_| anyhow!("failed to parse flaw"));
-                                                flaw_parsed
-                                            });
+                    match analysis {
+                        // Linux/Container Analysis
+                        Analysis::Hardening => {
+                            let an: Vec<LinuxHardeningAnalysis> =
+                                serde_json::from_value(result).unwrap();
+                            log::debug!("Hardening: {:#?}", an);
+                            let table = LinuxHardeningAnalysis::get_table_from_list(&an);
+                            println!("{}", table);
+                        }
+                        Analysis::CveCheck => {
+                            let an: Vec<LinuxCveCheckAnalysis> =
+                                serde_json::from_value(result).unwrap();
+                            log::debug!("CveCheck: {:#?}", an);
+                            let table = LinuxCveCheckAnalysis::get_table_from_list(&an);
+                            println!("{}", table);
+                        }
+                        Analysis::SecurityScan => {
+                            let an: Vec<LinuxSecurityScanAnalysis> =
+                                serde_json::from_value(result).unwrap();
+                            log::debug!("SecurityScan: {:#?}", an);
+                            let table = LinuxSecurityScanAnalysis::get_table_from_list(&an);
+                            println!("{}", table);
+                        }
+                        Analysis::PasswordHash => {
+                            let an: Vec<LinuxPasswordHashAnalysis> =
+                                serde_json::from_value(result).unwrap();
+                            log::debug!("PasswordHash: {:#?}", an);
+                            let table = LinuxPasswordHashAnalysis::get_table_from_list(&an);
+                            println!("{}", table);
+                        }
+                        Analysis::Crypto => {
+                            let an: Vec<LinuxCryptoAnalysis> =
+                                serde_json::from_value(result).unwrap();
+                            log::debug!("Crypto: {:#?}", an);
+                            let table = LinuxCryptoAnalysis::get_table_from_list(&an);
+                            println!("{}", table);
+                        }
+                        Analysis::Nvram => {
+                            let an: Vec<LinuxNvramAnalysis> =
+                                serde_json::from_value(result).unwrap();
+                            log::debug!("Nvram: {:#?}", an);
+                            let table = LinuxNvramAnalysis::get_table_from_list(&an);
+                            println!("{}", table);
+                        }
+                        Analysis::Kernel => {
+                            let an: Vec<LinuxKernelAnalysis> =
+                                serde_json::from_value(result).unwrap();
+                            log::debug!("Kernel: {:#?}", an);
+                            let table = LinuxKernelAnalysis::get_table_from_list(&an);
+                            println!("{}", table);
+                        }
+                        Analysis::SoftwareBOM => {
+                            let an: Vec<LinuxSoftwareBOMAnalysis> =
+                                serde_json::from_value(result).unwrap();
+                            log::debug!("SoftwareBOM: {:#?}", an);
+                            let table = LinuxSoftwareBOMAnalysis::get_table_from_list(&an);
+                            println!("{}", table);
+                        }
+                        Analysis::StaticCode => {
+                            let analysis_result: Vec<LinuxStaticCodeAnalysis> =
+                                serde_json::from_value(result).unwrap();
+                            let analysis_parsed: Result<Vec<LinuxStaticCode>, anyhow::Error> =
+                                analysis_result
+                                    .into_iter()
+                                    .map(|executable_flaw| {
+                                        let flaw_str = executable_flaw
+                                            .flaws
+                                            .as_str()
+                                            .ok_or(anyhow!("failed to access flaw string"));
 
-                                            flaw_parsed.map(|flaw| LinuxStaticCode {
-                                                line: flaw.line.trim().to_string(),
-                                                descr: flaw.descr.trim().to_string(),
-                                                flaw_type: flaw.flaw_type.trim().to_string(),
-                                                filename: executable_flaw.filename,
-                                            })
+                                        let flaw_parsed = flaw_str.and_then(|flaw| {
+                                            let flaw_parsed = serde_json::from_str::<
+                                                LinuxStaticCodeAnalysisFlaws,
+                                            >(
+                                                flaw
+                                            )
+                                            .map_err(|_| anyhow!("failed to parse flaw"));
+                                            flaw_parsed
+                                        });
+
+                                        flaw_parsed.map(|flaw| LinuxStaticCode {
+                                            line: flaw.line.trim().to_string(),
+                                            descr: flaw.descr.trim().to_string(),
+                                            flaw_type: flaw.flaw_type.trim().to_string(),
+                                            filename: executable_flaw.filename,
                                         })
-                                        .collect();
-                                let analysis_parsed = analysis_parsed?;
+                                    })
+                                    .collect();
+                            let analysis_parsed = analysis_parsed?;
 
-                                log::debug!("{:#?}", analysis_parsed);
-                                let table = LinuxStaticCode::get_table_from_list(&analysis_parsed);
-                                println!("{}", table);
-                            }
-                            // UEFI Analysis
-                            "Access" => {
-                                let an: Vec<UefiAccess> = serde_json::from_value(result).unwrap();
-                                log::debug!("Access: {:#?}", an);
-                                let table = UefiAccess::get_table_from_list(&an);
-                                println!("{}", table);
-                            }
-                            "IntelBootGuard" => {
-                                let an: UefiIntelBootGuard =
-                                    serde_json::from_value(result).unwrap();
-                                log::debug!("IntelBootGuard: {:#?}", an);
-                                let table = UefiIntelBootGuardRsa::get_table_from_list(&an.rsa);
-                                println!("{}", table);
-                                println!("ACM: {}", an.acm);
-                            }
-                            "Surface" => {
-                                let an: Vec<UefiSurface> = serde_json::from_value(result).unwrap();
-                                log::debug!("Surface: {:#?}", an);
-                                let table = UefiSurface::get_table_from_list(&an);
-                                println!("{}", table);
-                            }
-                            "SecureBoot" => {
-                                let an: UefiSecureBoot = serde_json::from_value(result).unwrap();
-                                log::info!("SecureBoot: {:#?}", an);
-                                let table =
-                                    UefiSecureBootCerts::get_table_from_list(&an.certs.kek, "kek");
-                                println!("{}", table);
-                                let table =
-                                    UefiSecureBootCerts::get_table_from_list(&[an.certs.pk], "pk");
-                                println!("{}", table);
-                                let table = UefiSecureBootCerts::get_table_from_list(
-                                    &an.databases.certs.db,
-                                    "db",
-                                );
-                                println!("{}", table);
-                                let table = UefiSecureBootCerts::get_table_from_list(
-                                    &an.databases.certs.dbx,
-                                    "dbx",
-                                );
-                                println!("{}", table);
-                            }
+                            log::debug!("{:#?}", analysis_parsed);
+                            let table = LinuxStaticCode::get_table_from_list(&analysis_parsed);
+                            println!("{}", table);
+                        }
+                        // UEFI Analysis
+                        Analysis::Access => {
+                            let an: Vec<UefiAccess> = serde_json::from_value(result).unwrap();
+                            log::debug!("Access: {:#?}", an);
+                            let table = UefiAccess::get_table_from_list(&an);
+                            println!("{}", table);
+                        }
+                        Analysis::IntelBootGuard => {
+                            let an: UefiIntelBootGuard = serde_json::from_value(result).unwrap();
+                            log::debug!("IntelBootGuard: {:#?}", an);
+                            let table = UefiIntelBootGuardRsa::get_table_from_list(&an.rsa);
+                            println!("{}", table);
+                            println!("ACM: {}", an.acm);
+                        }
+                        Analysis::Surface => {
+                            let an: Vec<UefiSurface> = serde_json::from_value(result).unwrap();
+                            log::debug!("Surface: {:#?}", an);
+                            let table = UefiSurface::get_table_from_list(&an);
+                            println!("{}", table);
+                        }
+                        Analysis::SecureBoot => {
+                            let an: UefiSecureBoot = serde_json::from_value(result).unwrap();
+                            log::info!("SecureBoot: {:#?}", an);
+                            let table =
+                                UefiSecureBootCerts::get_table_from_list(&an.certs.kek, "kek");
+                            println!("{}", table);
+                            let table =
+                                UefiSecureBootCerts::get_table_from_list(&[an.certs.pk], "pk");
+                            println!("{}", table);
+                            let table = UefiSecureBootCerts::get_table_from_list(
+                                &an.databases.certs.db,
+                                "db",
+                            );
+                            println!("{}", table);
+                            let table = UefiSecureBootCerts::get_table_from_list(
+                                &an.databases.certs.dbx,
+                                "dbx",
+                            );
+                            println!("{}", table);
+                        }
 
-                            "UefiSecurityScan" => {
-                                let an: Vec<UefiSecurityScan> =
-                                    serde_json::from_value(result).unwrap();
-                                log::debug!("UefiSecurityScan: {:#?}", an);
-                                let table = UefiSecurityScan::get_table_from_list(&an);
-                                println!("{}", table);
-                            }
-                            "PeimDxe" => {
-                                let an: Vec<UefiPeimDxe> = serde_json::from_value(result).unwrap();
-                                log::debug!("PeimDxe: {:#?}", an);
-                                let table = UefiPeimDxe::get_table_from_list(&an);
-                                println!("{}", table);
-                            }
-                            // Vxworks Analysis
-                            "Functions" => {
-                                let an: Vec<VxworksData> = serde_json::from_value(result).unwrap();
-                                log::debug!("Function: {:#?}", an);
-                                let table = VxworksData::get_table_from_list(&an);
-                                println!("{}", table);
-                            }
-                            "Symbols" => {
-                                let an: Vec<VxworksData> = serde_json::from_value(result).unwrap();
-                                log::debug!("Symbols: {:#?}", an);
-                                let table = VxworksData::get_table_from_list(&an);
-                                println!("{}", table);
-                            }
-                            "Tasks" => {
-                                let an: Vec<VxworksTask> = serde_json::from_value(result).unwrap();
-                                log::debug!("Tasks: {:#?}", an);
-                                let table = VxworksTask::get_table_from_list(&an);
-                                println!("{}", table);
-                            }
-                            "Capabilities" => {
-                                let an: Vec<VxworksCapability> =
-                                    serde_json::from_value(result).unwrap();
-                                log::debug!("Capabilities: {:#?}", an);
-                                let table = VxworksCapability::get_table_from_list(&an);
-                                println!("{}", table);
-                            }
-
-                            an => log::error!("Analysis not supported: {}", an),
+                        Analysis::UefiSecurityScan => {
+                            let an: Vec<UefiSecurityScan> = serde_json::from_value(result).unwrap();
+                            log::debug!("UefiSecurityScan: {:#?}", an);
+                            let table = UefiSecurityScan::get_table_from_list(&an);
+                            println!("{}", table);
+                        }
+                        Analysis::PeimDxe => {
+                            let an: Vec<UefiPeimDxe> = serde_json::from_value(result).unwrap();
+                            log::debug!("PeimDxe: {:#?}", an);
+                            let table = UefiPeimDxe::get_table_from_list(&an);
+                            println!("{}", table);
+                        }
+                        // Vxworks Analysis
+                        Analysis::Functions => {
+                            let an: Vec<VxworksData> = serde_json::from_value(result).unwrap();
+                            log::debug!("Function: {:#?}", an);
+                            let table = VxworksData::get_table_from_list(&an);
+                            println!("{}", table);
+                        }
+                        Analysis::Symbols => {
+                            let an: Vec<VxworksData> = serde_json::from_value(result).unwrap();
+                            log::debug!("Symbols: {:#?}", an);
+                            let table = VxworksData::get_table_from_list(&an);
+                            println!("{}", table);
+                        }
+                        Analysis::Tasks => {
+                            let an: Vec<VxworksTask> = serde_json::from_value(result).unwrap();
+                            log::debug!("Tasks: {:#?}", an);
+                            let table = VxworksTask::get_table_from_list(&an);
+                            println!("{}", table);
+                        }
+                        Analysis::Capabilities => {
+                            let an: Vec<VxworksCapability> =
+                                serde_json::from_value(result).unwrap();
+                            log::debug!("Capabilities: {:#?}", an);
+                            let table = VxworksCapability::get_table_from_list(&an);
+                            println!("{}", table);
                         }
                     }
-                    e => log::debug!("Analysis {} error: {}", analysis, e.unwrap()),
                 }
 
                 Ok(())
@@ -492,4 +479,65 @@ fn read_username_and_password_from_stdin() -> (String, String) {
     let username = iterator.next().unwrap().unwrap();
     let password = rpassword::prompt_password("Password: ").unwrap();
     (username, password)
+}
+
+#[derive(Debug, Clone, ArgEnum)]
+pub enum ApiKeyAction {
+    List,
+    Create,
+    Delete,
+}
+
+#[derive(Debug, Clone, ArgEnum)]
+pub enum Analysis {
+    // Linux/Container Analysis
+    Hardening,
+    CveCheck,
+    SecurityScan,
+    PasswordHash,
+    Crypto,
+    Nvram,
+    Kernel,
+    SoftwareBOM,
+    StaticCode,
+    // UEFI Analysis
+    Access,
+    IntelBootGuard,
+    Surface,
+    SecureBoot,
+    UefiSecurityScan,
+    PeimDxe,
+    // Vxworks Analysis
+    Functions,
+    Symbols,
+    Tasks,
+    Capabilities,
+}
+
+impl fmt::Display for Analysis {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let s = match self {
+            Analysis::Hardening => "Hardening",
+            Analysis::CveCheck => "CveCheck",
+            Analysis::SecurityScan => "SecurityScan",
+            Analysis::PasswordHash => "PasswordHash",
+            Analysis::Crypto => "Crypto",
+            Analysis::Nvram => "Nvram",
+            Analysis::Kernel => "Kernel",
+            Analysis::SoftwareBOM => "SoftwareBOM",
+            Analysis::StaticCode => "StaticCode",
+            Analysis::Access => "Access",
+            Analysis::IntelBootGuard => "IntelBootGuard",
+            Analysis::Surface => "Surface",
+            Analysis::SecureBoot => "SecureBoot",
+            Analysis::UefiSecurityScan => "UefiSecurityScan",
+            Analysis::PeimDxe => "PeimDxe",
+            Analysis::Functions => "Functions",
+            Analysis::Symbols => "Symbols",
+            Analysis::Tasks => "Tasks",
+            Analysis::Capabilities => "Capabilities",
+        };
+
+        write!(f, "{s}")
+    }
 }
