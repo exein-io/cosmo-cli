@@ -23,18 +23,14 @@ const UPDATES_ROUTE: &'static str = "/api/updates_check";
 
 #[derive(Debug)]
 pub struct HttpApiServer<U: AuthSystem> {
-    host: String,
-    port: String,
-    tls: bool,
+    address: String,
     auth_service: U,
 }
 
 impl<U: AuthSystem> HttpApiServer<U> {
-    pub fn new(host: String, port: String, tls: bool, auth_service: U) -> Self {
+    pub fn new(address: String, auth_service: U) -> Self {
         Self {
-            host,
-            port,
-            tls,
+            address,
             auth_service,
         }
     }
@@ -56,8 +52,7 @@ impl<U: AuthSystem> HttpApiServer<U> {
     }
 
     fn request(&self, path: &str, method: reqwest::Method) -> reqwest::RequestBuilder {
-        let protocol = get_protocol(self.tls);
-        let url = format!("{}://{}:{}{}", protocol, self.host, self.port, path);
+        let url = format!("{}{}", self.address, path);
 
         reqwest::Client::new()
             .request(method, &url)
@@ -77,14 +72,6 @@ impl<U: AuthSystem> HttpApiServer<U> {
             .header(AUTHORIZATION, format!("Bearer {}", auth_data.token));
 
         Ok(req)
-    }
-}
-
-fn get_protocol(tls: bool) -> &'static str {
-    if tls {
-        "https"
-    } else {
-        "http"
     }
 }
 
