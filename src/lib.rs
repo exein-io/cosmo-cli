@@ -45,10 +45,11 @@ async fn check_version<U: ApiServer>(api_server: &U) -> Result<(), Box<dyn Error
     let current_version = semver::Version::parse(version())?;
     let latest_version = api_server.updates_check().await?;
 
+    // TODO: fix repo path
     if current_version < latest_version.version {
         println!(
-            r#"
-A new version of Exein Cosmo is available! Download it at https://cosmo.exein.io/static/exein-analyzer-cli-installer.run
+r#"
+A new version of Exein Cosmo is available! Download it at path/to/repo/releases/latest
 and install it by running ./exein-analyzer-cli-installer.run in your terminal.
 "#
         );
