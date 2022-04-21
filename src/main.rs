@@ -1,11 +1,7 @@
 use std::{
-    alloc::System,
     env,
     path::{Path, PathBuf},
 };
-
-#[global_allocator]
-static GLOBAL: System = System;
 
 use cosmo_cli::{
     api::HttpApiServer,
