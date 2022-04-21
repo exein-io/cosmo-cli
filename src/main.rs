@@ -87,7 +87,7 @@ async fn main() {
     };
 
     // Run Command
-    if let Err(e) = cli_opts.command.run(&mut api_server).await {
+    if let Err(e) = cosmo_cli::run_cmd(cli_opts.command, &mut api_server).await {
         cli::report_error(&e);
         std::process::exit(1)
     }

@@ -1,8 +1,7 @@
-use std::{env, ffi::OsString};
+use std::{env, ffi::OsString, fmt};
 
 use clap::{ArgEnum, Args, FromArgMatches, IntoApp, Parser, Subcommand};
-
-use crate::Command;
+use uuid::Uuid;
 
 #[derive(Debug, Clone, ArgEnum)]
 pub enum PrintMode {
@@ -93,4 +92,145 @@ pub fn report_error(e: &anyhow::Error) {
     } else {
         log::error!("{:#}", e);
     }
+}
+
+#[derive(Debug, Clone, ArgEnum)]
+pub enum ApiKeyAction {
+    List,
+    Create,
+    Delete,
+}
+
+#[derive(Debug, Clone, ArgEnum)]
+pub enum Analysis {
+    // Linux/Container Analysis
+    Hardening,
+    CveCheck,
+    SecurityScan,
+    PasswordHash,
+    Crypto,
+    Nvram,
+    Kernel,
+    SoftwareBOM,
+    StaticCode,
+    // UEFI Analysis
+    Access,
+    IntelBootGuard,
+    Surface,
+    SecureBoot,
+    UefiSecurityScan,
+    PeimDxe,
+    // Vxworks Analysis
+    Functions,
+    Symbols,
+    Tasks,
+    Capabilities,
+}
+
+impl fmt::Display for Analysis {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let s = match self {
+            Analysis::Hardening => "Hardening",
+            Analysis::CveCheck => "CveCheck",
+            Analysis::SecurityScan => "SecurityScan",
+            Analysis::PasswordHash => "PasswordHash",
+            Analysis::Crypto => "Crypto",
+            Analysis::Nvram => "Nvram",
+            Analysis::Kernel => "Kernel",
+            Analysis::SoftwareBOM => "SoftwareBOM",
+            Analysis::StaticCode => "StaticCode",
+            Analysis::Access => "Access",
+            Analysis::IntelBootGuard => "IntelBootGuard",
+            Analysis::Surface => "Surface",
+            Analysis::SecureBoot => "SecureBoot",
+            Analysis::UefiSecurityScan => "UefiSecurityScan",
+            Analysis::PeimDxe => "PeimDxe",
+            Analysis::Functions => "Functions",
+            Analysis::Symbols => "Symbols",
+            Analysis::Tasks => "Tasks",
+            Analysis::Capabilities => "Capabilities",
+        };
+
+        write!(f, "{s}")
+    }
+}
+
+#[derive(Debug, Clone, Subcommand)]
+pub enum Command {
+    /// Create project
+    #[clap(visible_alias = "new")]
+    CreateProject {
+        /// Firmware path to analyze
+        #[clap(short = 'f', long = "file", value_name = "FILE")]
+        fw_filepath: String,
+        /// Project name
+        #[clap(short, long)]
+        name: String,
+        /// Project description
+        #[clap(short, long)]
+        description: Option<String>,
+        /// Type of your firmware
+        #[clap(short = 't', long = "type", value_name = "TYPE")]
+        fw_type: String,
+        /// Subtype of your firmware
+        #[clap(
+            short = 's',
+            long = "subtype",
+            value_name = "SUBTYPE",
+            default_value_t = String::from("generic")
+        )]
+        fw_subtype: String,
+    },
+    /// List all projects
+    #[clap(visible_alias = "ls")]
+    List,
+    /// Login to Cosmo
+    Login,
+    /// Logout
+    Logout,
+    /// Project overview
+    #[clap(visible_alias = "show")]
+    Overview {
+        /// ID of the project
+        #[clap(short = 'i', long = "id")]
+        project_id: Uuid,
+    },
+    /// Project analysis result
+    #[clap(visible_alias = "an")]
+    Analysis {
+        /// ID of the project
+        #[clap(short = 'i', long = "id")]
+        project_id: Uuid,
+        /// Analysis name
+        #[clap(short, long, arg_enum)]
+        analysis: Analysis,
+        /// Page number
+        #[clap(short = 'p', long, default_value_t = 0)]
+        page: i32,
+        /// Per page results
+        #[clap(short = 'l', long, default_value_t = 10)]
+        per_page: i32,
+    },
+    /// Delete a project
+    #[clap(visible_alias = "rm")]
+    Delete {
+        /// ID of the project
+        #[clap(short = 'i', long = "id")]
+        project_id: Uuid,
+    },
+    /// Project report
+    Report {
+        /// ID of the project
+        #[clap(short = 'i', long = "id")]
+        project_id: Uuid,
+        /// PDF report path
+        #[clap(short = 'o', long = "output")]
+        savepath: String, //TODO: default format!("/tmp/{}.pdf", project_id).as_str()
+    },
+    /// Manage API key
+    Apikey {
+        /// Action to perform
+        #[clap(short, long, arg_enum)]
+        action: ApiKeyAction,
+    },
 }
