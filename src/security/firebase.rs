@@ -1,6 +1,6 @@
 use super::*;
 use async_trait::async_trait;
-use jsonwebtoken::Validation;
+use jsonwebtoken::{DecodingKey, Validation};
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, error::Error, time::SystemTime};
 
@@ -296,8 +296,10 @@ fn decode_firebase_token(token: &str) -> Result<FirebaseClaims, jsonwebtoken::er
     let header = jsonwebtoken::decode_header(&token)?;
     let mut validation = Validation::default();
     validation.algorithms = vec![header.alg];
-    let decoded = jsonwebtoken::dangerous_insecure_decode_with_validation::<FirebaseClaims>(
+    validation.insecure_disable_signature_validation();
+    let decoded = jsonwebtoken::decode::<FirebaseClaims>(
         token,
+        &DecodingKey::from_secret("DUMMY_BECAUSE_VERIFICATION_TURNED_OFF".as_ref()),
         &validation,
     )?;
     Ok(decoded.claims)

@@ -1,5 +1,3 @@
-extern crate nom;
-
 pub mod api;
 pub mod cli;
 pub mod security;
@@ -494,6 +492,7 @@ impl<T> fmt::Display for CommandOutput<T> {
     }
 }
 
+// TODO: hadle unwraps
 fn read_username_and_password_from_stdin() -> (String, String) {
     let stdin = io::stdin();
     let mut iterator = stdin.lock().lines();
@@ -501,6 +500,6 @@ fn read_username_and_password_from_stdin() -> (String, String) {
     print!("Email: ");
     io::stdout().flush().unwrap();
     let username = iterator.next().unwrap().unwrap();
-    let password = rpassword::read_password_from_tty(Some("Password: ")).unwrap();
+    let password = rpassword::prompt_password("Password: ").unwrap();
     (username, password)
 }
