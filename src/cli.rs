@@ -70,7 +70,7 @@ where
 }
 
 fn show_backtrace() -> bool {
-    if log::max_level() > log::LevelFilter::Error {
+    if log::max_level() > log::LevelFilter::Info {
         return true;
     }
 
