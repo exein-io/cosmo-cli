@@ -323,6 +323,9 @@ impl<U: AuthSystem> HttpApiServer<U> {
 
 #[async_trait(?Send)]
 impl<U: AuthSystem> ApiServer for HttpApiServer<U> {
+    fn address(&self) -> &str {
+        &self.address
+    }
     async fn updates_check(&self) -> Result<LatestCliVersion, ApiServerError> {
         self.updates_check().await
     }

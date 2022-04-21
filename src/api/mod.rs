@@ -1,7 +1,8 @@
 use crate::{
     project_service::Project,
     security::{AuthData, AuthError},
-    services::{apikey_service::ApiKeyData, project_service::ProjectAnalysis}, Analysis,
+    services::{apikey_service::ApiKeyData, project_service::ProjectAnalysis},
+    Analysis,
 };
 use async_trait::async_trait;
 use semver::Version;
@@ -57,6 +58,7 @@ impl std::error::Error for ApiServerError {}
 
 #[async_trait(?Send)]
 pub trait ApiServer {
+    fn address(&self) -> &str;
     async fn authenticate(&mut self) -> Result<AuthData, AuthError>;
     async fn updates_check(&self) -> Result<LatestCliVersion, ApiServerError>;
     async fn create(

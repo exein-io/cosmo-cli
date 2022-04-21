@@ -141,13 +141,13 @@ pub enum Command {
 
 impl Command {
     pub async fn run<U: ApiServer>(self, api_server: &mut U) -> Result<(), anyhow::Error> {
-        //check_version(api_server).await?;
+        // check_version(api_server).await?; //TODO
 
         // Authentication
         if let Self::Logout = self {
-            // Trick to skip prehemptive auth if logout
+            // Skip auth if logout command
         } else {
-            log::debug!("First login attempt");
+            log::debug!("Startup login");
             let auth_data = api_server.authenticate().await?;
             log::info!("Logged in as: {}", auth_data.username);
         }
@@ -172,7 +172,8 @@ impl Command {
                 .await?;
                 log::info!("Project created successfull. Project id: {}", project_id);
                 log::info!(
-                    "Dashboard URL: https://cosmo.exein.io/reports/{}",
+                    "Dashboard URL: {}/reports/{}",
+                    api_server.address(),
                     project_id
                 );
                 Ok(())
