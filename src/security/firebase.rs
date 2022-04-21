@@ -50,15 +50,15 @@ pub struct FirebaseRefreshResponse {
 #[derive(Debug, Deserialize, Clone)]
 #[allow(non_snake_case)]
 pub struct FirebaseResponseError {
-    error: FirebaseErrorDescription,
+    pub error: FirebaseErrorDescription,
 }
 
 #[derive(Debug, Deserialize, Clone)]
 #[allow(non_snake_case)]
 pub struct FirebaseErrorDescription {
-    code: i32,
-    message: String,
-    errors: Vec<HashMap<String, String>>,
+    pub code: i32,
+    pub message: String,
+    pub errors: Vec<HashMap<String, String>>,
 }
 
 #[derive(Debug, Clone, Deserialize)]

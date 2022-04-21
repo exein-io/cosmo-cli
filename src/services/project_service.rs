@@ -21,15 +21,15 @@ pub struct ProjectIdDTO {
 
 #[derive(Debug, Deserialize)]
 pub struct Project {
-    description: Option<String>,
-    id: Uuid,
-    name: String,
-    original_name: String,
-    score: f32,
-    workspace_id: Uuid,
-    project_type: String,
-    project_subtype: String,
-    creation_date: DateTime<Utc>,
+    pub description: Option<String>,
+    pub id: Uuid,
+    pub name: String,
+    pub original_name: String,
+    pub score: f32,
+    pub workspace_id: Uuid,
+    pub project_type: String,
+    pub project_subtype: String,
+    pub creation_date: DateTime<Utc>,
 }
 
 impl Project {
@@ -79,46 +79,46 @@ impl Project {
 // Linux/Container Analysis
 #[derive(Debug, Deserialize)]
 pub struct LinuxProjectOverview {
-    kernel_security: Option<u16>,
-    password_hash: u16,
-    security_scan: u16,
-    cve_check: LinuxProjectOverviewCveCheck,
-    code: LinuxProjectOverviewCode,
-    binary: LinuxProjectOverviewBinary,
-    project: Project,
-    info: LinuxInfo,
+    pub kernel_security: Option<u16>,
+    pub password_hash: u16,
+    pub security_scan: u16,
+    pub cve_check: LinuxProjectOverviewCveCheck,
+    pub code: LinuxProjectOverviewCode,
+    pub binary: LinuxProjectOverviewBinary,
+    pub project: Project,
+    pub info: LinuxInfo,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct LinuxInfo {
-    arch: String,
-    banner: Option<String>,
-    kernel: Option<String>,
-    kernelc: Option<String>,
-    libc: Option<String>,
+    pub arch: String,
+    pub banner: Option<String>,
+    pub kernel: Option<String>,
+    pub kernelc: Option<String>,
+    pub libc: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct LinuxProjectOverviewCveCheck {
-    severity: LinuxProjectOverviewSeverity,
+    pub severity: LinuxProjectOverviewSeverity,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct LinuxProjectOverviewCode {
-    vulnerabilities: u16,
-    files_affected: u16,
+    pub vulnerabilities: u16,
+    pub files_affected: u16,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct LinuxProjectOverviewBinary {
-    severity: LinuxProjectOverviewSeverity,
+    pub severity: LinuxProjectOverviewSeverity,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct LinuxProjectOverviewSeverity {
-    low: u16,
-    medium: u16,
-    high: u16,
+    pub low: u16,
+    pub medium: u16,
+    pub high: u16,
 }
 
 #[derive(Debug, Deserialize)]
@@ -131,18 +131,18 @@ pub struct ProjectAnalysis {
 
 #[derive(Debug, Deserialize)]
 pub struct LinuxHardeningAnalysis {
-    filename: String,
-    r#type: String,
-    score: u8,
-    compiler: Option<String>,
-    stripped: bool,
-    suid: bool,
-    execstack: bool,
-    canary: bool,
-    fortify: bool,
-    nx: bool,
-    pie: String,
-    relro: String,
+    pub filename: String,
+    pub r#type: String,
+    pub score: u8,
+    pub compiler: Option<String>,
+    pub stripped: bool,
+    pub suid: bool,
+    pub execstack: bool,
+    pub canary: bool,
+    pub fortify: bool,
+    pub nx: bool,
+    pub pie: String,
+    pub relro: String,
 }
 
 impl LinuxHardeningAnalysis {
@@ -197,10 +197,10 @@ impl LinuxHardeningAnalysis {
 
 #[derive(Debug, Deserialize)]
 pub struct LinuxCveCheckAnalysis {
-    product: String,
-    cveid: String,
-    severity: String,
-    patch: Option<String>,
+    pub product: String,
+    pub cveid: String,
+    pub severity: String,
+    pub patch: Option<String>,
 }
 
 impl LinuxCveCheckAnalysis {
@@ -236,9 +236,9 @@ impl LinuxCveCheckAnalysis {
 
 #[derive(Debug, Deserialize)]
 pub struct LinuxSecurityScanAnalysis {
-    filename: String,
-    r#type: Vec<String>,
-    desc: String,
+    pub filename: String,
+    pub r#type: Vec<String>,
+    pub desc: String,
 }
 
 impl LinuxSecurityScanAnalysis {
@@ -521,16 +521,16 @@ impl LinuxSoftwareBOMAnalysis {
 
 #[derive(Debug, Deserialize)]
 pub struct UefiProjectOverview {
-    info: UefiInfo,
-    project: Project,
+    pub info: UefiInfo,
+    pub project: Project,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct UefiInfo {
-    dxe_no: u32,
-    pei_no: u32,
-    manufacturer: String,
-    s3mit: String,
+    pub dxe_no: u32,
+    pub pei_no: u32,
+    pub manufacturer: String,
+    pub s3mit: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -614,10 +614,10 @@ impl UefiIntelBootGuardRsa {
 
 #[derive(Debug, Deserialize)]
 pub struct UefiSurface {
-    name: String,
-    r#type: String,
-    value: String,
-    guid: Uuid,
+    pub name: String,
+    pub r#type: String,
+    pub value: String,
+    pub guid: Uuid,
 }
 
 impl UefiSurface {
@@ -673,20 +673,20 @@ impl UefiSecureBootCerts {
 
 #[derive(Debug, Deserialize)]
 pub struct UefiSecureBootDatabases {
-    pub(crate) certs: UefiSecureBootDatabasesData,
-    pub(crate) hashes: UefiSecureBootDatabasesData,
+    pub certs: UefiSecureBootDatabasesData,
+    pub hashes: UefiSecureBootDatabasesData,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct UefiSecureBootDatabasesData {
-    pub(crate) db: Vec<UefiSecureBootData>,
-    pub(crate) dbx: Vec<UefiSecureBootData>,
+    pub db: Vec<UefiSecureBootData>,
+    pub dbx: Vec<UefiSecureBootData>,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct UefiSecureBootData {
-    first: String,
-    second: String,
+    pub first: String,
+    pub second: String,
 }
 
 impl UefiSecureBootData {
@@ -722,9 +722,9 @@ impl UefiSecureBootData {
 
 #[derive(Debug, Deserialize)]
 pub struct UefiSecurityScan {
-    guid: Uuid,
-    module: String,
-    name: String,
+    pub guid: Uuid,
+    pub module: String,
+    pub name: String,
 }
 
 impl UefiSecurityScan {
@@ -759,13 +759,13 @@ impl UefiSecurityScan {
 
 #[derive(Debug, Deserialize)]
 pub struct UefiPeimDxe {
-    name: String,
-    filetype: String,
-    format: String,
-    machine: String,
-    r#type: String,
-    sign: Option<bool>,
-    dependencies: Option<Vec<String>>,
+    pub name: String,
+    pub filetype: String,
+    pub format: String,
+    pub machine: String,
+    pub r#type: String,
+    pub sign: Option<bool>,
+    pub dependencies: Option<Vec<String>>,
 }
 
 impl UefiPeimDxe {
@@ -806,21 +806,21 @@ impl UefiPeimDxe {
 
 #[derive(Debug, Deserialize)]
 pub struct VxworksProjectOverview {
-    info: VxworksInfo,
-    project: Project,
+    pub info: VxworksInfo,
+    pub project: Project,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct VxworksInfo {
-    functions_no: u32,
-    symbols_no: u32,
-    tasks_no: u32,
-    word_size: u32,
-    arch: String,
-    endianness: String,
-    kernel: Option<String>,
-    capabilities: Option<serde_json::Value>,
-    os: String,
+    pub functions_no: u32,
+    pub symbols_no: u32,
+    pub tasks_no: u32,
+    pub word_size: u32,
+    pub arch: String,
+    pub endianness: String,
+    pub kernel: Option<String>,
+    pub capabilities: Option<serde_json::Value>,
+    pub os: String,
 }
 
 #[derive(Debug, Deserialize)]
