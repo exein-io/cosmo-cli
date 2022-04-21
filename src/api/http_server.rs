@@ -97,7 +97,7 @@ impl<U: AuthSystem> HttpApiServer<U> {
             .await?;
         let response_status = response.status();
 
-        if response_status == http::StatusCode::OK {
+        if response_status == reqwest::StatusCode::OK {
             let latest_version = response.json::<LatestCliVersion>().await?;
             Ok(latest_version)
         } else {
@@ -155,7 +155,7 @@ impl<U: AuthSystem> HttpApiServer<U> {
 
         let response_status = response.status();
 
-        if response_status == http::StatusCode::OK {
+        if response_status == reqwest::StatusCode::OK {
             let dto = response.json::<ProjectIdDTO>().await?;
             Ok(dto.id)
         } else {
@@ -175,7 +175,7 @@ impl<U: AuthSystem> HttpApiServer<U> {
             .await?
             .send()
             .await?;
-        if response.status() == http::StatusCode::OK {
+        if response.status() == reqwest::StatusCode::OK {
             let overview = response.json().await?;
             Ok(overview)
         } else {
@@ -199,7 +199,7 @@ impl<U: AuthSystem> HttpApiServer<U> {
 
         let status = response.status();
 
-        if status == http::StatusCode::OK {
+        if status == reqwest::StatusCode::OK {
             let bytes = response.bytes().await?;
             let mut f = File::create(&savepath).map_err(|err| {
                 ApiServerError::RequestError(format!(
@@ -240,7 +240,7 @@ impl<U: AuthSystem> HttpApiServer<U> {
             .await?
             .send()
             .await?;
-        if response.status() == http::StatusCode::OK {
+        if response.status() == reqwest::StatusCode::OK {
             let res = response.json().await?;
             Ok(res)
         } else {
@@ -257,7 +257,7 @@ impl<U: AuthSystem> HttpApiServer<U> {
             .await?
             .send()
             .await?;
-        if response.status() == http::StatusCode::OK {
+        if response.status() == reqwest::StatusCode::OK {
             Ok(())
         } else {
             let body = response.text().await?;
@@ -272,7 +272,7 @@ impl<U: AuthSystem> HttpApiServer<U> {
             .send()
             .await?;
 
-        if response.status() == http::StatusCode::OK {
+        if response.status() == reqwest::StatusCode::OK {
             let projects: Vec<Project> = response.json::<Vec<Project>>().await?;
             Ok(projects)
         } else {
@@ -288,10 +288,10 @@ impl<U: AuthSystem> HttpApiServer<U> {
             .send()
             .await?;
 
-        if response.status() == http::StatusCode::OK {
+        if response.status() == reqwest::StatusCode::OK {
             let apikey = response.json().await?;
             Ok(apikey)
-        } else if response.status() == http::StatusCode::BAD_REQUEST {
+        } else if response.status() == reqwest::StatusCode::BAD_REQUEST {
             Err(ApiServerError::ApiError(
                 "API key already present!".to_string(),
             ))
@@ -308,10 +308,10 @@ impl<U: AuthSystem> HttpApiServer<U> {
             .send()
             .await?;
 
-        if response.status() == http::StatusCode::OK {
+        if response.status() == reqwest::StatusCode::OK {
             let apikey = response.json().await?;
             Ok(Some(apikey))
-        } else if response.status() == http::StatusCode::NO_CONTENT {
+        } else if response.status() == reqwest::StatusCode::NO_CONTENT {
             Ok(None)
         } else {
             let body = response.text().await?;
@@ -326,7 +326,7 @@ impl<U: AuthSystem> HttpApiServer<U> {
             .send()
             .await?;
 
-        if response.status() == http::StatusCode::OK {
+        if response.status() == reqwest::StatusCode::OK {
             Ok(())
         } else {
             let body = response.text().await?;

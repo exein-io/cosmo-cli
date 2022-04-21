@@ -225,7 +225,6 @@ dependencies = [
  "clap-verbosity-flag",
  "dirs",
  "env_logger",
- "http",
  "human-panic",
  "jsonwebtoken",
  "lazy_static",

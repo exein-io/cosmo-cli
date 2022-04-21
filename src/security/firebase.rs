@@ -209,7 +209,7 @@ impl Firebase {
             .send()
             .await?;
 
-        if response.status() != http::StatusCode::OK {
+        if response.status() != reqwest::StatusCode::OK {
             let response_error = response.json::<FirebaseResponseError>().await?;
             let error = FirebaseError::ResponseError(response_error);
             return Err(error);
@@ -261,7 +261,7 @@ impl Firebase {
             .json(&request)
             .send()
             .await?;
-        if response.status() != http::StatusCode::OK {
+        if response.status() != reqwest::StatusCode::OK {
             let response_error = response.json::<FirebaseResponseError>().await?;
             let error = FirebaseError::ResponseError(response_error);
             return Err(error);
