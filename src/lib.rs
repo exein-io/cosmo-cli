@@ -5,7 +5,7 @@ pub mod services;
 
 use anyhow::{anyhow, Context};
 use api::ApiServer;
-use cli::{Analysis, ApiKeyAction, Command, PrintMode};
+use cli::{Analysis, ApiKeyAction, Command, OutputMode};
 use core::fmt;
 use lazy_static::lazy_static;
 use project_service::Project;
@@ -59,7 +59,7 @@ and install it by running ./exein-analyzer-cli-installer.run in your terminal.
 
 #[derive(Debug)]
 pub struct CommandOutput<T> {
-    print_mode: PrintMode,
+    output_mode: OutputMode,
     inner_output: T,
 }
 

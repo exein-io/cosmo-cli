@@ -4,7 +4,7 @@ use clap::{ArgEnum, Args, FromArgMatches, IntoApp, Parser, Subcommand};
 use uuid::Uuid;
 
 #[derive(Debug, Clone, ArgEnum)]
-pub enum PrintMode {
+pub enum OutputMode {
     Raw,
     Json,
 }
@@ -13,7 +13,7 @@ pub enum PrintMode {
 pub struct CosmoCliOpts {
     pub api_server: Option<String>,
     pub log_level_filter: log::LevelFilter,
-    pub print_mode: PrintMode,
+    pub output_mode: OutputMode,
     pub command: Command,
 }
 
@@ -42,8 +42,8 @@ where
 
     #[derive(Parser, Debug)]
     struct DerivedArgs {
-        #[clap(long, arg_enum, default_value_t = PrintMode::Raw)]
-        print_mode: PrintMode,
+        #[clap(short = 'o', long = "output", arg_enum, default_value_t = OutputMode::Raw)]
+        output: OutputMode,
     }
 
     for a in app.get_subcommands_mut() {
@@ -54,8 +54,8 @@ where
 
     let base = BaseCosmoCliOpts::from_arg_matches(&matches)?;
 
-    let print_mode = match matches.subcommand() {
-        Some((_, matches)) => DerivedArgs::from_arg_matches(&matches)?.print_mode,
+    let output_mode = match matches.subcommand() {
+        Some((_, matches)) => DerivedArgs::from_arg_matches(&matches)?.output,
         None => unreachable!("Subcommand should be specified"),
     };
 
@@ -64,7 +64,7 @@ where
     Ok(CosmoCliOpts {
         api_server: base.api_server,
         log_level_filter: base.verbose.log_level_filter(),
-        print_mode,
+        output_mode,
         command,
     })
 }
@@ -223,9 +223,9 @@ pub enum Command {
         /// ID of the project
         #[clap(short = 'i', long = "id")]
         project_id: Uuid,
-        /// PDF report path
-        #[clap(short = 'o', long = "output")]
-        savepath: String, //TODO: default format!("/tmp/{}.pdf", project_id).as_str()
+        /// Path to download PDF report path
+        #[clap(short = 'f', long = "file")]
+        savepath: String, //TODO: default format!("/tmp/{}.pdf", project_id).as_str() - change with a directory instead of file
     },
     /// Manage API key
     Apikey {
