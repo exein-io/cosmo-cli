@@ -3,12 +3,12 @@ use std::{fs::File, path::Path};
 use anyhow::{anyhow, Result};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 use term_table::{
     row::Row,
     table_cell::{Alignment, TableCell},
     Table, TableStyle,
 };
+use uuid::Uuid;
 
 use crate::{api::ApiServer, cli::Analysis};
 

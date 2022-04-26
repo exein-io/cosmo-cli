@@ -7,7 +7,10 @@ use uuid::Uuid;
 use crate::{
     cli::Analysis,
     security::{AuthData, AuthError},
-    services::{apikey_service::ApiKeyData, project_service::{ProjectAnalysis, Project}},
+    services::{
+        apikey_service::ApiKeyData,
+        project_service::{Project, ProjectAnalysis},
+    },
 };
 
 mod http_server;
