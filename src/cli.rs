@@ -5,7 +5,7 @@ use uuid::Uuid;
 
 #[derive(Debug, Clone, ArgEnum)]
 pub enum OutputMode {
-    Raw,
+    Text,
     Json,
 }
 
@@ -42,7 +42,7 @@ where
 
     #[derive(Parser, Debug)]
     struct DerivedArgs {
-        #[clap(short = 'o', long = "output", arg_enum, default_value_t = OutputMode::Raw)]
+        #[clap(short = 'o', long = "output", arg_enum, default_value_t = OutputMode::Text)]
         output: OutputMode,
     }
 
@@ -91,6 +91,55 @@ pub fn report_error(e: &anyhow::Error) {
         log::error!("{:?}", e);
     } else {
         log::error!("{:#}", e);
+    }
+}
+
+pub fn print_cmd_output<T: CommandOutput + ?Sized>(cmd_output: &T, mode: OutputMode) {
+    let output = match mode {
+        OutputMode::Text => cmd_output.text(),
+        OutputMode::Json => cmd_output.json(),
+    };
+    println!("{output}")
+}
+
+pub trait CommandOutput {
+    fn text(&self) -> String;
+    fn json(&self) -> String;
+}
+
+impl CommandOutput for &str {
+    fn text(&self) -> String {
+        self.to_string()
+    }
+
+    fn json(&self) -> String {
+        serde_json::json!({
+            "msg": self,
+        })
+        .to_string()
+    }
+}
+
+impl CommandOutput for String {
+    fn text(&self) -> String {
+        self.to_owned()
+    }
+
+    fn json(&self) -> String {
+        serde_json::json!({
+            "msg": self,
+        })
+        .to_string()
+    }
+}
+
+impl CommandOutput for () {
+    fn text(&self) -> String {
+        String::new()
+    }
+
+    fn json(&self) -> String {
+        String::new()
     }
 }
 

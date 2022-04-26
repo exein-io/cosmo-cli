@@ -3,10 +3,9 @@ pub mod cli;
 pub mod security;
 pub mod services;
 
-use anyhow::{anyhow, Context};
+use anyhow::{anyhow, bail, Context};
 use api::ApiServer;
-use cli::{Analysis, ApiKeyAction, Command, OutputMode};
-use core::fmt;
+use cli::{Analysis, ApiKeyAction, Command, CommandOutput};
 use lazy_static::lazy_static;
 use project_service::Project;
 use services::*;
@@ -57,19 +56,6 @@ and install it by running ./exein-analyzer-cli-installer.run in your terminal.
     Ok(())
 }
 
-#[derive(Debug)]
-pub struct CommandOutput<T> {
-    output_mode: OutputMode,
-    inner_output: T,
-}
-
-impl<T> fmt::Display for CommandOutput<T> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        // write!(f, "({}, {})", self.x, self.y)
-        todo!()
-    }
-}
-
 // TODO: hadle unwraps
 fn read_username_and_password_from_stdin() -> (String, String) {
     let stdin = io::stdin();
@@ -82,7 +68,10 @@ fn read_username_and_password_from_stdin() -> (String, String) {
     (username, password)
 }
 
-pub async fn run_cmd<U: ApiServer>(cmd: Command, api_server: &mut U) -> Result<(), anyhow::Error> {
+pub async fn run_cmd<U: ApiServer>(
+    cmd: Command,
+    api_server: &mut U,
+) -> Result<Box<dyn CommandOutput>, anyhow::Error> {
     // check_version(api_server).await?; //TODO
 
     // Authentication
@@ -94,7 +83,7 @@ pub async fn run_cmd<U: ApiServer>(cmd: Command, api_server: &mut U) -> Result<(
         log::info!("Logged in as: {}", auth_data.username);
     }
 
-    match cmd {
+    let z: Box<dyn CommandOutput> = match cmd {
         Command::CreateProject {
             fw_filepath,
             fw_type,
@@ -103,7 +92,7 @@ pub async fn run_cmd<U: ApiServer>(cmd: Command, api_server: &mut U) -> Result<(
             description,
         } => {
             log::info!("Create Project...");
-            let project_id = project_service::create(
+            let project_created = project_service::create(
                 &fw_filepath,
                 &fw_type,
                 &fw_subtype,
@@ -112,26 +101,29 @@ pub async fn run_cmd<U: ApiServer>(cmd: Command, api_server: &mut U) -> Result<(
                 api_server,
             )
             .await?;
-            log::info!("Project created successfull. Project id: {}", project_id);
-            log::info!(
-                "Dashboard URL: {}/reports/{}",
-                api_server.address(),
-                project_id
-            );
-            Ok(())
+
+            let project_id = project_created.id;
+            Box::new(format!("Project created successfull with id: {project_id}. Dashboard URL: {}/reports/{project_id}", api_server.address()))
         }
         Command::List => {
+            impl CommandOutput for Vec<Project> {
+                fn text(&self) -> String {
+                    Project::get_table_from_list(self)
+                }
+
+                fn json(&self) -> String {
+                    serde_json::to_string(self).unwrap()
+                }
+            }
+
             let projects: Vec<Project> = project_service::list_projects(api_server).await?;
-            let table = Project::get_table_from_list(&projects);
-            log::debug!("res: {:#?}", projects);
-            println!("{}", table);
-            Ok(())
+
+            Box::new(projects)
         }
-        Command::Login => Ok(()),
+        Command::Login => Box::new(()),
         Command::Logout => {
             api_server.logout().await?;
-            log::info!("Logout successfully");
-            Ok(())
+            Box::new("Logout successfully")
         }
         Command::Overview { project_id } => {
             let overview = project_service::overview(api_server, project_id).await?;
@@ -143,21 +135,51 @@ pub async fn run_cmd<U: ApiServer>(cmd: Command, api_server: &mut U) -> Result<(
             log::debug!("project type {}", fw_type);
             match fw_type {
                 "LINUX" | "CONTAINER" => {
+                    impl CommandOutput for LinuxProjectOverview {
+                        fn text(&self) -> String {
+                            format!("Overview: {:#?}", self) //TODO
+                        }
+
+                        fn json(&self) -> String {
+                            serde_json::to_string(self).unwrap()
+                        }
+                    }
+
                     let lpo: LinuxProjectOverview = serde_json::from_value(overview).unwrap();
-                    log::info!("Overview: {:#?}", lpo);
+
+                    Box::new(lpo)
                 }
                 "UEFI" => {
+                    impl CommandOutput for UefiProjectOverview {
+                        fn text(&self) -> String {
+                            format!("Overview: {:#?}", self) //TODO
+                        }
+
+                        fn json(&self) -> String {
+                            serde_json::to_string(self).unwrap()
+                        }
+                    }
+
                     let upo: UefiProjectOverview = serde_json::from_value(overview).unwrap();
-                    log::info!("Overview: {:#?}", upo);
+
+                    Box::new(upo)
                 }
                 "VXWORKS" => {
-                    let vpo: VxworksProjectOverview = serde_json::from_value(overview).unwrap();
-                    log::info!("Overview: {:#?}", vpo);
-                }
-                np => log::error!("Type not supported: {}", np),
-            }
+                    impl CommandOutput for VxworksProjectOverview {
+                        fn text(&self) -> String {
+                            format!("Overview: {:#?}", self) //TODO
+                        }
 
-            Ok(())
+                        fn json(&self) -> String {
+                            serde_json::to_string(self).unwrap()
+                        }
+                    }
+                    let vpo: VxworksProjectOverview = serde_json::from_value(overview).unwrap();
+
+                    Box::new(vpo)
+                }
+                np => bail!("Type not supported: {}", np), //TODO: remove branch with prehemptive parse
+            }
         }
         Command::Analysis {
             project_id,
@@ -169,8 +191,7 @@ pub async fn run_cmd<U: ApiServer>(cmd: Command, api_server: &mut U) -> Result<(
                 .await?;
 
             if let Some(err) = res.error {
-                println!("Analysis {} error: {}", analysis, err)
-                // TODO:
+                Box::new(format!("Analysis {} error: {}", analysis, err))
             } else {
                 let result = res.result.unwrap(); // Safe to unwrap
 
@@ -179,53 +200,128 @@ pub async fn run_cmd<U: ApiServer>(cmd: Command, api_server: &mut U) -> Result<(
                 match analysis {
                     // Linux/Container Analysis
                     Analysis::Hardening => {
-                        let an: Vec<LinuxHardeningAnalysis> =
-                            serde_json::from_value(result).unwrap();
-                        let table = LinuxHardeningAnalysis::get_table_from_list(&an);
-                        println!("{}", table);
+                        impl CommandOutput for Vec<LinuxHardeningAnalysis> {
+                            fn text(&self) -> String {
+                                LinuxHardeningAnalysis::get_table_from_list(self)
+                            }
+
+                            fn json(&self) -> String {
+                                serde_json::to_string(self).unwrap()
+                            }
+                        }
+
+                        let an: Vec<LinuxHardeningAnalysis> = serde_json::from_value(result)?;
+
+                        Box::new(an)
                     }
                     Analysis::CveCheck => {
-                        let an: Vec<LinuxCveCheckAnalysis> =
-                            serde_json::from_value(result).unwrap();
-                        let table = LinuxCveCheckAnalysis::get_table_from_list(&an);
-                        println!("{}", table);
+                        impl CommandOutput for Vec<LinuxCveCheckAnalysis> {
+                            fn text(&self) -> String {
+                                LinuxCveCheckAnalysis::get_table_from_list(self)
+                            }
+
+                            fn json(&self) -> String {
+                                serde_json::to_string(self).unwrap()
+                            }
+                        }
+
+                        let an: Vec<LinuxCveCheckAnalysis> = serde_json::from_value(result)?;
+
+                        Box::new(an)
                     }
                     Analysis::SecurityScan => {
-                        let an: Vec<LinuxSecurityScanAnalysis> =
-                            serde_json::from_value(result).unwrap();
-                        let table = LinuxSecurityScanAnalysis::get_table_from_list(&an);
-                        println!("{}", table);
+                        impl CommandOutput for Vec<LinuxSecurityScanAnalysis> {
+                            fn text(&self) -> String {
+                                LinuxSecurityScanAnalysis::get_table_from_list(self)
+                            }
+
+                            fn json(&self) -> String {
+                                serde_json::to_string(self).unwrap()
+                            }
+                        }
+
+                        let an: Vec<LinuxSecurityScanAnalysis> = serde_json::from_value(result)?;
+
+                        Box::new(an)
                     }
                     Analysis::PasswordHash => {
-                        let an: Vec<LinuxPasswordHashAnalysis> =
-                            serde_json::from_value(result).unwrap();
-                        let table = LinuxPasswordHashAnalysis::get_table_from_list(&an);
-                        println!("{}", table);
+                        impl CommandOutput for Vec<LinuxPasswordHashAnalysis> {
+                            fn text(&self) -> String {
+                                LinuxPasswordHashAnalysis::get_table_from_list(self)
+                            }
+
+                            fn json(&self) -> String {
+                                serde_json::to_string(self).unwrap()
+                            }
+                        }
+
+                        let an: Vec<LinuxPasswordHashAnalysis> = serde_json::from_value(result)?;
+
+                        Box::new(an)
                     }
                     Analysis::Crypto => {
-                        let an: Vec<LinuxCryptoAnalysis> = serde_json::from_value(result).unwrap();
-                        let table = LinuxCryptoAnalysis::get_table_from_list(&an);
-                        println!("{}", table);
+                        impl CommandOutput for Vec<LinuxCryptoAnalysis> {
+                            fn text(&self) -> String {
+                                LinuxCryptoAnalysis::get_table_from_list(self)
+                            }
+
+                            fn json(&self) -> String {
+                                serde_json::to_string(self).unwrap()
+                            }
+                        }
+
+                        let an: Vec<LinuxCryptoAnalysis> = serde_json::from_value(result)?;
+
+                        Box::new(an)
                     }
                     Analysis::Nvram => {
-                        let an: Vec<LinuxNvramAnalysis> = serde_json::from_value(result).unwrap();
-                        let table = LinuxNvramAnalysis::get_table_from_list(&an);
-                        println!("{}", table);
+                        impl CommandOutput for Vec<LinuxNvramAnalysis> {
+                            fn text(&self) -> String {
+                                LinuxNvramAnalysis::get_table_from_list(self)
+                            }
+
+                            fn json(&self) -> String {
+                                serde_json::to_string(self).unwrap()
+                            }
+                        }
+
+                        let an: Vec<LinuxNvramAnalysis> = serde_json::from_value(result)?;
+
+                        Box::new(an)
                     }
                     Analysis::Kernel => {
-                        let an: Vec<LinuxKernelAnalysis> = serde_json::from_value(result).unwrap();
-                        let table = LinuxKernelAnalysis::get_table_from_list(&an);
-                        println!("{}", table);
+                        impl CommandOutput for Vec<LinuxKernelAnalysis> {
+                            fn text(&self) -> String {
+                                LinuxKernelAnalysis::get_table_from_list(self)
+                            }
+
+                            fn json(&self) -> String {
+                                serde_json::to_string(self).unwrap()
+                            }
+                        }
+
+                        let an: Vec<LinuxKernelAnalysis> = serde_json::from_value(result)?;
+
+                        Box::new(an)
                     }
                     Analysis::SoftwareBOM => {
-                        let an: Vec<LinuxSoftwareBOMAnalysis> =
-                            serde_json::from_value(result).unwrap();
-                        let table = LinuxSoftwareBOMAnalysis::get_table_from_list(&an);
-                        println!("{}", table);
+                        impl CommandOutput for Vec<LinuxSoftwareBOMAnalysis> {
+                            fn text(&self) -> String {
+                                LinuxSoftwareBOMAnalysis::get_table_from_list(self)
+                            }
+
+                            fn json(&self) -> String {
+                                serde_json::to_string(self).unwrap()
+                            }
+                        }
+
+                        let an: Vec<LinuxSoftwareBOMAnalysis> = serde_json::from_value(result)?;
+
+                        Box::new(an)
                     }
                     Analysis::StaticCode => {
                         let analysis_result: Vec<LinuxStaticCodeAnalysis> =
-                            serde_json::from_value(result).unwrap();
+                            serde_json::from_value(result)?;
                         let analysis_parsed: Result<Vec<LinuxStaticCode>, anyhow::Error> =
                             analysis_result
                                 .into_iter()
@@ -254,118 +350,216 @@ pub async fn run_cmd<U: ApiServer>(cmd: Command, api_server: &mut U) -> Result<(
                                 .collect();
                         let analysis_parsed = analysis_parsed?;
 
-                        log::debug!("{:#?}", analysis_parsed);
-                        let table = LinuxStaticCode::get_table_from_list(&analysis_parsed);
-                        println!("{}", table);
+                        log::trace!("Analysis parsed: {:#?}", analysis_parsed);
+
+                        impl CommandOutput for Vec<LinuxStaticCode> {
+                            fn text(&self) -> String {
+                                LinuxStaticCode::get_table_from_list(self)
+                            }
+
+                            fn json(&self) -> String {
+                                serde_json::to_string(self).unwrap()
+                            }
+                        }
+
+                        let an = LinuxStaticCode::get_table_from_list(&analysis_parsed);
+
+                        Box::new(an)
                     }
                     // UEFI Analysis
                     Analysis::Access => {
-                        let an: Vec<UefiAccess> = serde_json::from_value(result).unwrap();
-                        let table = UefiAccess::get_table_from_list(&an);
-                        println!("{}", table);
+                        impl CommandOutput for Vec<UefiAccess> {
+                            fn text(&self) -> String {
+                                UefiAccess::get_table_from_list(self)
+                            }
+
+                            fn json(&self) -> String {
+                                serde_json::to_string(self).unwrap()
+                            }
+                        }
+
+                        let an: Vec<UefiAccess> = serde_json::from_value(result)?;
+
+                        Box::new(an)
                     }
                     Analysis::IntelBootGuard => {
-                        let an: UefiIntelBootGuard = serde_json::from_value(result).unwrap();
-                        let table = UefiIntelBootGuardRsa::get_table_from_list(&an.rsa);
-                        println!("{}", table);
-                        println!("ACM: {}", an.acm);
+                        impl CommandOutput for UefiIntelBootGuard {
+                            fn text(&self) -> String {
+                                let table = UefiIntelBootGuardRsa::get_table_from_list(&self.rsa);
+                                format!("{}\nACM: {}", table, self.acm)
+                            }
+
+                            fn json(&self) -> String {
+                                serde_json::to_string(self).unwrap()
+                            }
+                        }
+
+                        let an: UefiIntelBootGuard = serde_json::from_value(result)?;
+
+                        Box::new(an)
                     }
                     Analysis::Surface => {
-                        let an: Vec<UefiSurface> = serde_json::from_value(result).unwrap();
-                        let table = UefiSurface::get_table_from_list(&an);
-                        println!("{}", table);
+                        impl CommandOutput for Vec<UefiSurface> {
+                            fn text(&self) -> String {
+                                UefiSurface::get_table_from_list(self)
+                            }
+
+                            fn json(&self) -> String {
+                                serde_json::to_string(self).unwrap()
+                            }
+                        }
+
+                        let an: Vec<UefiSurface> = serde_json::from_value(result)?;
+
+                        Box::new(an)
                     }
                     Analysis::SecureBoot => {
-                        let an: UefiSecureBoot = serde_json::from_value(result).unwrap();
-                        let table = UefiSecureBootCerts::get_table_from_list(&an.certs.kek, "kek");
-                        println!("{}", table);
-                        let table = UefiSecureBootCerts::get_table_from_list(&[an.certs.pk], "pk");
-                        println!("{}", table);
-                        let table =
-                            UefiSecureBootCerts::get_table_from_list(&an.databases.certs.db, "db");
-                        println!("{}", table);
-                        let table = UefiSecureBootCerts::get_table_from_list(
-                            &an.databases.certs.dbx,
-                            "dbx",
-                        );
-                        println!("{}", table);
+                        impl CommandOutput for UefiSecureBoot {
+                            fn text(&self) -> String {
+                                vec![
+                                    UefiSecureBootCerts::get_table_from_list(
+                                        &self.certs.kek,
+                                        "kek",
+                                    ),
+                                    UefiSecureBootCerts::get_table_from_list(
+                                        &[self.certs.pk.clone()],
+                                        "pk",
+                                    ),
+                                    UefiSecureBootCerts::get_table_from_list(
+                                        &self.databases.certs.db,
+                                        "db",
+                                    ),
+                                    UefiSecureBootCerts::get_table_from_list(
+                                        &self.databases.certs.dbx,
+                                        "dbx",
+                                    ),
+                                ]
+                                .join("\n")
+                            }
+
+                            fn json(&self) -> String {
+                                serde_json::to_string(self).unwrap()
+                            }
+                        }
+
+                        let an: UefiSecureBoot = serde_json::from_value(result)?;
+
+                        Box::new(an)
                     }
 
                     Analysis::UefiSecurityScan => {
-                        let an: Vec<UefiSecurityScan> = serde_json::from_value(result).unwrap();
-                        let table = UefiSecurityScan::get_table_from_list(&an);
-                        println!("{}", table);
+                        impl CommandOutput for Vec<UefiSecurityScan> {
+                            fn text(&self) -> String {
+                                UefiSecurityScan::get_table_from_list(self)
+                            }
+
+                            fn json(&self) -> String {
+                                serde_json::to_string(self).unwrap()
+                            }
+                        }
+
+                        let an: Vec<UefiSecurityScan> = serde_json::from_value(result)?;
+
+                        Box::new(an)
                     }
                     Analysis::PeimDxe => {
-                        let an: Vec<UefiPeimDxe> = serde_json::from_value(result).unwrap();
-                        let table = UefiPeimDxe::get_table_from_list(&an);
-                        println!("{}", table);
+                        impl CommandOutput for Vec<UefiPeimDxe> {
+                            fn text(&self) -> String {
+                                UefiPeimDxe::get_table_from_list(self)
+                            }
+
+                            fn json(&self) -> String {
+                                serde_json::to_string(self).unwrap()
+                            }
+                        }
+
+                        let an: Vec<UefiPeimDxe> = serde_json::from_value(result)?;
+
+                        Box::new(an)
                     }
                     // Vxworks Analysis
                     Analysis::Functions => {
-                        let an: Vec<VxworksData> = serde_json::from_value(result).unwrap();
-                        let table = VxworksData::get_table_from_list(&an);
-                        println!("{}", table);
+                        let an: Vec<VxworksData> = serde_json::from_value(result)?;
+
+                        Box::new(an)
                     }
                     Analysis::Symbols => {
-                        let an: Vec<VxworksData> = serde_json::from_value(result).unwrap();
-                        let table = VxworksData::get_table_from_list(&an);
-                        println!("{}", table);
+                        impl CommandOutput for Vec<VxworksData> {
+                            fn text(&self) -> String {
+                                VxworksData::get_table_from_list(self)
+                            }
+
+                            fn json(&self) -> String {
+                                serde_json::to_string(self).unwrap()
+                            }
+                        }
+
+                        let an: Vec<VxworksData> = serde_json::from_value(result)?;
+
+                        Box::new(an)
                     }
                     Analysis::Tasks => {
-                        let an: Vec<VxworksTask> = serde_json::from_value(result).unwrap();
-                        let table = VxworksTask::get_table_from_list(&an);
-                        println!("{}", table);
+                        impl CommandOutput for Vec<VxworksTask> {
+                            fn text(&self) -> String {
+                                VxworksTask::get_table_from_list(self)
+                            }
+
+                            fn json(&self) -> String {
+                                serde_json::to_string(self).unwrap()
+                            }
+                        }
+
+                        let an: Vec<VxworksTask> = serde_json::from_value(result)?;
+
+                        Box::new(an)
                     }
                     Analysis::Capabilities => {
-                        let an: Vec<VxworksCapability> = serde_json::from_value(result).unwrap();
-                        let table = VxworksCapability::get_table_from_list(&an);
-                        println!("{}", table);
+                        impl CommandOutput for Vec<VxworksCapability> {
+                            fn text(&self) -> String {
+                                VxworksCapability::get_table_from_list(self)
+                            }
+
+                            fn json(&self) -> String {
+                                serde_json::to_string(self).unwrap()
+                            }
+                        }
+
+                        let an: Vec<VxworksCapability> = serde_json::from_value(result)?;
+
+                        Box::new(an)
                     }
                 }
             }
-
-            Ok(())
         }
         Command::Delete { project_id } => {
             project_service::delete(api_server, project_id).await?;
-            log::debug!("deleted {:#?}", project_id);
-            Ok(())
+            Box::new(format!("Project {} deleted", project_id))
         }
         Command::Report {
             project_id,
             savepath,
         } => {
             let report = project_service::report(api_server, project_id, savepath).await?;
-            log::info!("Report saved to {}", report);
-
-            Ok(())
+            Box::new(format!("Report saved to {}", report))
         }
-        Command::Apikey { action } => {
-            match action {
-                ApiKeyAction::Create => {
-                    let apikey_data = apikey_service::create(api_server).await?;
-                    log::info!("api key created: {}", apikey_data.api_key);
-                }
-                ApiKeyAction::List => {
-                    let apikey_data = apikey_service::list(api_server).await?;
-                    if let Some(apikey_data) = apikey_data {
-                        log::info!(
-                            "api key: {} created on {}",
-                            apikey_data.api_key,
-                            apikey_data.creation_date
-                        );
-                    } else {
-                        log::info!("No API key found!")
-                    }
-                }
-                ApiKeyAction::Delete => {
-                    apikey_service::delete(api_server).await?;
-                    log::info!("api key deleted");
+        Command::Apikey { action } => match action {
+            ApiKeyAction::Create => {
+                let apikey_data = apikey_service::create(api_server).await?;
+                Box::new(apikey_data)
+            }
+            ApiKeyAction::List => {
+                if let Some(apikey_data) = apikey_service::list(api_server).await? {
+                    Box::new(apikey_data)
+                } else {
+                    Box::new("No API key found!")
                 }
             }
+            ApiKeyAction::Delete => {
+                apikey_service::delete(api_server).await?;
+                Box::new("api key deleted")
+            }
+        },
+    };
 
-            Ok(())
-        }
-    }
+    Ok(z)
 }

@@ -87,8 +87,14 @@ async fn main() {
     };
 
     // Run Command
-    if let Err(e) = cosmo_cli::run_cmd(cli_opts.command, &mut api_server).await {
-        cli::report_error(&e);
-        std::process::exit(1)
+    match cosmo_cli::run_cmd(cli_opts.command, &mut api_server).await {
+        Ok(cmd_output) => {
+            log::debug!("Printing in {:?} mode", cli_opts.output_mode);
+            cli::print_cmd_output(&*cmd_output, cli_opts.output_mode)
+        }
+        Err(e) => {
+            cli::report_error(&e);
+            std::process::exit(1)
+        }
     }
 }

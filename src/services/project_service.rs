@@ -2,7 +2,7 @@ use std::{fs::File, path::Path};
 
 use anyhow::{anyhow, Result};
 use chrono::{DateTime, Utc};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::Analysis;
@@ -21,7 +21,7 @@ pub struct ProjectIdDTO {
     pub id: Uuid,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Project {
     pub description: Option<String>,
     pub id: Uuid,
@@ -79,7 +79,7 @@ impl Project {
 }
 
 // Linux/Container Analysis
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct LinuxProjectOverview {
     pub kernel_security: Option<u16>,
     pub password_hash: u16,
@@ -91,7 +91,7 @@ pub struct LinuxProjectOverview {
     pub info: LinuxInfo,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct LinuxInfo {
     pub arch: String,
     pub banner: Option<String>,
@@ -100,30 +100,30 @@ pub struct LinuxInfo {
     pub libc: Option<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct LinuxProjectOverviewCveCheck {
     pub severity: LinuxProjectOverviewSeverity,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct LinuxProjectOverviewCode {
     pub vulnerabilities: u16,
     pub files_affected: u16,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct LinuxProjectOverviewBinary {
     pub severity: LinuxProjectOverviewSeverity,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct LinuxProjectOverviewSeverity {
     pub low: u16,
     pub medium: u16,
     pub high: u16,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct ProjectAnalysis {
     pub(crate) name: String,
     pub(crate) fw_type: String,
@@ -131,7 +131,7 @@ pub struct ProjectAnalysis {
     pub(crate) result: Option<serde_json::Value>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct LinuxHardeningAnalysis {
     pub filename: String,
     pub r#type: String,
@@ -197,7 +197,7 @@ impl LinuxHardeningAnalysis {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct LinuxCveCheckAnalysis {
     pub product: String,
     pub cveid: String,
@@ -236,7 +236,7 @@ impl LinuxCveCheckAnalysis {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct LinuxSecurityScanAnalysis {
     pub filename: String,
     pub r#type: Vec<String>,
@@ -272,7 +272,7 @@ impl LinuxSecurityScanAnalysis {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct LinuxPasswordHashAnalysis {
     username: String,
     password: String,
@@ -307,7 +307,7 @@ impl LinuxPasswordHashAnalysis {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct LinuxCryptoAnalysis {
     filename: String,
     r#type: String,
@@ -348,7 +348,7 @@ impl LinuxCryptoAnalysis {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct LinuxNvramAnalysis {
     exe: String,
     fun: String,
@@ -399,7 +399,7 @@ pub struct LinuxStaticCodeAnalysisFlaws {
     pub(crate) flaw_type: String,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct LinuxStaticCode {
     pub(crate) filename: String,
     pub(crate) line: String,
@@ -440,7 +440,7 @@ impl LinuxStaticCode {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct LinuxKernelAnalysis {
     name: String,
     enabled: bool,
@@ -474,7 +474,7 @@ impl LinuxKernelAnalysis {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct LinuxSoftwareBOMAnalysis {
     filename: String,
     license: Option<String>,
@@ -521,13 +521,13 @@ impl LinuxSoftwareBOMAnalysis {
 
 // UEFI Analysis
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct UefiProjectOverview {
     pub info: UefiInfo,
     pub project: Project,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct UefiInfo {
     pub dxe_no: u32,
     pub pei_no: u32,
@@ -535,7 +535,7 @@ pub struct UefiInfo {
     pub s3mit: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct UefiAccess {
     read: String,
     region: String,
@@ -573,13 +573,13 @@ impl UefiAccess {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct UefiIntelBootGuard {
     pub(crate) acm: String,
     pub(crate) rsa: Vec<UefiIntelBootGuardRsa>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct UefiIntelBootGuardRsa {
     name: String,
     value: String,
@@ -614,7 +614,7 @@ impl UefiIntelBootGuardRsa {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct UefiSurface {
     pub name: String,
     pub r#type: String,
@@ -653,13 +653,13 @@ impl UefiSurface {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct UefiSecureBoot {
     pub(crate) certs: UefiSecureBootCerts,
     pub(crate) databases: UefiSecureBootDatabases,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "UPPERCASE")]
 pub struct UefiSecureBootCerts {
     pub(crate) kek: Vec<UefiSecureBootData>,
@@ -673,19 +673,19 @@ impl UefiSecureBootCerts {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct UefiSecureBootDatabases {
     pub certs: UefiSecureBootDatabasesData,
     pub hashes: UefiSecureBootDatabasesData,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct UefiSecureBootDatabasesData {
     pub db: Vec<UefiSecureBootData>,
     pub dbx: Vec<UefiSecureBootData>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UefiSecureBootData {
     pub first: String,
     pub second: String,
@@ -722,7 +722,7 @@ impl UefiSecureBootData {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct UefiSecurityScan {
     pub guid: Uuid,
     pub module: String,
@@ -759,7 +759,7 @@ impl UefiSecurityScan {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct UefiPeimDxe {
     pub name: String,
     pub filetype: String,
@@ -806,13 +806,13 @@ impl UefiPeimDxe {
 
 // VxWorks Analysis
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct VxworksProjectOverview {
     pub info: VxworksInfo,
     pub project: Project,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct VxworksInfo {
     pub functions_no: u32,
     pub symbols_no: u32,
@@ -825,7 +825,7 @@ pub struct VxworksInfo {
     pub os: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct VxworksData {
     offset: u32,
     size: u32,
@@ -862,7 +862,7 @@ impl VxworksData {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct VxworksTask {
     task_name: String,
     task_addr: u32,
@@ -899,7 +899,7 @@ impl VxworksTask {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct VxworksCapability {
     name: String,
     caps: Vec<String>,
@@ -984,6 +984,11 @@ pub async fn delete<U: ApiServer>(api_server: &mut U, project_id: Uuid) -> Resul
     Ok(())
 }
 
+#[derive(Debug)]
+pub struct ProjectCreated {
+    pub id: Uuid,
+}
+
 // Create a new project
 pub async fn create<U: ApiServer>(
     fw_filepath: &str,
@@ -992,7 +997,7 @@ pub async fn create<U: ApiServer>(
     name: &str,
     description: Option<&str>,
     api_server: &mut U,
-) -> Result<Uuid> {
+) -> Result<ProjectCreated> {
     let fw_file = Path::new(fw_filepath);
 
     if !fw_file.exists() {
@@ -1016,9 +1021,9 @@ pub async fn create<U: ApiServer>(
         ));
     }
 
-    let model_id = api_server
+    let project_id = api_server
         .create(fw_filepath, fw_type, fw_subtype, name, description)
         .await?;
 
-    Ok(model_id)
+    Ok(ProjectCreated { id: project_id })
 }
