@@ -145,7 +145,7 @@ pub async fn run_cmd<U: ApiServer>(
                         }
                     }
 
-                    let lpo: LinuxProjectOverview = serde_json::from_value(overview).unwrap();
+                    let lpo: LinuxProjectOverview = serde_json::from_value(overview)?;
 
                     Box::new(lpo)
                 }
@@ -160,7 +160,7 @@ pub async fn run_cmd<U: ApiServer>(
                         }
                     }
 
-                    let upo: UefiProjectOverview = serde_json::from_value(overview).unwrap();
+                    let upo: UefiProjectOverview = serde_json::from_value(overview)?;
 
                     Box::new(upo)
                 }
@@ -174,7 +174,7 @@ pub async fn run_cmd<U: ApiServer>(
                             serde_json::to_string(self).unwrap()
                         }
                     }
-                    let vpo: VxworksProjectOverview = serde_json::from_value(overview).unwrap();
+                    let vpo: VxworksProjectOverview = serde_json::from_value(overview)?;
 
                     Box::new(vpo)
                 }
