@@ -7,7 +7,6 @@ use crate::api::ApiServer;
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-
 pub struct ApiKeyData {
     pub api_key: Uuid,
     pub creation_date: DateTime<Utc>,
