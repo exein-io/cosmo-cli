@@ -23,3 +23,7 @@ openssl = { version = '0.10.38' }
 [features]
 default = []
 vendored-openssl = ['openssl/vendored'] # Statically include openssl
+
+[profile.release]
+lto = true        # Enable Link Time Optimization
+codegen-units = 1 # Reduce number of codegen units to increase optimizations
