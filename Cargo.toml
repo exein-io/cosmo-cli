@@ -11,3 +11,15 @@ edition = "2018"
 [[bin]]
 path = "src/main.rs"
 name = "cosmo"
+
+[dependencies]
+log = "0.4"
+serde = { version = "1.0.136", features = ["derive"] }
+async-trait = "0.1.53"
+jsonwebtoken = "8"
+reqwest = { version = "0.11.10", features = ["json", "multipart"] }
+openssl = { version = '0.10.38' }
+
+[features]
+default = []
+vendored-openssl = ['openssl/vendored'] # Statically include openssl
