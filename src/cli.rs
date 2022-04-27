@@ -17,7 +17,7 @@ pub struct CosmoCliOpts {
     pub command: Command,
 }
 
-pub fn parse_from<'a, I, T>(args: I) -> Result<CosmoCliOpts, clap::Error>
+pub fn parse_from<I, T>(args: I) -> Result<CosmoCliOpts, clap::Error>
 where
     I: Iterator<Item = T>,
     T: Into<OsString> + Clone,
@@ -55,7 +55,7 @@ where
     let base = BaseCosmoCliOpts::from_arg_matches(&matches)?;
 
     let output_mode = match matches.subcommand() {
-        Some((_, matches)) => DerivedArgs::from_arg_matches(&matches)?.output,
+        Some((_, matches)) => DerivedArgs::from_arg_matches(matches)?.output,
         None => unreachable!("Subcommand should be specified"),
     };
 

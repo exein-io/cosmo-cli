@@ -332,15 +332,11 @@ pub async fn run_cmd<U: ApiServer>(
                                     let flaw_str = executable_flaw
                                         .flaws
                                         .as_str()
-                                        .ok_or(anyhow!("failed to access flaw string"));
+                                        .ok_or_else(|| anyhow!("failed to access flaw string"));
 
                                     let flaw_parsed = flaw_str.and_then(|flaw| {
-                                        let flaw_parsed =
-                                            serde_json::from_str::<LinuxStaticCodeAnalysisFlaws>(
-                                                flaw,
-                                            )
-                                            .map_err(|_| anyhow!("failed to parse flaw"));
-                                        flaw_parsed
+                                        serde_json::from_str::<LinuxStaticCodeAnalysisFlaws>(flaw)
+                                            .map_err(|_| anyhow!("failed to parse flaw"))
                                     });
 
                                     flaw_parsed.map(|flaw| LinuxStaticCode {

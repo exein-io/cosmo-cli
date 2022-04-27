@@ -127,7 +127,7 @@ impl<T: AuthSystem> AuthSystem for TokenCacher<T> {
     }
     async fn logout(&mut self) -> Result<(), AuthError> {
         self.auth_service.logout().await?;
-        TokenCacher::delete_refresh_token(&self)
+        TokenCacher::delete_refresh_token(self)
             .map_err(|err| AuthError::LogoutError(err.to_string()))
     }
 }
