@@ -6,6 +6,8 @@ The command-line interface tool that allows you to interact with the [Cosmo](htt
 
 With the Cosmo CLI tool you are able to manage your projects, run scans, generate reports or manage your API keys to interface directly with the API.
 
+![A GIF highlighting the simple usage of the Cosmo CLI to list projects and fetch details of a specific project.](./res/demo.gif)
+
 ## Build
 
 Requires Rust version 1.59 or higher.
