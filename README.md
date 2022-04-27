@@ -1,4 +1,14 @@
-# Exein Cosmo CLI
+<div align="center">
+    <img width="300" src="res/cosmo-logo-exein_color_reverse.png" alt="Cosmo Exein Logo">
+ 
+  <p>
+    <a href="https://opensource.org/licenses/Apache-2.0">
+      <img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg" alt="License">
+    </a>
+  </p>
+</div>
+
+<br/>
 
 ## Usage
 
@@ -6,23 +16,23 @@
 cosmo [command] [arguments]
 ```
 
-## How to build
+## Build
   
 ```bash
 cargo build --release
 ```
 
-## Examples
+## Usage 
 
-- List personal projects: `$ cosmo list` or `$ cosmo ls`
-- Create a new analysis:  `$ cosmo create -f <fw-path> -t <fw-type> -n <project-name>` or `$ cosmo new -f <fw-path> -t <fw-type> -n <project-name>`
-- View project results overview: `$ cosmo overview -i <uuid-project>` or `$ cosmo show -i <uuid-project>`
-- View analysis results: `$ cosmo analysis -i <uuid-project> -a PeimDxe`
-- View paginated analysis results: `$ cosmo analysis -i <uuid-project> -a PeimDxe -p 1 -l 10`
-- Delete project: `$ cosmo delete -i <uuid-project>` or `$ cosmo rm -i <uuid-project>`
-- Log out: `$ cosmo logout`
-- Create an API key: `$ cosmo apikey -a create`
-- List API key: `$ cosmo apikey -a list`
-- Delete API key: `$ cosmo apikey -a delete`
-- Save PDF report: `$ cosmo report -i <uuid-project>`
- 
+| **Description**                 | **Command**                                                                                                                                   |
+|---------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
+| List personal projects          | `cosmo list`<br>`cosmo ls`                                                                                                                    |
+| Create a new analysis           | `cosmo create -f <firmware-path> -t <firmware-type> -n <project-name>`<br>`cosmo new -f <firmware-path> -t <firmware-type> -n <project-name>` |
+| View project results overview   | `cosmo overview -i <project-uuid>` <br>`cosmo show -i <project-uuid>`                                                                         |
+| View analysis results           | `cosmo analysis -i <project-uuid> -a PeimDxe`                                                                                                 |
+| View paginated analysis results | `cosmo analysis -i <project-uuid> -a PeimDxe -p 1 -l 10`                                                                                      |
+| Delete project                  | `cosmo delete -i <project-uuid>`<br>`cosmo rm -i <project-uuid>`                                                                              |
+| Log out                         | `cosmo logout`                                                                                                                                |
+| Create an API key               | `cosmo apikey -a create`                                                                                                                      |
+| List API key                    | `cosmo apikey -a list`                                                                                                                        |
+| Save PDF report                 | `cosmo report -i <project-uuid>`                                                                                                              |
