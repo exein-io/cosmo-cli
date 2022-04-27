@@ -1,20 +1,10 @@
-<div align="center">
-    <img width="300" src="res/cosmo-logo-exein_color_reverse.png" alt="Cosmo Exein Logo">
- 
-  <p>
-    <a href="https://opensource.org/licenses/Apache-2.0">
-      <img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg" alt="License">
-    </a>
-  </p>
-</div>
+<img width="300" src="res/cosmo-logo-exein_color_reverse.png" alt="Cosmo Exein Logo">
 
 <br/>
 
-## Usage
+The command-line interface tool that allows you to interact with the [Cosmo](https://cosmo.exein.io/) API. 
 
-```bash
-cosmo [command] [arguments]
-```
+With the Cosmo CLI tool you are able to manage your projects, run scans, generate reports or manage your API keys to interface directly with the API.
 
 ## Build
   
@@ -36,3 +26,13 @@ cargo build --release
 | Create an API key               | `cosmo apikey -a create`                                                                                                                      |
 | List API key                    | `cosmo apikey -a list`                                                                                                                        |
 | Save PDF report                 | `cosmo report -i <project-uuid>`                                                                                                              |
+
+## Contributing
+
+To contribute to the project please refer to our [contribution guidelines](./CONTRIBUTING.md).
+
+## License
+
+Copyright (c) Exein SpA. All rights reserved.
+
+Licensed under the [Apache License 2.0 license](./LICENSE).
