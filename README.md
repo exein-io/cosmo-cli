@@ -18,18 +18,43 @@ cargo build --release
 
 ## Usage 
 
-| **Description**                 | **Command**                                                                                                                                   |
-|---------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
-| List personal projects          | `cosmo list`<br>`cosmo ls`                                                                                                                    |
-| Create a new analysis           | `cosmo create -f <firmware-path> -t <firmware-type> -n <project-name>`<br>`cosmo new -f <firmware-path> -t <firmware-type> -n <project-name>` |
-| View project results overview   | `cosmo overview -i <project-uuid>` <br>`cosmo show -i <project-uuid>`                                                                         |
-| View analysis results           | `cosmo analysis -i <project-uuid> -a PeimDxe`                                                                                                 |
-| View paginated analysis results | `cosmo analysis -i <project-uuid> -a PeimDxe -p 1 -l 10`                                                                                      |
-| Delete project                  | `cosmo delete -i <project-uuid>`<br>`cosmo rm -i <project-uuid>`                                                                              |
-| Log out                         | `cosmo logout`                                                                                                                                |
-| Create an API key               | `cosmo apikey -a create`                                                                                                                      |
-| List API key                    | `cosmo apikey -a list`                                                                                                                        |
-| Save PDF report                 | `cosmo report -i <project-uuid>`                                                                                                              |
+| **Description**                                         | **Command**                                                                                                       |
+| ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| List personal projects                                  | `cosmo list`<br>`cosmo ls`                                                                                        |
+| Create a new analysis                                   | `cosmo create --file <FILE> --name <NAME> --type <TYPE>`<br>`cosmo new --file <FILE> --name <NAME> --type <TYPE>` |
+| View project results overview                           | `cosmo overview --id <PROJECT_ID>` <br>`cosmo show --id <PROJECT_ID>`                                             |
+| View analysis results[*](#supported-analysis)           | `cosmo analysis --id <PROJECT_ID> --analysis <ANALYSIS>`                                                          |
+| View paginated analysis results[*](#supported-analysis) | `cosmo analysis --id <PROJECT_ID> --analysis <ANALYSIS> --page 1 --per-page 10`                                   |
+| Delete project                                          | `cosmo delete --id <PROJECT_ID>`<br>`cosmo rm --id <PROJECT_ID>`                                                  |
+| Log out                                                 | `cosmo logout`                                                                                                    |
+| Create an API key                                       | `cosmo apikey --action create`                                                                                    |
+| List API key                                            | `cosmo apikey --action list`                                                                                      |
+| Save PDF report                                         | `cosmo report --id <PROJECT_ID>`                                                                                  |
+
+## Supported analysis
+
+### Linux/Container Analysis
+* hardening
+* cve-check
+* security-scan
+* password-hash
+* crypto
+* nvram
+* kernel
+* software-bom
+* static-code
+### UEFI Analysis
+* access
+* intel-boot-guard
+* surface
+* secure-boot
+* uefi-security-scan
+* peim-dxe
+### Vxworks Analysis
+* functions
+* symbols
+* tasks
+* capabilities
 
 ## Contributing
 
