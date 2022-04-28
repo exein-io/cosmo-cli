@@ -22,9 +22,9 @@ lazy_static! {
     );
 }
 
-const PROJECT_ROUTE_V1: &'static str = "/api/v1/projects";
-const APIKEY_ROUTE_V1: &'static str = "/api/v1/api_key";
-const UPDATES_ROUTE: &'static str = "/api/updates_check";
+const PROJECT_ROUTE_V1: &str = "/api/v1/projects";
+const APIKEY_ROUTE_V1: &str = "/api/v1/api_key";
+const UPDATES_ROUTE: &str = "/api/updates_check";
 
 #[derive(Debug)]
 pub struct HttpApiServer<U: AuthSystem> {
@@ -43,13 +43,11 @@ impl<U: AuthSystem> HttpApiServer<U> {
     pub async fn authenticate(&mut self) -> Result<AuthData, AuthError> {
         if let Ok(auth_data) = self.auth_service.logged_in().await {
             Ok(auth_data)
+        } else if let Ok(auth_data) = self.auth_service.refresh().await {
+            Ok(auth_data)
         } else {
-            if let Ok(auth_data) = self.auth_service.refresh().await {
-                Ok(auth_data)
-            } else {
-                let (email, password) = crate::read_username_and_password_from_stdin();
-                self.auth_service.login(&email, &password).await
-            }
+            let (email, password) = crate::read_username_and_password_from_stdin();
+            self.auth_service.login(&email, &password).await
         }
     }
     pub async fn logout(&mut self) -> Result<(), AuthError> {
@@ -115,13 +113,14 @@ impl<U: AuthSystem> HttpApiServer<U> {
         }
         let fw_filename = path
             .file_name()
-            .map(|s| s.to_str())
-            .flatten()
+            .and_then(|s| s.to_str())
             .map(|s| s.to_string())
-            .ok_or(ApiServerError::RequestError(format!(
-                "Problem with image filename: {}",
-                path.display()
-            )))?;
+            .ok_or_else(|| {
+                ApiServerError::RequestError(format!(
+                    "Problem with image filename: {}",
+                    path.display()
+                ))
+            })?;
 
         // Prepare the file data
         let bytes = crate::read_bytes_from_file(fw_filepath).unwrap(); //TODO: unwrap?

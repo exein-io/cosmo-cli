@@ -48,7 +48,7 @@ impl Project {
         ]));
 
         let rows: Vec<Row> = list
-            .into_iter()
+            .iter()
             .map(|project| {
                 let desc = project
                     .description
@@ -65,7 +65,7 @@ impl Project {
                     TableCell::new(&project.project_subtype),
                 ]
             })
-            .map(|rtc| Row::new(rtc))
+            .map(Row::new)
             .collect();
 
         for row in rows {
@@ -169,7 +169,7 @@ impl LinuxHardeningAnalysis {
         ]));
 
         let rows: Vec<Row> = list
-            .into_iter()
+            .iter()
             .map(|project| {
                 vec![
                     TableCell::new(&project.filename),
@@ -184,7 +184,7 @@ impl LinuxHardeningAnalysis {
                     TableCell::new(&project.score),
                 ]
             })
-            .map(|rtc| Row::new(rtc))
+            .map(Row::new)
             .collect();
 
         for row in rows {
@@ -215,7 +215,7 @@ impl LinuxCveCheckAnalysis {
         ]));
 
         let rows: Vec<Row> = list
-            .into_iter()
+            .iter()
             .map(|project| {
                 vec![
                     TableCell::new(&project.product),
@@ -223,7 +223,7 @@ impl LinuxCveCheckAnalysis {
                     TableCell::new(&project.severity),
                 ]
             })
-            .map(|rtc| Row::new(rtc))
+            .map(Row::new)
             .collect();
 
         for row in rows {
@@ -252,14 +252,14 @@ impl LinuxSecurityScanAnalysis {
         ]));
 
         let rows: Vec<Row> = list
-            .into_iter()
+            .iter()
             .map(|project| {
                 vec![
                     TableCell::new(&project.filename),
                     TableCell::new(&project.desc),
                 ]
             })
-            .map(|rtc| Row::new(rtc))
+            .map(Row::new)
             .collect();
 
         for row in rows {
@@ -287,14 +287,14 @@ impl LinuxPasswordHashAnalysis {
         ]));
 
         let rows: Vec<Row> = list
-            .into_iter()
+            .iter()
             .map(|project| {
                 vec![
                     TableCell::new(&project.username),
                     TableCell::new(&project.password),
                 ]
             })
-            .map(|rtc| Row::new(rtc))
+            .map(Row::new)
             .collect();
 
         for row in rows {
@@ -326,7 +326,7 @@ impl LinuxCryptoAnalysis {
         ]));
 
         let rows: Vec<Row> = list
-            .into_iter()
+            .iter()
             .map(|project| {
                 vec![
                     TableCell::new(&project.filename),
@@ -335,7 +335,7 @@ impl LinuxCryptoAnalysis {
                     TableCell::new(&project.pubsz),
                 ]
             })
-            .map(|rtc| Row::new(rtc))
+            .map(Row::new)
             .collect();
 
         for row in rows {
@@ -365,7 +365,7 @@ impl LinuxNvramAnalysis {
         ]));
 
         let rows: Vec<Row> = list
-            .into_iter()
+            .iter()
             .map(|project| {
                 vec![
                     TableCell::new(&project.exe),
@@ -373,7 +373,7 @@ impl LinuxNvramAnalysis {
                     TableCell::new(&project.name),
                 ]
             })
-            .map(|rtc| Row::new(rtc))
+            .map(Row::new)
             .collect();
 
         for row in rows {
@@ -418,7 +418,7 @@ impl LinuxStaticCode {
         ]));
 
         let rows: Vec<Row> = list
-            .into_iter()
+            .iter()
             .map(|project| {
                 vec![
                     TableCell::new(&project.filename),
@@ -427,7 +427,7 @@ impl LinuxStaticCode {
                     TableCell::new(&project.flaw_type),
                 ]
             })
-            .map(|rtc| Row::new(rtc))
+            .map(Row::new)
             .collect();
 
         for row in rows {
@@ -454,14 +454,14 @@ impl LinuxKernelAnalysis {
         ]));
 
         let rows: Vec<Row> = list
-            .into_iter()
+            .iter()
             .map(|project| {
                 vec![
                     TableCell::new(&project.name),
                     TableCell::new(&project.enabled),
                 ]
             })
-            .map(|rtc| Row::new(rtc))
+            .map(Row::new)
             .collect();
 
         for row in rows {
@@ -492,7 +492,7 @@ impl LinuxSoftwareBOMAnalysis {
         ]));
 
         let rows: Vec<Row> = list
-            .into_iter()
+            .iter()
             .map(|project| {
                 let lic = project
                     .license
@@ -506,7 +506,7 @@ impl LinuxSoftwareBOMAnalysis {
                     TableCell::new(lic),
                 ]
             })
-            .map(|rtc| Row::new(rtc))
+            .map(Row::new)
             .collect();
 
         for row in rows {
@@ -552,7 +552,7 @@ impl UefiAccess {
         ]));
 
         let rows: Vec<Row> = list
-            .into_iter()
+            .iter()
             .map(|project| {
                 vec![
                     TableCell::new(&project.region),
@@ -560,7 +560,7 @@ impl UefiAccess {
                     TableCell::new(&project.write),
                 ]
             })
-            .map(|rtc| Row::new(rtc))
+            .map(Row::new)
             .collect();
 
         for row in rows {
@@ -594,14 +594,14 @@ impl UefiIntelBootGuardRsa {
         ]));
 
         let rows: Vec<Row> = list
-            .into_iter()
+            .iter()
             .map(|project| {
                 vec![
                     TableCell::new(&project.name),
                     TableCell::new(&project.value),
                 ]
             })
-            .map(|rtc| Row::new(rtc))
+            .map(Row::new)
             .collect();
 
         for row in rows {
@@ -632,7 +632,7 @@ impl UefiSurface {
         ]));
 
         let rows: Vec<Row> = list
-            .into_iter()
+            .iter()
             .map(|project| {
                 vec![
                     TableCell::new(&project.name),
@@ -640,7 +640,7 @@ impl UefiSurface {
                     TableCell::new(&project.guid),
                 ]
             })
-            .map(|rtc| Row::new(rtc))
+            .map(Row::new)
             .collect();
 
         for row in rows {
@@ -666,7 +666,7 @@ pub struct UefiSecureBootCerts {
 
 impl UefiSecureBootCerts {
     pub fn get_table_from_list(list: &[UefiSecureBootData], db: &str) -> String {
-        let table = UefiSecureBootData::get_table_from_list(&list, db);
+        let table = UefiSecureBootData::get_table_from_list(list, db);
         table.render()
     }
 }
@@ -701,7 +701,7 @@ impl UefiSecureBootData {
         ]));
 
         let rows: Vec<Row> = list
-            .into_iter()
+            .iter()
             .map(|project| {
                 vec![
                     TableCell::new(db),
@@ -709,7 +709,7 @@ impl UefiSecureBootData {
                     TableCell::new(&project.second),
                 ]
             })
-            .map(|rtc| Row::new(rtc))
+            .map(Row::new)
             .collect();
 
         for row in rows {
@@ -739,7 +739,7 @@ impl UefiSecurityScan {
         ]));
 
         let rows: Vec<Row> = list
-            .into_iter()
+            .iter()
             .map(|project| {
                 vec![
                     TableCell::new(&project.name),
@@ -747,7 +747,7 @@ impl UefiSecurityScan {
                     TableCell::new(&project.guid),
                 ]
             })
-            .map(|rtc| Row::new(rtc))
+            .map(Row::new)
             .collect();
 
         for row in rows {
@@ -782,7 +782,7 @@ impl UefiPeimDxe {
         ]));
 
         let rows: Vec<Row> = list
-            .into_iter()
+            .iter()
             .map(|project| {
                 vec![
                     TableCell::new(&project.name),
@@ -792,7 +792,7 @@ impl UefiPeimDxe {
                     TableCell::new(&project.r#type),
                 ]
             })
-            .map(|rtc| Row::new(rtc))
+            .map(Row::new)
             .collect();
 
         for row in rows {
@@ -842,7 +842,7 @@ impl VxworksData {
         ]));
 
         let rows: Vec<Row> = list
-            .into_iter()
+            .iter()
             .map(|project| {
                 vec![
                     TableCell::new(&project.name),
@@ -850,7 +850,7 @@ impl VxworksData {
                     TableCell::new(&project.size),
                 ]
             })
-            .map(|rtc| Row::new(rtc))
+            .map(Row::new)
             .collect();
 
         for row in rows {
@@ -879,7 +879,7 @@ impl VxworksTask {
         ]));
 
         let rows: Vec<Row> = list
-            .into_iter()
+            .iter()
             .map(|project| {
                 vec![
                     TableCell::new(&project.task_name),
@@ -887,7 +887,7 @@ impl VxworksTask {
                     TableCell::new(&project.fcn_name),
                 ]
             })
-            .map(|rtc| Row::new(rtc))
+            .map(Row::new)
             .collect();
 
         for row in rows {
@@ -914,14 +914,14 @@ impl VxworksCapability {
         ]));
 
         let rows: Vec<Row> = list
-            .into_iter()
+            .iter()
             .map(|project| {
                 vec![
                     TableCell::new(&project.name),
                     TableCell::new(&project.caps.join(", ")),
                 ]
             })
-            .map(|rtc| Row::new(rtc))
+            .map(Row::new)
             .collect();
 
         for row in rows {
@@ -955,9 +955,9 @@ pub async fn report<U: ApiServer>(
     let report_path = Path::new(&savepath);
 
     if report_path.exists() {
-        Err(anyhow!("File {} already exists", report_path.display()))?;
+        return Err(anyhow!("File {} already exists", report_path.display()));
     }
-    api_server.report(&project_id, &report_path).await?;
+    api_server.report(&project_id, report_path).await?;
 
     Ok(savepath)
 }

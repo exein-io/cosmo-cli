@@ -4,9 +4,9 @@ use jsonwebtoken::{DecodingKey, Validation};
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, error::Error, time::SystemTime};
 
-const FIREBASE_LOGIN_URL: &'static str =
+const FIREBASE_LOGIN_URL: &str =
     "https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword";
-const FIREBASE_REFRESH_URL: &'static str = "https://securetoken.googleapis.com/v1/token";
+const FIREBASE_REFRESH_URL: &str = "https://securetoken.googleapis.com/v1/token";
 const TOKEN_EXPIRATION_LEEWAY: u64 = 60; // seconds
 
 #[derive(Debug, Serialize)]
@@ -293,7 +293,7 @@ impl Firebase {
 }
 
 fn decode_firebase_token(token: &str) -> Result<FirebaseClaims, jsonwebtoken::errors::Error> {
-    let header = jsonwebtoken::decode_header(&token)?;
+    let header = jsonwebtoken::decode_header(token)?;
     let mut validation = Validation::default();
     validation.algorithms = vec![header.alg];
     validation.insecure_disable_signature_validation();
@@ -339,6 +339,7 @@ impl AuthSystem for Firebase {
         Ok(firebase_auth_data.into())
     }
     async fn logout(&mut self) -> Result<(), AuthError> {
-        Ok(Firebase::logout(self))
+        Firebase::logout(self);
+        Ok(())
     }
 }
