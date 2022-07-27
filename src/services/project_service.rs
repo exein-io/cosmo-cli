@@ -1,7 +1,6 @@
 use std::{fs::File, path::Path};
 
 use anyhow::{anyhow, Result};
-use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use term_table::{
     row::Row,
@@ -26,10 +25,9 @@ pub struct Project {
     pub name: String,
     pub original_name: String,
     pub score: f32,
-    pub workspace_id: Uuid,
     pub project_type: String,
     pub project_subtype: String,
-    pub creation_date: DateTime<Utc>,
+    pub creation_date: String,
 }
 
 impl Project {

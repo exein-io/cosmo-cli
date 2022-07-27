@@ -30,6 +30,10 @@ cargo build --release
 | Create an API key                                       | `cosmo apikey --action create`                                                                                    |
 | List API key                                            | `cosmo apikey --action list`                                                                                      |
 | Save PDF report                                         | `cosmo report --id <PROJECT_ID>`                                                                                  |
+| List organizations                                      | `cosmo organization list`                                                                                         |
+| Create an organization                                  | `cosmo organization create --name <NAME> --description <DESCRIPTION>`                                             |
+| Delete an organization                                  | `cosmo organization delete --id <ORGANIZATION_ID>`                                             |
+
 
 ## Supported analysis
 

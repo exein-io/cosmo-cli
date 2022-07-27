@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use lazy_static::lazy_static;
 use reqwest::header::{AUTHORIZATION, USER_AGENT};
-use std::{fs::File, io::Write, path::Path};
+use std::{collections::HashMap, fs::File, io::Write, path::Path};
 use uuid::Uuid;
 
 use crate::{
@@ -9,6 +9,7 @@ use crate::{
     security::{AuthData, AuthError, AuthSystem},
     services::{
         apikey_service::ApiKeyData,
+        organization_service::OrganizationData,
         project_service::{Project, ProjectAnalysis, ProjectIdDTO},
     },
 };
@@ -16,13 +17,11 @@ use crate::{
 use super::{ApiServer, ApiServerError, LatestCliVersion};
 
 lazy_static! {
-    pub static ref CLI_USER_AGENT: String = format!(
-        "ExeinCLI/{}", // TODO: possibile estrarre la distribuzione
-        crate::version()
-    );
+    pub static ref CLI_USER_AGENT: String = format!("ExeinCosmoCLI/{}", crate::version());
 }
 
 const PROJECT_ROUTE_V1: &str = "/api/v1/projects";
+const ORGANIZATION_ROUTE_V1: &str = "/api/v1/organizations";
 const APIKEY_ROUTE_V1: &str = "/api/v1/api_key";
 const UPDATES_ROUTE: &str = "/api/updates_check";
 
@@ -272,6 +271,64 @@ impl<U: AuthSystem> HttpApiServer<U> {
         }
     }
 
+    pub async fn organization_list(&mut self) -> Result<Vec<OrganizationData>, ApiServerError> {
+        let response = self
+            .authenticated_request(ORGANIZATION_ROUTE_V1, reqwest::Method::GET, None)
+            .await?
+            .send()
+            .await?;
+
+        if response.status() == reqwest::StatusCode::OK {
+            let orgs: Vec<OrganizationData> = response.json::<Vec<OrganizationData>>().await?;
+            Ok(orgs)
+        } else {
+            let body = response.text().await?;
+            Err(ApiServerError::ApiError(body))
+        }
+    }
+
+    pub async fn organization_create(
+        &mut self,
+        name: &str,
+        description: &str,
+    ) -> Result<(), ApiServerError> {
+        // Create the form
+        let mut form = HashMap::new();
+        form.insert("name", name.to_string());
+        form.insert("description", description.to_string());
+
+        let response = self
+            .authenticated_request(ORGANIZATION_ROUTE_V1, reqwest::Method::POST, None)
+            .await?
+            .json(&form)
+            .send()
+            .await?;
+
+        if response.status() == reqwest::StatusCode::CREATED {
+            Ok(())
+        } else {
+            let body = response.text().await?;
+            Err(ApiServerError::ApiError(body))
+        }
+    }
+
+    pub async fn organization_delete(&mut self, id: &Uuid) -> Result<(), ApiServerError> {
+        let path = format!("{}/{}", ORGANIZATION_ROUTE_V1, id).to_string();
+
+        let response = self
+            .authenticated_request(&path, reqwest::Method::DELETE, None)
+            .await?
+            .send()
+            .await?;
+
+        if response.status() == reqwest::StatusCode::NO_CONTENT {
+            Ok(())
+        } else {
+            let body = response.text().await?;
+            Err(ApiServerError::ApiError(body))
+        }
+    }
+
     pub async fn apikey_create(&mut self) -> Result<ApiKeyData, ApiServerError> {
         let response = self
             .authenticated_request(APIKEY_ROUTE_V1, reqwest::Method::POST, None)
@@ -395,5 +452,21 @@ impl<U: AuthSystem> ApiServer for HttpApiServer<U> {
 
     async fn apikey_delete(&mut self) -> Result<(), ApiServerError> {
         self.apikey_delete().await
+    }
+
+    async fn organization_create(
+        &mut self,
+        name: &str,
+        description: &str,
+    ) -> Result<(), ApiServerError> {
+        self.organization_create(name, description).await
+    }
+
+    async fn organization_list(&mut self) -> Result<Vec<OrganizationData>, ApiServerError> {
+        self.organization_list().await
+    }
+
+    async fn organization_delete(&mut self, id: &Uuid) -> Result<(), ApiServerError> {
+        self.organization_delete(id).await
     }
 }

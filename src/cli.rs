@@ -150,6 +150,23 @@ pub enum ApiKeyAction {
     Delete,
 }
 
+#[derive(Debug, Clone, Parser)]
+pub enum Organization {
+    List,
+    Create{
+        /// Organization name
+        #[clap(long, short)]
+        name: String,
+        /// Organization description
+        #[clap(long, short)]
+        description: String
+    },
+    Delete{
+        #[clap(long, short)]
+        id: Uuid,
+    }
+}
+
 #[derive(Debug, Clone, ArgEnum)]
 pub enum Analysis {
     // Linux/Container Analysis
@@ -282,4 +299,7 @@ pub enum Command {
         #[clap(short, long, arg_enum)]
         action: ApiKeyAction,
     },
+    /// Manage Organizations
+    #[clap(subcommand)]
+    Organization(Organization),
 }
