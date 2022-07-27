@@ -24,6 +24,7 @@ pub struct Project {
     pub id: Uuid,
     pub name: String,
     pub original_name: String,
+    pub organization_name: Option<String>,
     pub score: f32,
     pub project_type: String,
     pub project_subtype: String,
@@ -40,6 +41,7 @@ impl Project {
             TableCell::new("ID"),
             TableCell::new("DESCRIPTION"),
             TableCell::new("ORIGINAL NAME"),
+            TableCell::new("ORGANIZATION NAME"),
             TableCell::new("SCORE"),
             TableCell::new("TYPE"),
             TableCell::new("SUBTYPE"),
@@ -53,11 +55,17 @@ impl Project {
                     .as_ref()
                     .map(|s| s.to_string())
                     .unwrap_or_default();
+                let org = project
+                    .organization_name
+                    .as_ref()
+                    .map(|s| s.to_string())
+                    .unwrap_or_default();
                 vec![
                     TableCell::new(&project.name),
                     TableCell::new(&project.id),
                     TableCell::new(desc),
                     TableCell::new(&project.original_name),
+                    TableCell::new(org),
                     TableCell::new(&project.score),
                     TableCell::new(&project.project_type),
                     TableCell::new(&project.project_subtype),

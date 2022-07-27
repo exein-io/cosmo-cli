@@ -256,19 +256,28 @@ impl<U: AuthSystem> HttpApiServer<U> {
     }
 
     pub async fn list_projects(&mut self) -> Result<Vec<Project>, ApiServerError> {
-        let response = self
-            .authenticated_request(PROJECT_ROUTE_V1, reqwest::Method::GET, None)
-            .await?
-            .send()
-            .await?;
+        let organizations = self.organization_list().await?;
 
-        if response.status() == reqwest::StatusCode::OK {
-            let projects: Vec<Project> = response.json::<Vec<Project>>().await?;
-            Ok(projects)
-        } else {
-            let body = response.text().await?;
-            Err(ApiServerError::ApiError(body))
+        let mut projects: Vec<Project> = vec![];
+        for o in organizations {
+            let path = format!("{}/{}/projects", ORGANIZATION_ROUTE_V1, o.id).to_string();
+
+            let response = self
+                .authenticated_request(&path, reqwest::Method::GET, None)
+                .await?
+                .send()
+                .await?;
+
+            if response.status() == reqwest::StatusCode::OK {
+                let current_projects = response.json::<Vec<Project>>().await?;
+                let current_projects = current_projects.into_iter().map(|mut x| {
+                    x.organization_name = Some(o.name.clone());
+                    x
+                });
+                projects.extend(current_projects);
+            }
         }
+        Ok(projects)
     }
 
     pub async fn organization_list(&mut self) -> Result<Vec<OrganizationData>, ApiServerError> {
