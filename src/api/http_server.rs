@@ -139,17 +139,16 @@ impl<U: AuthSystem> HttpApiServer<U> {
 
         let org_id = match organization {
             Some(o) => o.to_string(),
-            None => {
-                self.organization_list()
-                    .await?
-                    .into_iter()
-                    .filter(|s| s.built_in)
-                    .next()
-                    .ok_or(ApiServerError::RequestError("No organization found".to_string()))?
-                    .id
-                    .to_string()
-            }
+            None => self
+                .organization_list()
+                .await?
+                .into_iter()
+                .find(|s| s.built_in)
+                .ok_or_else(|| ApiServerError::RequestError("No organization found".to_string()))?
+                .id
+                .to_string(),
         };
+        println!("oooooooooo {}", org_id);
 
         let path = format!("{}/{}/projects", ORGANIZATION_ROUTE_V1, org_id).to_string();
 

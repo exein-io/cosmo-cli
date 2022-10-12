@@ -87,7 +87,11 @@ pub trait ApiServer {
     async fn list_projects(&mut self) -> Result<Vec<Project>, ApiServerError>;
     async fn login(&mut self) -> Result<(), AuthError>;
     async fn logout(&mut self) -> Result<(), AuthError>;
-    async fn organization_create(&mut self, name: &str, description: &str) -> Result<(), ApiServerError>;
+    async fn organization_create(
+        &mut self,
+        name: &str,
+        description: &str,
+    ) -> Result<(), ApiServerError>;
     async fn organization_list(&mut self) -> Result<Vec<OrganizationData>, ApiServerError>;
     async fn organization_delete(&mut self, id: &Uuid) -> Result<(), ApiServerError>;
     async fn apikey_create(&mut self) -> Result<ApiKeyData, ApiServerError>;

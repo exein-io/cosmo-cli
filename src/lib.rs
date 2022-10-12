@@ -557,7 +557,7 @@ pub async fn run_cmd<U: ApiServer>(
             }
 
             match action {
-                Organization::Create{name, description} => {
+                Organization::Create { name, description } => {
                     organization_service::create(api_server, &name, &description).await?;
                     Box::new(format!("Organization created: {}", name))
                 }
@@ -565,7 +565,7 @@ pub async fn run_cmd<U: ApiServer>(
                     let org = organization_service::list(api_server).await?;
                     Box::new(org)
                 }
-                Organization::Delete{id} => {
+                Organization::Delete { id } => {
                     organization_service::delete(api_server, id).await?;
                     Box::new(format!("Organization deleted. ID: {}", id))
                 }

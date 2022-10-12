@@ -1027,7 +1027,14 @@ pub async fn create<U: ApiServer>(
     }
 
     let project_id = api_server
-        .create(fw_filepath, fw_type, fw_subtype, name, description, organization)
+        .create(
+            fw_filepath,
+            fw_type,
+            fw_subtype,
+            name,
+            description,
+            organization,
+        )
         .await?;
 
     Ok(ProjectCreated { id: project_id })
