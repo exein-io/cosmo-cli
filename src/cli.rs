@@ -153,18 +153,18 @@ pub enum ApiKeyAction {
 #[derive(Debug, Clone, Parser)]
 pub enum Organization {
     List,
-    Create{
+    Create {
         /// Organization name
         #[clap(long, short)]
         name: String,
         /// Organization description
         #[clap(long, short)]
-        description: String
+        description: String,
     },
-    Delete{
+    Delete {
         #[clap(long, short)]
         id: Uuid,
-    }
+    },
 }
 
 #[derive(Debug, Clone, ArgEnum)]
@@ -224,7 +224,7 @@ impl fmt::Display for Analysis {
 #[derive(Debug, Clone, Subcommand)]
 pub enum Command {
     /// Create project
-    #[clap(visible_alias = "new")]
+    #[clap(visible_alias = "new", visible_alias = "create")]
     CreateProject {
         /// Firmware path to analyze
         #[clap(short = 'f', long = "file", value_name = "FILE")]
@@ -235,6 +235,9 @@ pub enum Command {
         /// Project description
         #[clap(short, long)]
         description: Option<String>,
+        /// Project organization
+        #[clap(long)]
+        organization: Option<String>,
         /// Type of your firmware
         #[clap(short = 't', long = "type", value_name = "TYPE")]
         fw_type: String,

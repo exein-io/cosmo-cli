@@ -94,6 +94,7 @@ pub async fn run_cmd<U: ApiServer>(
             fw_subtype,
             name,
             description,
+            organization,
         } => {
             log::info!("Create Project...");
             let project_created = project_service::create(
@@ -102,6 +103,7 @@ pub async fn run_cmd<U: ApiServer>(
                 &fw_subtype,
                 &name,
                 description.as_deref(),
+                organization.as_deref(),
                 api_server,
             )
             .await?;

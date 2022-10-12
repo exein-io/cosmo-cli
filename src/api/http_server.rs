@@ -102,6 +102,7 @@ impl<U: AuthSystem> HttpApiServer<U> {
         fw_subtype: &str,
         name: &str,
         description: Option<&str>,
+        organization: Option<&str>,
     ) -> Result<Uuid, ApiServerError> {
         let path = Path::new(&fw_filepath);
         if !path.exists() || path.is_dir() {
@@ -136,8 +137,24 @@ impl<U: AuthSystem> HttpApiServer<U> {
             form = form.text("description", descr.to_string());
         }
 
+        let org_id = match organization {
+            Some(o) => o.to_string(),
+            None => {
+                self.organization_list()
+                    .await?
+                    .into_iter()
+                    .filter(|s| s.built_in)
+                    .next()
+                    .ok_or(ApiServerError::RequestError("No organization found".to_string()))?
+                    .id
+                    .to_string()
+            }
+        };
+
+        let path = format!("{}/{}/projects", ORGANIZATION_ROUTE_V1, org_id).to_string();
+
         let response = self
-            .authenticated_request(PROJECT_ROUTE_V1, reqwest::Method::POST, None)
+            .authenticated_request(&path, reqwest::Method::POST, None)
             .await?
             .multipart(form)
             .send()
@@ -408,9 +425,17 @@ impl<U: AuthSystem> ApiServer for HttpApiServer<U> {
         fw_subtype: &str,
         name: &str,
         description: Option<&str>,
+        organization: Option<&str>,
     ) -> Result<Uuid, ApiServerError> {
-        self.create(fw_filepath, fw_type, fw_subtype, name, description)
-            .await
+        self.create(
+            fw_filepath,
+            fw_type,
+            fw_subtype,
+            name,
+            description,
+            organization,
+        )
+        .await
     }
 
     async fn overview(&mut self, project_id: &Uuid) -> Result<serde_json::Value, ApiServerError> {

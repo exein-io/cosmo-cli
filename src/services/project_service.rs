@@ -1000,6 +1000,7 @@ pub async fn create<U: ApiServer>(
     fw_subtype: &str,
     name: &str,
     description: Option<&str>,
+    organization: Option<&str>,
     api_server: &mut U,
 ) -> Result<ProjectCreated> {
     let fw_file = Path::new(fw_filepath);
@@ -1026,7 +1027,7 @@ pub async fn create<U: ApiServer>(
     }
 
     let project_id = api_server
-        .create(fw_filepath, fw_type, fw_subtype, name, description)
+        .create(fw_filepath, fw_type, fw_subtype, name, description, organization)
         .await?;
 
     Ok(ProjectCreated { id: project_id })

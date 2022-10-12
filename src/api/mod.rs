@@ -72,6 +72,7 @@ pub trait ApiServer {
         fw_subtype: &str,
         name: &str,
         description: Option<&str>,
+        organization: Option<&str>,
     ) -> Result<Uuid, ApiServerError>;
     async fn overview(&mut self, project_id: &Uuid) -> Result<serde_json::Value, ApiServerError>;
     async fn analysis(
