@@ -148,7 +148,6 @@ impl<U: AuthSystem> HttpApiServer<U> {
                 .id
                 .to_string(),
         };
-        println!("oooooooooo {}", org_id);
 
         let path = format!("{}/{}/projects", ORGANIZATION_ROUTE_V1, org_id).to_string();
 
