@@ -1,7 +1,6 @@
 use std::{fs::File, path::Path};
 
 use anyhow::{anyhow, Result};
-use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use term_table::{
     row::Row,
@@ -25,11 +24,11 @@ pub struct Project {
     pub id: Uuid,
     pub name: String,
     pub original_name: String,
+    pub organization_name: Option<String>,
     pub score: f32,
-    pub workspace_id: Uuid,
     pub project_type: String,
     pub project_subtype: String,
-    pub creation_date: DateTime<Utc>,
+    pub creation_date: String,
 }
 
 impl Project {
@@ -42,6 +41,7 @@ impl Project {
             TableCell::new("ID"),
             TableCell::new("DESCRIPTION"),
             TableCell::new("ORIGINAL NAME"),
+            TableCell::new("ORGANIZATION NAME"),
             TableCell::new("SCORE"),
             TableCell::new("TYPE"),
             TableCell::new("SUBTYPE"),
@@ -55,11 +55,17 @@ impl Project {
                     .as_ref()
                     .map(|s| s.to_string())
                     .unwrap_or_default();
+                let org = project
+                    .organization_name
+                    .as_ref()
+                    .map(|s| s.to_string())
+                    .unwrap_or_default();
                 vec![
                     TableCell::new(&project.name),
                     TableCell::new(&project.id),
                     TableCell::new(desc),
                     TableCell::new(&project.original_name),
+                    TableCell::new(org),
                     TableCell::new(&project.score),
                     TableCell::new(&project.project_type),
                     TableCell::new(&project.project_subtype),
@@ -994,6 +1000,7 @@ pub async fn create<U: ApiServer>(
     fw_subtype: &str,
     name: &str,
     description: Option<&str>,
+    organization: Option<&str>,
     api_server: &mut U,
 ) -> Result<ProjectCreated> {
     let fw_file = Path::new(fw_filepath);
@@ -1020,7 +1027,14 @@ pub async fn create<U: ApiServer>(
     }
 
     let project_id = api_server
-        .create(fw_filepath, fw_type, fw_subtype, name, description)
+        .create(
+            fw_filepath,
+            fw_type,
+            fw_subtype,
+            name,
+            description,
+            organization,
+        )
         .await?;
 
     Ok(ProjectCreated { id: project_id })

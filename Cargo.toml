@@ -1,6 +1,6 @@
 [package]
 name = "cosmo_cli"
-version = "0.0.1"
+version = "0.1.0"
 description = "Easy Cosmo pipeline helper"
 authors = [
     "banditopazzo <banditopazzo@gmail.com>",
@@ -13,25 +13,25 @@ path = "src/main.rs"
 name = "cosmo"
 
 [dependencies]
-log = "0.4"
-serde = { version = "1.0.136", features = ["derive"] }
-async-trait = "0.1.53"
-jsonwebtoken = "8"
-reqwest = { version = "0.11.10", features = ["json", "multipart"] }
-openssl = { version = '0.10.38' }
+log = "0.4.17"
+serde = { version = "1.0.145", features = ["derive"] }
+async-trait = "0.1.57"
+jsonwebtoken = "8.1.1"
+reqwest = { version = "0.11.12", features = ["json", "multipart"] }
+openssl = { version = '0.10.42' }
 openssl-probe = "0.1.5"
-anyhow = "1.0"
+anyhow = "1.0.65"
 lazy_static = "1.4.0"
 clap = { version = "3.1.10", features = ["derive"] }
 clap-verbosity-flag = "1.0.0"
-uuid = { version = "1.0.0", features = ["serde", "v4"] }
-serde_json = "1.0.79"
-semver = { version = "1.0.7", features = ["serde"] }
-chrono = { version = "0.4.19", features = ["serde"] }
+uuid = { version = "1.2.1", features = ["serde", "v4"] }
+serde_json = "1.0.86"
+semver = { version = "1.0.14", features = ["serde"] }
+chrono = { version = "0.4.22", features = ["serde"] }
 term-table = "1.3.2"
 rpassword = "6.0.1"
-tokio = { version = "1.17.0", features = ["macros", "rt-multi-thread"] }
-env_logger = "0.9.0"
+tokio = { version = "1.21.2", features = ["macros", "rt-multi-thread"] }
+env_logger = "0.9.1"
 dirs = "4.0.0"
 human-panic = "1.0.3"
 

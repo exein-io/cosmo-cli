@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use lazy_static::lazy_static;
 use reqwest::header::{AUTHORIZATION, USER_AGENT};
-use std::{fs::File, io::Write, path::Path};
+use std::{collections::HashMap, fs::File, io::Write, path::Path};
 use uuid::Uuid;
 
 use crate::{
@@ -9,6 +9,7 @@ use crate::{
     security::{AuthData, AuthError, AuthSystem},
     services::{
         apikey_service::ApiKeyData,
+        organization_service::OrganizationData,
         project_service::{Project, ProjectAnalysis, ProjectIdDTO},
     },
 };
@@ -16,13 +17,11 @@ use crate::{
 use super::{ApiServer, ApiServerError, LatestCliVersion};
 
 lazy_static! {
-    pub static ref CLI_USER_AGENT: String = format!(
-        "ExeinCLI/{}", // TODO: possibile estrarre la distribuzione
-        crate::version()
-    );
+    pub static ref CLI_USER_AGENT: String = format!("ExeinCosmoCLI/{}", crate::version());
 }
 
 const PROJECT_ROUTE_V1: &str = "/api/v1/projects";
+const ORGANIZATION_ROUTE_V1: &str = "/api/v1/organizations";
 const APIKEY_ROUTE_V1: &str = "/api/v1/api_key";
 const UPDATES_ROUTE: &str = "/api/updates_check";
 
@@ -103,6 +102,7 @@ impl<U: AuthSystem> HttpApiServer<U> {
         fw_subtype: &str,
         name: &str,
         description: Option<&str>,
+        organization: Option<&str>,
     ) -> Result<Uuid, ApiServerError> {
         let path = Path::new(&fw_filepath);
         if !path.exists() || path.is_dir() {
@@ -137,8 +137,22 @@ impl<U: AuthSystem> HttpApiServer<U> {
             form = form.text("description", descr.to_string());
         }
 
+        let org_id = match organization {
+            Some(o) => o.to_string(),
+            None => self
+                .organization_list()
+                .await?
+                .into_iter()
+                .find(|s| s.built_in)
+                .ok_or_else(|| ApiServerError::RequestError("No organization found".to_string()))?
+                .id
+                .to_string(),
+        };
+
+        let path = format!("{}/{}/projects", ORGANIZATION_ROUTE_V1, org_id).to_string();
+
         let response = self
-            .authenticated_request(PROJECT_ROUTE_V1, reqwest::Method::POST, None)
+            .authenticated_request(&path, reqwest::Method::POST, None)
             .await?
             .multipart(form)
             .send()
@@ -257,15 +271,82 @@ impl<U: AuthSystem> HttpApiServer<U> {
     }
 
     pub async fn list_projects(&mut self) -> Result<Vec<Project>, ApiServerError> {
+        let organizations = self.organization_list().await?;
+
+        let mut projects: Vec<Project> = vec![];
+        for o in organizations {
+            let path = format!("{}/{}/projects", ORGANIZATION_ROUTE_V1, o.id).to_string();
+
+            let response = self
+                .authenticated_request(&path, reqwest::Method::GET, None)
+                .await?
+                .send()
+                .await?;
+
+            if response.status() == reqwest::StatusCode::OK {
+                let current_projects = response.json::<Vec<Project>>().await?;
+                let current_projects = current_projects.into_iter().map(|mut x| {
+                    x.organization_name = Some(o.name.clone());
+                    x
+                });
+                projects.extend(current_projects);
+            }
+        }
+        Ok(projects)
+    }
+
+    pub async fn organization_list(&mut self) -> Result<Vec<OrganizationData>, ApiServerError> {
         let response = self
-            .authenticated_request(PROJECT_ROUTE_V1, reqwest::Method::GET, None)
+            .authenticated_request(ORGANIZATION_ROUTE_V1, reqwest::Method::GET, None)
             .await?
             .send()
             .await?;
 
         if response.status() == reqwest::StatusCode::OK {
-            let projects: Vec<Project> = response.json::<Vec<Project>>().await?;
-            Ok(projects)
+            let orgs: Vec<OrganizationData> = response.json::<Vec<OrganizationData>>().await?;
+            Ok(orgs)
+        } else {
+            let body = response.text().await?;
+            Err(ApiServerError::ApiError(body))
+        }
+    }
+
+    pub async fn organization_create(
+        &mut self,
+        name: &str,
+        description: &str,
+    ) -> Result<(), ApiServerError> {
+        // Create the form
+        let mut form = HashMap::new();
+        form.insert("name", name.to_string());
+        form.insert("description", description.to_string());
+
+        let response = self
+            .authenticated_request(ORGANIZATION_ROUTE_V1, reqwest::Method::POST, None)
+            .await?
+            .json(&form)
+            .send()
+            .await?;
+
+        if response.status() == reqwest::StatusCode::CREATED {
+            Ok(())
+        } else {
+            let body = response.text().await?;
+            Err(ApiServerError::ApiError(body))
+        }
+    }
+
+    pub async fn organization_delete(&mut self, id: &Uuid) -> Result<(), ApiServerError> {
+        let path = format!("{}/{}", ORGANIZATION_ROUTE_V1, id).to_string();
+
+        let response = self
+            .authenticated_request(&path, reqwest::Method::DELETE, None)
+            .await?
+            .send()
+            .await?;
+
+        if response.status() == reqwest::StatusCode::NO_CONTENT {
+            Ok(())
         } else {
             let body = response.text().await?;
             Err(ApiServerError::ApiError(body))
@@ -342,9 +423,17 @@ impl<U: AuthSystem> ApiServer for HttpApiServer<U> {
         fw_subtype: &str,
         name: &str,
         description: Option<&str>,
+        organization: Option<&str>,
     ) -> Result<Uuid, ApiServerError> {
-        self.create(fw_filepath, fw_type, fw_subtype, name, description)
-            .await
+        self.create(
+            fw_filepath,
+            fw_type,
+            fw_subtype,
+            name,
+            description,
+            organization,
+        )
+        .await
     }
 
     async fn overview(&mut self, project_id: &Uuid) -> Result<serde_json::Value, ApiServerError> {
@@ -395,5 +484,21 @@ impl<U: AuthSystem> ApiServer for HttpApiServer<U> {
 
     async fn apikey_delete(&mut self) -> Result<(), ApiServerError> {
         self.apikey_delete().await
+    }
+
+    async fn organization_create(
+        &mut self,
+        name: &str,
+        description: &str,
+    ) -> Result<(), ApiServerError> {
+        self.organization_create(name, description).await
+    }
+
+    async fn organization_list(&mut self) -> Result<Vec<OrganizationData>, ApiServerError> {
+        self.organization_list().await
+    }
+
+    async fn organization_delete(&mut self, id: &Uuid) -> Result<(), ApiServerError> {
+        self.organization_delete(id).await
     }
 }

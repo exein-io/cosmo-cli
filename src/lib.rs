@@ -9,9 +9,10 @@ use cli::Command;
 use lazy_static::lazy_static;
 
 use crate::{
-    cli::{Analysis, ApiKeyAction, CommandOutput},
+    cli::{Analysis, ApiKeyAction, CommandOutput, Organization},
     services::{
         apikey_service::{self, ApiKeyData},
+        organization_service::{self, OrganizationData},
         project_service::{self, *},
     },
 };
@@ -93,6 +94,7 @@ pub async fn run_cmd<U: ApiServer>(
             fw_subtype,
             name,
             description,
+            organization,
         } => {
             log::info!("Create Project...");
             let project_created = project_service::create(
@@ -101,6 +103,7 @@ pub async fn run_cmd<U: ApiServer>(
                 &fw_subtype,
                 &name,
                 description.as_deref(),
+                organization.as_deref(),
                 api_server,
             )
             .await?;
@@ -540,6 +543,33 @@ pub async fn run_cmd<U: ApiServer>(
         } => {
             let report = project_service::report(api_server, project_id, savepath).await?;
             Box::new(format!("Report saved to {}", report))
+        }
+
+        Command::Organization(action) => {
+            impl CommandOutput for Vec<OrganizationData> {
+                fn text(&self) -> String {
+                    OrganizationData::get_table_from_list(self)
+                }
+
+                fn json(&self) -> String {
+                    serde_json::to_string(self).unwrap()
+                }
+            }
+
+            match action {
+                Organization::Create { name, description } => {
+                    organization_service::create(api_server, &name, &description).await?;
+                    Box::new(format!("Organization created: {}", name))
+                }
+                Organization::List => {
+                    let org = organization_service::list(api_server).await?;
+                    Box::new(org)
+                }
+                Organization::Delete { id } => {
+                    organization_service::delete(api_server, id).await?;
+                    Box::new(format!("Organization deleted. ID: {}", id))
+                }
+            }
         }
         Command::Apikey { action } => {
             impl CommandOutput for ApiKeyData {
