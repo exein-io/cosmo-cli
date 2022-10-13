@@ -1,12 +1,17 @@
 [package]
-name = "cosmo_cli"
+name = "cosmo-cli"
 version = "0.1.0"
 description = "Easy Cosmo pipeline helper"
 authors = [
     "banditopazzo <banditopazzo@gmail.com>",
     "Gianluigi <gianluigi@exein.io>",
 ]
-edition = "2018"
+edition = "2021"
+repository = "https://github.com/Exein-io/cosmo-cli.git"
+homepage = "https://cosmo.exein.io"
+license-file = "LICENSE"
+license = "Apache-2.0"
+
 
 [[bin]]
 path = "src/main.rs"
