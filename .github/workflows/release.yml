@@ -34,7 +34,7 @@ jobs:
           use-cross: true
           toolchain: "1.64"
           command: build
-          args: --release --target=x86_64-unknown-linux-musl
+          args: --release --features "vendored-openssl" --target=x86_64-unknown-linux-musl
 
       # Create Release
       - name: Create Release
