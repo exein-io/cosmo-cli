@@ -91,7 +91,7 @@ pub struct LinuxProjectOverview {
     pub cve_check: LinuxProjectOverviewCveCheck,
     pub code: LinuxProjectOverviewCode,
     pub binary: LinuxProjectOverviewBinary,
-    pub project: Project,
+    // pub project: Project,
     pub info: LinuxInfo,
 }
 
@@ -528,7 +528,7 @@ impl LinuxSoftwareBOMAnalysis {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct UefiProjectOverview {
     pub info: UefiInfo,
-    pub project: Project,
+    // pub project: Project,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -813,7 +813,7 @@ impl UefiPeimDxe {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct VxworksProjectOverview {
     pub info: VxworksInfo,
-    pub project: Project,
+    // pub project: Project,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
