@@ -5,6 +5,7 @@
 The command-line interface tool that allows you to interact with the [Cosmo](https://cosmo.exein.io/) API. 
 
 With the Cosmo CLI tool you are able to manage your projects, run scans, generate reports or manage your API keys to interface directly with the API.
+For more info read the [docs](https://docs.exein.io/cosmo/get_started/cli).
 
 ![A GIF highlighting the simple usage of the Cosmo CLI to list projects and fetch details of a specific project.](./res/demo.gif)
 
