@@ -203,10 +203,15 @@ impl LinuxHardeningAnalysis {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct LinuxCveCheckAnalysis {
-    pub product: String,
     pub cveid: String,
     pub severity: String,
+    pub summary: String,
+    pub vendor: String,
+    pub product: String,
+    pub version: String,
+    pub vector: String,
     pub patch: Option<String>,
+    pub references: Option<String>,
 }
 
 impl LinuxCveCheckAnalysis {
@@ -216,6 +221,7 @@ impl LinuxCveCheckAnalysis {
         table.max_column_width = 30;
         table.add_row(Row::new(vec![
             TableCell::new("PRODUCT"),
+            TableCell::new("VERSION"),
             TableCell::new("CVE ID"),
             TableCell::new("SEVERITY"),
         ]));
@@ -225,6 +231,7 @@ impl LinuxCveCheckAnalysis {
             .map(|project| {
                 vec![
                     TableCell::new(&project.product),
+                    TableCell::new(&project.version),
                     TableCell::new(&project.cveid),
                     TableCell::new(&project.severity),
                 ]
