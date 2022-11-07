@@ -109,7 +109,7 @@ pub async fn run_cmd<U: ApiServer>(
             .await?;
 
             let project_id = project_created.id;
-            Box::new(format!("Project created successfull with id: {project_id}. Dashboard URL: {}/reports/{project_id}", api_server.address()))
+            Box::new(format!("Project created successfull with id: {project_id}\nDashboard URL: {}/reports/{project_id}", api_server.address()))
         }
         Command::List => {
             impl CommandOutput for Vec<Project> {

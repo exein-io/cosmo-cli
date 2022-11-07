@@ -11,7 +11,7 @@ use uuid::Uuid;
 
 use crate::{api::ApiServer, cli::Analysis};
 
-pub const FILE_SIZE_LIMIT: usize = 536870912; // 512 Mb
+pub const FILE_SIZE_LIMIT: usize = 2147483648; // 2 Gb
 
 #[derive(Deserialize, Debug)]
 pub struct ProjectIdDTO {
@@ -596,7 +596,10 @@ impl ContainerProjectOverview {
             .unwrap_or_default();
         let arch = &project.info.arch;
 
-        format!("Name: {}\nVersion: {}\nArchitecture: {}", name, version, arch)
+        format!(
+            "Name: {}\nVersion: {}\nArchitecture: {}",
+            name, version, arch
+        )
     }
 }
 
