@@ -127,6 +127,41 @@ pub struct LinuxProjectOverviewSeverity {
     pub high: u16,
 }
 
+impl LinuxProjectOverview {
+    pub fn get_text_output(project: &LinuxProjectOverview) -> String {
+        let banner = project
+            .info
+            .banner
+            .as_ref()
+            .map(|s| s.to_string())
+            .unwrap_or_default();
+        let kernel = project
+            .info
+            .kernel
+            .as_ref()
+            .map(|s| s.to_string())
+            .unwrap_or_default();
+        let kernelc = project
+            .info
+            .kernelc
+            .as_ref()
+            .map(|s| s.to_string())
+            .unwrap_or_default();
+        let libc = project
+            .info
+            .libc
+            .as_ref()
+            .map(|s| s.to_string())
+            .unwrap_or_default();
+        let arch = &project.info.arch;
+
+        format!(
+            "Architecture: {}\nBanner: {}\nLib C: {}\nKernel version: {}\nKernel compiler: {}",
+            arch, banner, libc, kernel, kernelc
+        )
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ProjectAnalysis {
     pub(crate) name: String,
@@ -530,6 +565,41 @@ impl LinuxSoftwareBOMAnalysis {
     }
 }
 
+// CONTAINER Analysis
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ContainerProjectOverview {
+    pub info: ContainerInfo,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ContainerInfo {
+    pub arch: String,
+    pub os_name: Option<String>,
+    pub os_version: Option<String>,
+    pub env: Option<String>,
+    pub history: Option<String>,
+}
+
+impl ContainerProjectOverview {
+    pub fn get_text_output(project: &ContainerProjectOverview) -> String {
+        let name = project
+            .info
+            .os_name
+            .as_ref()
+            .map(|s| s.to_string())
+            .unwrap_or_default();
+        let version = project
+            .info
+            .os_version
+            .as_ref()
+            .map(|s| s.to_string())
+            .unwrap_or_default();
+        let arch = &project.info.arch;
+
+        format!("Name: {}\nVersion: {}\nArchitecture: {}", name, version, arch)
+    }
+}
+
 // UEFI Analysis
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -544,6 +614,20 @@ pub struct UefiInfo {
     pub pei_no: u32,
     pub manufacturer: String,
     pub s3mit: String,
+}
+
+impl UefiProjectOverview {
+    pub fn get_text_output(project: &UefiProjectOverview) -> String {
+        let manufacturer = &project.info.manufacturer;
+        let dxe_no = &project.info.dxe_no;
+        let pei_no = &project.info.pei_no;
+        let s3mit = &project.info.s3mit;
+
+        format!(
+            "Manufacturer: {}\nDXE number: {}\nPEI number: {}\nS3 mitigation: {}",
+            manufacturer, dxe_no, pei_no, s3mit
+        )
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -834,6 +918,28 @@ pub struct VxworksInfo {
     pub kernel: Option<String>,
     pub capabilities: Option<serde_json::Value>,
     pub os: String,
+}
+
+impl VxworksProjectOverview {
+    pub fn get_text_output(project: &VxworksProjectOverview) -> String {
+        let os = &project.info.os;
+        let arch = &project.info.arch;
+        let functions_no = &project.info.functions_no;
+        let tasks_no = &project.info.tasks_no;
+        let symbols_no = &project.info.symbols_no;
+
+        let kernel = project
+            .info
+            .kernel
+            .as_ref()
+            .map(|s| s.to_string())
+            .unwrap_or_default();
+
+        format!(
+            "Architecture: {}\nOS version: {}\nKernel version: {}\nFunctions: {}\nTasks: {}\nSymbols: {}",
+            arch, os, kernel, functions_no, tasks_no, symbols_no
+        )
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
