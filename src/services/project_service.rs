@@ -12,6 +12,7 @@ use uuid::Uuid;
 use crate::{api::ApiServer, cli::Analysis};
 
 pub const FILE_SIZE_LIMIT: usize = 2147483648; // 2 Gb
+pub const CVE_DETAILS_BASE_URL: &str = "https://nvd.nist.gov/vuln/detail/";
 
 #[derive(Deserialize, Debug)]
 pub struct ProjectIdDTO {
@@ -254,11 +255,13 @@ impl LinuxCveCheckAnalysis {
         let mut table = Table::new();
         table.style = TableStyle::simple();
         table.max_column_width = 30;
+        table.set_max_width_for_column(4, 50);
         table.add_row(Row::new(vec![
             TableCell::new("PRODUCT"),
             TableCell::new("VERSION"),
             TableCell::new("CVE ID"),
             TableCell::new("SEVERITY"),
+            TableCell::new("DETAILS"),
         ]));
 
         let rows: Vec<Row> = list
@@ -269,6 +272,7 @@ impl LinuxCveCheckAnalysis {
                     TableCell::new(&project.version),
                     TableCell::new(&project.cveid),
                     TableCell::new(&project.severity),
+                    TableCell::new(format!("{}{}", CVE_DETAILS_BASE_URL, &project.cveid)),
                 ]
             })
             .map(Row::new)
@@ -576,7 +580,7 @@ pub struct ContainerInfo {
     pub arch: String,
     pub os_name: Option<String>,
     pub os_version: Option<String>,
-    pub env: Option<String>,
+    pub env: Option<serde_json::Value>,
     pub history: Option<String>,
 }
 
