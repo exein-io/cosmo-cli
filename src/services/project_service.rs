@@ -248,6 +248,9 @@ pub struct LinuxCveCheckAnalysis {
     pub vector: String,
     pub patch: Option<String>,
     pub references: Option<String>,
+    pub cvss: Option<serde_json::Value>,
+    pub problems: Option<serde_json::Value>,
+    pub published_date: Option<String>,
 }
 
 impl LinuxCveCheckAnalysis {
