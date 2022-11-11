@@ -11,7 +11,8 @@ use uuid::Uuid;
 
 use crate::{api::ApiServer, cli::Analysis};
 
-pub const FILE_SIZE_LIMIT: usize = 536870912; // 512 Mb
+pub const FILE_SIZE_LIMIT: usize = 2147483648; // 2 Gb
+pub const CVE_DETAILS_BASE_URL: &str = "https://nvd.nist.gov/vuln/detail/";
 
 #[derive(Deserialize, Debug)]
 pub struct ProjectIdDTO {
@@ -127,6 +128,41 @@ pub struct LinuxProjectOverviewSeverity {
     pub high: u16,
 }
 
+impl LinuxProjectOverview {
+    pub fn get_text_output(project: &LinuxProjectOverview) -> String {
+        let banner = project
+            .info
+            .banner
+            .as_ref()
+            .map(|s| s.to_string())
+            .unwrap_or_default();
+        let kernel = project
+            .info
+            .kernel
+            .as_ref()
+            .map(|s| s.to_string())
+            .unwrap_or_default();
+        let kernelc = project
+            .info
+            .kernelc
+            .as_ref()
+            .map(|s| s.to_string())
+            .unwrap_or_default();
+        let libc = project
+            .info
+            .libc
+            .as_ref()
+            .map(|s| s.to_string())
+            .unwrap_or_default();
+        let arch = &project.info.arch;
+
+        format!(
+            "Architecture: {}\nBanner: {}\nLib C: {}\nKernel version: {}\nKernel compiler: {}",
+            arch, banner, libc, kernel, kernelc
+        )
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ProjectAnalysis {
     pub(crate) name: String,
@@ -203,10 +239,18 @@ impl LinuxHardeningAnalysis {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct LinuxCveCheckAnalysis {
-    pub product: String,
     pub cveid: String,
     pub severity: String,
+    pub summary: String,
+    pub vendor: String,
+    pub product: String,
+    pub version: String,
+    pub vector: String,
     pub patch: Option<String>,
+    pub references: Option<String>,
+    pub cvss: Option<serde_json::Value>,
+    pub problems: Option<serde_json::Value>,
+    pub published_date: Option<String>,
 }
 
 impl LinuxCveCheckAnalysis {
@@ -214,10 +258,13 @@ impl LinuxCveCheckAnalysis {
         let mut table = Table::new();
         table.style = TableStyle::simple();
         table.max_column_width = 30;
+        table.set_max_width_for_column(4, 50);
         table.add_row(Row::new(vec![
             TableCell::new("PRODUCT"),
+            TableCell::new("VERSION"),
             TableCell::new("CVE ID"),
             TableCell::new("SEVERITY"),
+            TableCell::new("DETAILS"),
         ]));
 
         let rows: Vec<Row> = list
@@ -225,8 +272,10 @@ impl LinuxCveCheckAnalysis {
             .map(|project| {
                 vec![
                     TableCell::new(&project.product),
+                    TableCell::new(&project.version),
                     TableCell::new(&project.cveid),
                     TableCell::new(&project.severity),
+                    TableCell::new(format!("{}{}", CVE_DETAILS_BASE_URL, &project.cveid)),
                 ]
             })
             .map(Row::new)
@@ -523,6 +572,44 @@ impl LinuxSoftwareBOMAnalysis {
     }
 }
 
+// CONTAINER Analysis
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ContainerProjectOverview {
+    pub info: ContainerInfo,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ContainerInfo {
+    pub arch: String,
+    pub os_name: Option<String>,
+    pub os_version: Option<String>,
+    pub env: Option<serde_json::Value>,
+    pub history: Option<String>,
+}
+
+impl ContainerProjectOverview {
+    pub fn get_text_output(project: &ContainerProjectOverview) -> String {
+        let name = project
+            .info
+            .os_name
+            .as_ref()
+            .map(|s| s.to_string())
+            .unwrap_or_default();
+        let version = project
+            .info
+            .os_version
+            .as_ref()
+            .map(|s| s.to_string())
+            .unwrap_or_default();
+        let arch = &project.info.arch;
+
+        format!(
+            "Name: {}\nVersion: {}\nArchitecture: {}",
+            name, version, arch
+        )
+    }
+}
+
 // UEFI Analysis
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -537,6 +624,20 @@ pub struct UefiInfo {
     pub pei_no: u32,
     pub manufacturer: String,
     pub s3mit: String,
+}
+
+impl UefiProjectOverview {
+    pub fn get_text_output(project: &UefiProjectOverview) -> String {
+        let manufacturer = &project.info.manufacturer;
+        let dxe_no = &project.info.dxe_no;
+        let pei_no = &project.info.pei_no;
+        let s3mit = &project.info.s3mit;
+
+        format!(
+            "Manufacturer: {}\nDXE number: {}\nPEI number: {}\nS3 mitigation: {}",
+            manufacturer, dxe_no, pei_no, s3mit
+        )
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -827,6 +928,28 @@ pub struct VxworksInfo {
     pub kernel: Option<String>,
     pub capabilities: Option<serde_json::Value>,
     pub os: String,
+}
+
+impl VxworksProjectOverview {
+    pub fn get_text_output(project: &VxworksProjectOverview) -> String {
+        let os = &project.info.os;
+        let arch = &project.info.arch;
+        let functions_no = &project.info.functions_no;
+        let tasks_no = &project.info.tasks_no;
+        let symbols_no = &project.info.symbols_no;
+
+        let kernel = project
+            .info
+            .kernel
+            .as_ref()
+            .map(|s| s.to_string())
+            .unwrap_or_default();
+
+        format!(
+            "Architecture: {}\nOS version: {}\nKernel version: {}\nFunctions: {}\nTasks: {}\nSymbols: {}",
+            arch, os, kernel, functions_no, tasks_no, symbols_no
+        )
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]

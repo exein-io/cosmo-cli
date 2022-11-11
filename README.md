@@ -54,6 +54,8 @@ cargo build --release
 * kernel
 * software-bom
 * static-code
+### Container/Docker Lite Analysis
+* cve-check
 ### UEFI Analysis
 * access
 * intel-boot-guard
@@ -75,6 +77,7 @@ cargo build --release
 | linux | buildroot | 
 | linux | openwrt | 
 | container | docker |
+| container | docker-lite |
 | container | lxc |
 | uefi | generic |
 | vxworks | generic |

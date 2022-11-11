@@ -109,7 +109,7 @@ pub async fn run_cmd<U: ApiServer>(
             .await?;
 
             let project_id = project_created.id;
-            Box::new(format!("Project created successfull with id: {project_id}. Dashboard URL: {}/reports/{project_id}", api_server.address()))
+            Box::new(format!("Project created successfull with id: {project_id}\nDashboard URL: {}/reports/{project_id}", api_server.address()))
         }
         Command::List => {
             impl CommandOutput for Vec<Project> {
@@ -140,10 +140,10 @@ pub async fn run_cmd<U: ApiServer>(
                 .context("Error extracting string")?;
             log::debug!("project type {}", fw_type);
             match fw_type {
-                "LINUX" | "CONTAINER" => {
+                "LINUX" => {
                     impl CommandOutput for LinuxProjectOverview {
                         fn text(&self) -> String {
-                            format!("Overview: {:#?}", self) //TODO
+                            LinuxProjectOverview::get_text_output(self)
                         }
 
                         fn json(&self) -> String {
@@ -155,10 +155,25 @@ pub async fn run_cmd<U: ApiServer>(
 
                     Box::new(lpo)
                 }
+                "CONTAINER" => {
+                    impl CommandOutput for ContainerProjectOverview {
+                        fn text(&self) -> String {
+                            ContainerProjectOverview::get_text_output(self)
+                        }
+
+                        fn json(&self) -> String {
+                            serde_json::to_string(self).unwrap()
+                        }
+                    }
+
+                    let lpo: ContainerProjectOverview = serde_json::from_value(overview)?;
+
+                    Box::new(lpo)
+                }
                 "UEFI" => {
                     impl CommandOutput for UefiProjectOverview {
                         fn text(&self) -> String {
-                            format!("Overview: {:#?}", self) //TODO
+                            UefiProjectOverview::get_text_output(self)
                         }
 
                         fn json(&self) -> String {
@@ -173,7 +188,7 @@ pub async fn run_cmd<U: ApiServer>(
                 "VXWORKS" => {
                     impl CommandOutput for VxworksProjectOverview {
                         fn text(&self) -> String {
-                            format!("Overview: {:#?}", self) //TODO
+                            VxworksProjectOverview::get_text_output(self)
                         }
 
                         fn json(&self) -> String {
