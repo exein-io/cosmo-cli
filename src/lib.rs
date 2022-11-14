@@ -96,7 +96,7 @@ pub async fn run_cmd<U: ApiServer>(
             description,
             organization,
         } => {
-            log::info!("Create Project...");
+            log::info!("Creating Project...");
             let project_created = project_service::create(
                 &fw_filepath,
                 &fw_type,
@@ -109,7 +109,7 @@ pub async fn run_cmd<U: ApiServer>(
             .await?;
 
             let project_id = project_created.id;
-            Box::new(format!("Project created successfull with id: {project_id}\nDashboard URL: {}/reports/{project_id}", api_server.address()))
+            Box::new(format!("Project created successfull with ID: {project_id}\nThe security scan is currently in progress, please allow up to a few minutes for completion. We will notify you via email as soon as the scan is over."))
         }
         Command::List => {
             impl CommandOutput for Vec<Project> {
