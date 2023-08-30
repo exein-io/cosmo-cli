@@ -126,6 +126,7 @@ pub struct LinuxProjectOverviewSeverity {
     pub low: u16,
     pub medium: u16,
     pub high: u16,
+    pub critical: Option<u16>,
 }
 
 impl LinuxProjectOverview {
