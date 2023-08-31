@@ -1,11 +1,11 @@
 use std::{env, ffi::OsString, fmt};
 
-use clap::{ArgEnum, Args, FromArgMatches, IntoApp, Parser, Subcommand};
+use clap::{Args, CommandFactory, FromArgMatches, Parser, Subcommand, ValueEnum};
 use uuid::Uuid;
 
 use super::COSMO_API_SERVER;
 
-#[derive(Debug, Clone, ArgEnum)]
+#[derive(Debug, Clone, ValueEnum)]
 pub enum OutputMode {
     Text,
     Json,
@@ -48,7 +48,7 @@ where
 
     #[derive(Parser, Debug)]
     struct DerivedArgs {
-        #[clap(short = 'o', long = "output", arg_enum, default_value_t = OutputMode::Text)]
+        #[clap(short = 'o', long = "output", value_enum, default_value_t = OutputMode::Text)]
         output: OutputMode,
     }
 
@@ -150,7 +150,7 @@ impl CommandOutput for () {
     }
 }
 
-#[derive(Debug, Clone, ArgEnum)]
+#[derive(Debug, Clone, ValueEnum)]
 pub enum ApiKeyAction {
     List,
     Create,
@@ -174,7 +174,7 @@ pub enum Organization {
     },
 }
 
-#[derive(Debug, Clone, ArgEnum)]
+#[derive(Debug, Clone, ValueEnum)]
 pub enum Analysis {
     // Linux/Container Analysis
     Hardening,
@@ -278,7 +278,7 @@ pub enum Command {
         #[clap(short = 'i', long = "id")]
         project_id: Uuid,
         /// Analysis name
-        #[clap(short, long, arg_enum)]
+        #[clap(short, long, value_enum)]
         analysis: Analysis,
         /// Page number
         #[clap(short = 'p', long, default_value_t = 0)]
@@ -306,7 +306,7 @@ pub enum Command {
     /// Manage API key
     Apikey {
         /// Action to perform
-        #[clap(short, long, arg_enum)]
+        #[clap(short, long, value_enum)]
         action: ApiKeyAction,
     },
     /// Manage Organizations
