@@ -1,12 +1,8 @@
 use std::{fs::File, path::Path};
 
 use anyhow::{anyhow, Result};
+use comfy_table::{Cell, CellAlignment, Row, Table};
 use serde::{Deserialize, Serialize};
-use term_table::{
-    row::Row,
-    table_cell::{Alignment, TableCell},
-    Table, TableStyle,
-};
 use uuid::Uuid;
 
 use crate::{api::ApiServer, cli::Analysis};
@@ -35,17 +31,16 @@ pub struct Project {
 impl Project {
     pub fn get_table_from_list(list: &[Project]) -> String {
         let mut table = Table::new();
-        table.style = TableStyle::simple();
-        table.max_column_width = 40;
-        table.add_row(Row::new(vec![
-            TableCell::new("NAME"),
-            TableCell::new("ID"),
-            TableCell::new("DESCRIPTION"),
-            TableCell::new("ORIGINAL NAME"),
-            TableCell::new("ORGANIZATION NAME"),
-            TableCell::new("SCORE"),
-            TableCell::new("TYPE"),
-            TableCell::new("SUBTYPE"),
+        // table.max_column_width = 40;
+        table.add_row(Row::from(vec![
+            Cell::new("NAME"),
+            Cell::new("ID"),
+            Cell::new("DESCRIPTION"),
+            Cell::new("ORIGINAL NAME"),
+            Cell::new("ORGANIZATION NAME"),
+            Cell::new("SCORE"),
+            Cell::new("TYPE"),
+            Cell::new("SUBTYPE"),
         ]));
 
         let rows: Vec<Row> = list
@@ -62,24 +57,24 @@ impl Project {
                     .map(|s| s.to_string())
                     .unwrap_or_default();
                 vec![
-                    TableCell::new(&project.name),
-                    TableCell::new(&project.id),
-                    TableCell::new(desc),
-                    TableCell::new(&project.original_name),
-                    TableCell::new(org),
-                    TableCell::new(&project.score),
-                    TableCell::new(&project.project_type),
-                    TableCell::new(&project.project_subtype),
+                    Cell::new(&project.name),
+                    Cell::new(&project.id),
+                    Cell::new(desc),
+                    Cell::new(&project.original_name),
+                    Cell::new(org),
+                    Cell::new(&project.score),
+                    Cell::new(&project.project_type),
+                    Cell::new(&project.project_subtype),
                 ]
             })
-            .map(Row::new)
+            .map(Row::from)
             .collect();
 
         for row in rows {
             table.add_row(row);
         }
 
-        table.render()
+        table.to_string()
     }
 }
 
@@ -191,50 +186,49 @@ pub struct LinuxHardeningAnalysis {
 impl LinuxHardeningAnalysis {
     pub fn get_table_from_list(list: &[LinuxHardeningAnalysis]) -> String {
         let mut table = Table::new();
-        table.max_column_width = 50;
-        table.style = TableStyle::simple();
-        table.add_row(Row::new(vec![
-            TableCell::new("NAME"),
-            TableCell::new_with_alignment("HARDENING", 8, Alignment::Center),
-            TableCell::new("SCORE"),
+        // table.max_column_width = 50;
+        table.add_row(Row::from(vec![
+            Cell::new("NAME"),
+            Cell::new("HARDENING").set_alignment(CellAlignment::Center),
+            Cell::new("SCORE"),
         ]));
-        table.add_row(Row::new(vec![
-            TableCell::new(""),
-            TableCell::new("CANARY"),
-            TableCell::new("FORTIFY"),
-            TableCell::new("NX"),
-            TableCell::new("PIE"),
-            TableCell::new("RELRO"),
-            TableCell::new("EXEC STACK"),
-            TableCell::new("SUID"),
-            TableCell::new("STRIPPED"),
-            TableCell::new(""),
+        table.add_row(Row::from(vec![
+            Cell::new(""),
+            Cell::new("CANARY"),
+            Cell::new("FORTIFY"),
+            Cell::new("NX"),
+            Cell::new("PIE"),
+            Cell::new("RELRO"),
+            Cell::new("EXEC STACK"),
+            Cell::new("SUID"),
+            Cell::new("STRIPPED"),
+            Cell::new(""),
         ]));
 
         let rows: Vec<Row> = list
             .iter()
             .map(|project| {
                 vec![
-                    TableCell::new(&project.filename),
-                    TableCell::new(&project.canary),
-                    TableCell::new(&project.fortify),
-                    TableCell::new(&project.nx),
-                    TableCell::new(&project.pie),
-                    TableCell::new(&project.relro),
-                    TableCell::new(&project.execstack),
-                    TableCell::new(&project.suid),
-                    TableCell::new(&project.stripped),
-                    TableCell::new(&project.score),
+                    Cell::new(&project.filename),
+                    Cell::new(&project.canary),
+                    Cell::new(&project.fortify),
+                    Cell::new(&project.nx),
+                    Cell::new(&project.pie),
+                    Cell::new(&project.relro),
+                    Cell::new(&project.execstack),
+                    Cell::new(&project.suid),
+                    Cell::new(&project.stripped),
+                    Cell::new(&project.score),
                 ]
             })
-            .map(Row::new)
+            .map(Row::from)
             .collect();
 
         for row in rows {
             table.add_row(row);
         }
 
-        table.render()
+        table.to_string()
     }
 }
 
@@ -257,36 +251,35 @@ pub struct LinuxCveCheckAnalysis {
 impl LinuxCveCheckAnalysis {
     pub fn get_table_from_list(list: &[LinuxCveCheckAnalysis]) -> String {
         let mut table = Table::new();
-        table.style = TableStyle::simple();
-        table.max_column_width = 30;
-        table.set_max_width_for_column(4, 50);
-        table.add_row(Row::new(vec![
-            TableCell::new("PRODUCT"),
-            TableCell::new("VERSION"),
-            TableCell::new("CVE ID"),
-            TableCell::new("SEVERITY"),
-            TableCell::new("DETAILS"),
+        // table.max_column_width = 30;
+        // table.set_max_width_for_column(4, 50);
+        table.add_row(Row::from(vec![
+            Cell::new("PRODUCT"),
+            Cell::new("VERSION"),
+            Cell::new("CVE ID"),
+            Cell::new("SEVERITY"),
+            Cell::new("DETAILS"),
         ]));
 
         let rows: Vec<Row> = list
             .iter()
             .map(|project| {
                 vec![
-                    TableCell::new(&project.product),
-                    TableCell::new(&project.version),
-                    TableCell::new(&project.cveid),
-                    TableCell::new(&project.severity),
-                    TableCell::new(format!("{}{}", CVE_DETAILS_BASE_URL, &project.cveid)),
+                    Cell::new(&project.product),
+                    Cell::new(&project.version),
+                    Cell::new(&project.cveid),
+                    Cell::new(&project.severity),
+                    Cell::new(format!("{}{}", CVE_DETAILS_BASE_URL, &project.cveid)),
                 ]
             })
-            .map(Row::new)
+            .map(Row::from)
             .collect();
 
         for row in rows {
             table.add_row(row);
         }
 
-        table.render()
+        table.to_string()
     }
 }
 
@@ -300,29 +293,20 @@ pub struct LinuxSecurityScanAnalysis {
 impl LinuxSecurityScanAnalysis {
     pub fn get_table_from_list(list: &[LinuxSecurityScanAnalysis]) -> String {
         let mut table = Table::new();
-        table.style = TableStyle::simple();
-        table.max_column_width = 30;
-        table.add_row(Row::new(vec![
-            TableCell::new("NAME"),
-            TableCell::new("DESCRIPTION"),
-        ]));
+        // table.max_column_width = 30;
+        table.add_row(Row::from(vec![Cell::new("NAME"), Cell::new("DESCRIPTION")]));
 
         let rows: Vec<Row> = list
             .iter()
-            .map(|project| {
-                vec![
-                    TableCell::new(&project.filename),
-                    TableCell::new(&project.desc),
-                ]
-            })
-            .map(Row::new)
+            .map(|project| vec![Cell::new(&project.filename), Cell::new(&project.desc)])
+            .map(Row::from)
             .collect();
 
         for row in rows {
             table.add_row(row);
         }
 
-        table.render()
+        table.to_string()
     }
 }
 
@@ -335,29 +319,23 @@ pub struct LinuxPasswordHashAnalysis {
 impl LinuxPasswordHashAnalysis {
     pub fn get_table_from_list(list: &[LinuxPasswordHashAnalysis]) -> String {
         let mut table = Table::new();
-        table.style = TableStyle::simple();
-        table.max_column_width = 30;
-        table.add_row(Row::new(vec![
-            TableCell::new("USERNAME"),
-            TableCell::new("PASSWORD"),
+        // table.max_column_width = 30;
+        table.add_row(Row::from(vec![
+            Cell::new("USERNAME"),
+            Cell::new("PASSWORD"),
         ]));
 
         let rows: Vec<Row> = list
             .iter()
-            .map(|project| {
-                vec![
-                    TableCell::new(&project.username),
-                    TableCell::new(&project.password),
-                ]
-            })
-            .map(Row::new)
+            .map(|project| vec![Cell::new(&project.username), Cell::new(&project.password)])
+            .map(Row::from)
             .collect();
 
         for row in rows {
             table.add_row(row);
         }
 
-        table.render()
+        table.to_string()
     }
 }
 
@@ -372,33 +350,32 @@ pub struct LinuxCryptoAnalysis {
 impl LinuxCryptoAnalysis {
     pub fn get_table_from_list(list: &[LinuxCryptoAnalysis]) -> String {
         let mut table = Table::new();
-        table.style = TableStyle::simple();
-        table.max_column_width = 30;
-        table.add_row(Row::new(vec![
-            TableCell::new("NAME"),
-            TableCell::new("TYPE"),
-            TableCell::new("SUBTYPE"),
-            TableCell::new("SIZE"),
+        // table.max_column_width = 30;
+        table.add_row(Row::from(vec![
+            Cell::new("NAME"),
+            Cell::new("TYPE"),
+            Cell::new("SUBTYPE"),
+            Cell::new("SIZE"),
         ]));
 
         let rows: Vec<Row> = list
             .iter()
             .map(|project| {
                 vec![
-                    TableCell::new(&project.filename),
-                    TableCell::new(&project.r#type),
-                    TableCell::new(&project.subtype),
-                    TableCell::new(&project.pubsz),
+                    Cell::new(&project.filename),
+                    Cell::new(&project.r#type),
+                    Cell::new(&project.subtype),
+                    Cell::new(&project.pubsz),
                 ]
             })
-            .map(Row::new)
+            .map(Row::from)
             .collect();
 
         for row in rows {
             table.add_row(row);
         }
 
-        table.render()
+        table.to_string()
     }
 }
 
@@ -412,31 +389,30 @@ pub struct LinuxNvramAnalysis {
 impl LinuxNvramAnalysis {
     pub fn get_table_from_list(list: &[LinuxNvramAnalysis]) -> String {
         let mut table = Table::new();
-        table.style = TableStyle::simple();
-        table.max_column_width = 30;
-        table.add_row(Row::new(vec![
-            TableCell::new("EXECUTABLE NAME"),
-            TableCell::new("FUNCTION TYPE"),
-            TableCell::new("NVRAM NAME"),
+        // table.max_column_width = 30;
+        table.add_row(Row::from(vec![
+            Cell::new("EXECUTABLE NAME"),
+            Cell::new("FUNCTION TYPE"),
+            Cell::new("NVRAM NAME"),
         ]));
 
         let rows: Vec<Row> = list
             .iter()
             .map(|project| {
                 vec![
-                    TableCell::new(&project.exe),
-                    TableCell::new(&project.fun),
-                    TableCell::new(&project.name),
+                    Cell::new(&project.exe),
+                    Cell::new(&project.fun),
+                    Cell::new(&project.name),
                 ]
             })
-            .map(Row::new)
+            .map(Row::from)
             .collect();
 
         for row in rows {
             table.add_row(row);
         }
 
-        table.render()
+        table.to_string()
     }
 }
 
@@ -464,33 +440,32 @@ pub struct LinuxStaticCode {
 impl LinuxStaticCode {
     pub fn get_table_from_list(list: &[LinuxStaticCode]) -> String {
         let mut table = Table::new();
-        table.style = TableStyle::simple();
-        table.max_column_width = 30;
-        table.add_row(Row::new(vec![
-            TableCell::new("NAME"),
-            TableCell::new("LINE"),
-            TableCell::new("DESCRIPTION"),
-            TableCell::new("FLAW TYPE"),
+        // table.max_column_width = 30;
+        table.add_row(Row::from(vec![
+            Cell::new("NAME"),
+            Cell::new("LINE"),
+            Cell::new("DESCRIPTION"),
+            Cell::new("FLAW TYPE"),
         ]));
 
         let rows: Vec<Row> = list
             .iter()
             .map(|project| {
                 vec![
-                    TableCell::new(&project.filename),
-                    TableCell::new(&project.line),
-                    TableCell::new(&project.descr),
-                    TableCell::new(&project.flaw_type),
+                    Cell::new(&project.filename),
+                    Cell::new(&project.line),
+                    Cell::new(&project.descr),
+                    Cell::new(&project.flaw_type),
                 ]
             })
-            .map(Row::new)
+            .map(Row::from)
             .collect();
 
         for row in rows {
             table.add_row(row);
         }
 
-        table.render()
+        table.to_string()
     }
 }
 
@@ -503,28 +478,19 @@ pub struct LinuxKernelAnalysis {
 impl LinuxKernelAnalysis {
     pub fn get_table_from_list(list: &[LinuxKernelAnalysis]) -> String {
         let mut table = Table::new();
-        table.style = TableStyle::simple();
-        table.add_row(Row::new(vec![
-            TableCell::new("FEATURE"),
-            TableCell::new("ENABLED"),
-        ]));
+        table.add_row(Row::from(vec![Cell::new("FEATURE"), Cell::new("ENABLED")]));
 
         let rows: Vec<Row> = list
             .iter()
-            .map(|project| {
-                vec![
-                    TableCell::new(&project.name),
-                    TableCell::new(&project.enabled),
-                ]
-            })
-            .map(Row::new)
+            .map(|project| vec![Cell::new(&project.name), Cell::new(&project.enabled)])
+            .map(Row::from)
             .collect();
 
         for row in rows {
             table.add_row(row);
         }
 
-        table.render()
+        table.to_string()
     }
 }
 
@@ -539,12 +505,11 @@ pub struct LinuxSoftwareBOMAnalysis {
 impl LinuxSoftwareBOMAnalysis {
     pub fn get_table_from_list(list: &[LinuxSoftwareBOMAnalysis]) -> String {
         let mut table = Table::new();
-        table.style = TableStyle::simple();
-        table.add_row(Row::new(vec![
-            TableCell::new("NAME"),
-            TableCell::new("RESOLVE TO"),
-            TableCell::new("OCCURENCES"),
-            TableCell::new("LICENSE"),
+        table.add_row(Row::from(vec![
+            Cell::new("NAME"),
+            Cell::new("RESOLVE TO"),
+            Cell::new("OCCURENCES"),
+            Cell::new("LICENSE"),
         ]));
 
         let rows: Vec<Row> = list
@@ -556,20 +521,20 @@ impl LinuxSoftwareBOMAnalysis {
                     .map(|s| s.to_string())
                     .unwrap_or_default();
                 vec![
-                    TableCell::new(&project.filename),
-                    TableCell::new(&project.resolve),
-                    TableCell::new(&project.occurrences),
-                    TableCell::new(lic),
+                    Cell::new(&project.filename),
+                    Cell::new(&project.resolve),
+                    Cell::new(&project.occurrences),
+                    Cell::new(lic),
                 ]
             })
-            .map(Row::new)
+            .map(Row::from)
             .collect();
 
         for row in rows {
             table.add_row(row);
         }
 
-        table.render()
+        table.to_string()
     }
 }
 
@@ -651,31 +616,30 @@ pub struct UefiAccess {
 impl UefiAccess {
     pub fn get_table_from_list(list: &[UefiAccess]) -> String {
         let mut table = Table::new();
-        table.style = TableStyle::simple();
-        table.max_column_width = 30;
-        table.add_row(Row::new(vec![
-            TableCell::new("REGION"),
-            TableCell::new("READ"),
-            TableCell::new("WRITE"),
+        // table.max_column_width = 30;
+        table.add_row(Row::from(vec![
+            Cell::new("REGION"),
+            Cell::new("READ"),
+            Cell::new("WRITE"),
         ]));
 
         let rows: Vec<Row> = list
             .iter()
             .map(|project| {
                 vec![
-                    TableCell::new(&project.region),
-                    TableCell::new(&project.read),
-                    TableCell::new(&project.write),
+                    Cell::new(&project.region),
+                    Cell::new(&project.read),
+                    Cell::new(&project.write),
                 ]
             })
-            .map(Row::new)
+            .map(Row::from)
             .collect();
 
         for row in rows {
             table.add_row(row);
         }
 
-        table.render()
+        table.to_string()
     }
 }
 
@@ -694,29 +658,20 @@ pub struct UefiIntelBootGuardRsa {
 impl UefiIntelBootGuardRsa {
     pub fn get_table_from_list(list: &[UefiIntelBootGuardRsa]) -> String {
         let mut table = Table::new();
-        table.style = TableStyle::simple();
-        table.max_column_width = 70;
-        table.add_row(Row::new(vec![
-            TableCell::new("NAME"),
-            TableCell::new("VALUE"),
-        ]));
+        // table.max_column_width = 70;
+        table.add_row(Row::from(vec![Cell::new("NAME"), Cell::new("VALUE")]));
 
         let rows: Vec<Row> = list
             .iter()
-            .map(|project| {
-                vec![
-                    TableCell::new(&project.name),
-                    TableCell::new(&project.value),
-                ]
-            })
-            .map(Row::new)
+            .map(|project| vec![Cell::new(&project.name), Cell::new(&project.value)])
+            .map(Row::from)
             .collect();
 
         for row in rows {
             table.add_row(row);
         }
 
-        table.render()
+        table.to_string()
     }
 }
 
@@ -731,31 +686,30 @@ pub struct UefiSurface {
 impl UefiSurface {
     pub fn get_table_from_list(list: &[UefiSurface]) -> String {
         let mut table = Table::new();
-        table.style = TableStyle::simple();
-        table.max_column_width = 40;
-        table.add_row(Row::new(vec![
-            TableCell::new("NAME"),
-            TableCell::new("TYPE"),
-            TableCell::new("GUID"),
+        // table.max_column_width = 40;
+        table.add_row(Row::from(vec![
+            Cell::new("NAME"),
+            Cell::new("TYPE"),
+            Cell::new("GUID"),
         ]));
 
         let rows: Vec<Row> = list
             .iter()
             .map(|project| {
                 vec![
-                    TableCell::new(&project.name),
-                    TableCell::new(&project.r#type),
-                    TableCell::new(&project.guid),
+                    Cell::new(&project.name),
+                    Cell::new(&project.r#type),
+                    Cell::new(&project.guid),
                 ]
             })
-            .map(Row::new)
+            .map(Row::from)
             .collect();
 
         for row in rows {
             table.add_row(row);
         }
 
-        table.render()
+        table.to_string()
     }
 }
 
@@ -775,7 +729,7 @@ pub struct UefiSecureBootCerts {
 impl UefiSecureBootCerts {
     pub fn get_table_from_list(list: &[UefiSecureBootData], db: &str) -> String {
         let table = UefiSecureBootData::get_table_from_list(list, db);
-        table.render()
+        table.to_string()
     }
 }
 
@@ -798,33 +752,32 @@ pub struct UefiSecureBootData {
 }
 
 impl UefiSecureBootData {
-    pub fn get_table_from_list<'a>(list: &'a [UefiSecureBootData], db: &'a str) -> Table<'a> {
+    pub fn get_table_from_list(list: &[UefiSecureBootData], db: &str) -> Table {
         let mut table = Table::new();
-        table.style = TableStyle::simple();
-        table.max_column_width = 50;
-        table.add_row(Row::new(vec![
-            TableCell::new("NAME"),
-            TableCell::new("ISSUED BY"),
-            TableCell::new("ISSUED TO"),
+        // table.max_column_width = 50;
+        table.add_row(Row::from(vec![
+            Cell::new("NAME"),
+            Cell::new("ISSUED BY"),
+            Cell::new("ISSUED TO"),
         ]));
 
         let rows: Vec<Row> = list
             .iter()
             .map(|project| {
                 vec![
-                    TableCell::new(db),
-                    TableCell::new(&project.first),
-                    TableCell::new(&project.second),
+                    Cell::new(db),
+                    Cell::new(&project.first),
+                    Cell::new(&project.second),
                 ]
             })
-            .map(Row::new)
+            .map(Row::from)
             .collect();
 
         for row in rows {
             table.add_row(row);
         }
         table
-        //table.render()
+        //table.to_string()
     }
 }
 
@@ -838,30 +791,29 @@ pub struct UefiSecurityScan {
 impl UefiSecurityScan {
     pub fn get_table_from_list(list: &[UefiSecurityScan]) -> String {
         let mut table = Table::new();
-        table.style = TableStyle::simple();
-        table.max_column_width = 50;
-        table.add_row(Row::new(vec![
-            TableCell::new("NAME"),
-            TableCell::new("MODULE"),
-            TableCell::new("GUID"),
+        // table.max_column_width = 50;
+        table.add_row(Row::from(vec![
+            Cell::new("NAME"),
+            Cell::new("MODULE"),
+            Cell::new("GUID"),
         ]));
 
         let rows: Vec<Row> = list
             .iter()
             .map(|project| {
                 vec![
-                    TableCell::new(&project.name),
-                    TableCell::new(&project.module),
-                    TableCell::new(&project.guid),
+                    Cell::new(&project.name),
+                    Cell::new(&project.module),
+                    Cell::new(&project.guid),
                 ]
             })
-            .map(Row::new)
+            .map(Row::from)
             .collect();
 
         for row in rows {
             table.add_row(row);
         }
-        table.render()
+        table.to_string()
     }
 }
 
@@ -879,34 +831,33 @@ pub struct UefiPeimDxe {
 impl UefiPeimDxe {
     pub fn get_table_from_list(list: &[UefiPeimDxe]) -> String {
         let mut table = Table::new();
-        table.style = TableStyle::simple();
-        table.max_column_width = 50;
-        table.add_row(Row::new(vec![
-            TableCell::new("NAME"),
-            TableCell::new("FILETYPE"),
-            TableCell::new("FORMAT"),
-            TableCell::new("MACHINE"),
-            TableCell::new("TYPE"),
+        // table.max_column_width = 50;
+        table.add_row(Row::from(vec![
+            Cell::new("NAME"),
+            Cell::new("FILETYPE"),
+            Cell::new("FORMAT"),
+            Cell::new("MACHINE"),
+            Cell::new("TYPE"),
         ]));
 
         let rows: Vec<Row> = list
             .iter()
             .map(|project| {
                 vec![
-                    TableCell::new(&project.name),
-                    TableCell::new(&project.filetype),
-                    TableCell::new(&project.format),
-                    TableCell::new(&project.machine),
-                    TableCell::new(&project.r#type),
+                    Cell::new(&project.name),
+                    Cell::new(&project.filetype),
+                    Cell::new(&project.format),
+                    Cell::new(&project.machine),
+                    Cell::new(&project.r#type),
                 ]
             })
-            .map(Row::new)
+            .map(Row::from)
             .collect();
 
         for row in rows {
             table.add_row(row);
         }
-        table.render()
+        table.to_string()
     }
 }
 
@@ -963,30 +914,29 @@ pub struct VxworksData {
 impl VxworksData {
     pub fn get_table_from_list(list: &[VxworksData]) -> String {
         let mut table = Table::new();
-        table.style = TableStyle::simple();
-        table.max_column_width = 50;
-        table.add_row(Row::new(vec![
-            TableCell::new("NAME"),
-            TableCell::new("OFFSET"),
-            TableCell::new("SIZE"),
+        // table.max_column_width = 50;
+        table.add_row(Row::from(vec![
+            Cell::new("NAME"),
+            Cell::new("OFFSET"),
+            Cell::new("SIZE"),
         ]));
 
         let rows: Vec<Row> = list
             .iter()
             .map(|project| {
                 vec![
-                    TableCell::new(&project.name),
-                    TableCell::new(&project.offset),
-                    TableCell::new(&project.size),
+                    Cell::new(&project.name),
+                    Cell::new(&project.offset),
+                    Cell::new(&project.size),
                 ]
             })
-            .map(Row::new)
+            .map(Row::from)
             .collect();
 
         for row in rows {
             table.add_row(row);
         }
-        table.render()
+        table.to_string()
     }
 }
 
@@ -1000,30 +950,29 @@ pub struct VxworksTask {
 impl VxworksTask {
     pub fn get_table_from_list(list: &[VxworksTask]) -> String {
         let mut table = Table::new();
-        table.style = TableStyle::simple();
-        table.max_column_width = 50;
-        table.add_row(Row::new(vec![
-            TableCell::new("TASK NAME"),
-            TableCell::new("TASK ADDRESS"),
-            TableCell::new("FUNCTION NAME"),
+        // table.max_column_width = 50;
+        table.add_row(Row::from(vec![
+            Cell::new("TASK NAME"),
+            Cell::new("TASK ADDRESS"),
+            Cell::new("FUNCTION NAME"),
         ]));
 
         let rows: Vec<Row> = list
             .iter()
             .map(|project| {
                 vec![
-                    TableCell::new(&project.task_name),
-                    TableCell::new(&project.task_addr),
-                    TableCell::new(&project.fcn_name),
+                    Cell::new(&project.task_name),
+                    Cell::new(&project.task_addr),
+                    Cell::new(&project.fcn_name),
                 ]
             })
-            .map(Row::new)
+            .map(Row::from)
             .collect();
 
         for row in rows {
             table.add_row(row);
         }
-        table.render()
+        table.to_string()
     }
 }
 
@@ -1036,28 +985,27 @@ pub struct VxworksCapability {
 impl VxworksCapability {
     pub fn get_table_from_list(list: &[VxworksCapability]) -> String {
         let mut table = Table::new();
-        table.style = TableStyle::simple();
-        table.max_column_width = 50;
-        table.add_row(Row::new(vec![
-            TableCell::new("NAME"),
-            TableCell::new("CAPABILITIES"),
+        // table.max_column_width = 50;
+        table.add_row(Row::from(vec![
+            Cell::new("NAME"),
+            Cell::new("CAPABILITIES"),
         ]));
 
         let rows: Vec<Row> = list
             .iter()
             .map(|project| {
                 vec![
-                    TableCell::new(&project.name),
-                    TableCell::new(&project.caps.join(", ")),
+                    Cell::new(&project.name),
+                    Cell::new(&project.caps.join(", ")),
                 ]
             })
-            .map(Row::new)
+            .map(Row::from)
             .collect();
 
         for row in rows {
             table.add_row(row);
         }
-        table.render()
+        table.to_string()
     }
 }
 
