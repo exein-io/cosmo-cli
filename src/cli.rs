@@ -3,6 +3,8 @@ use std::{env, ffi::OsString, fmt};
 use clap::{ArgEnum, Args, FromArgMatches, IntoApp, Parser, Subcommand};
 use uuid::Uuid;
 
+use super::COSMO_API_SERVER;
+
 #[derive(Debug, Clone, ArgEnum)]
 pub enum OutputMode {
     Text,
@@ -11,7 +13,8 @@ pub enum OutputMode {
 
 #[derive(Debug, Clone)]
 pub struct CosmoCliOpts {
-    pub api_server: Option<String>,
+    pub api_server: String,
+    pub api_key: String,
     pub log_level_filter: log::LevelFilter,
     pub output_mode: OutputMode,
     pub command: Command,
@@ -26,8 +29,11 @@ where
     #[clap(about, version = crate::version())]
     struct BaseCosmoCliOpts {
         /// Specify custom api server
+        #[clap(long, default_value_t= COSMO_API_SERVER.to_string())]
+        api_server: String,
+        // Api Key
         #[clap(long)]
-        api_server: Option<String>,
+        api_key: String,
         /// Verbosity
         #[clap(flatten)]
         verbose: clap_verbosity_flag::Verbosity<clap_verbosity_flag::InfoLevel>,
@@ -63,6 +69,7 @@ where
 
     Ok(CosmoCliOpts {
         api_server: base.api_server,
+        api_key: base.api_key,
         log_level_filter: base.verbose.log_level_filter(),
         output_mode,
         command,

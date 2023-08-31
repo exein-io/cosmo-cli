@@ -1,12 +1,11 @@
 use async_trait::async_trait;
 use lazy_static::lazy_static;
-use reqwest::header::{AUTHORIZATION, USER_AGENT};
+use reqwest::header::USER_AGENT;
 use std::{collections::HashMap, fs::File, io::Write, path::Path};
 use uuid::Uuid;
 
 use crate::{
     cli::Analysis,
-    security::{AuthData, AuthError, AuthSystem},
     services::{
         apikey_service::ApiKeyData,
         organization_service::OrganizationData,
@@ -20,37 +19,22 @@ lazy_static! {
     pub static ref CLI_USER_AGENT: String = format!("ExeinCosmoCLI/{}", crate::version());
 }
 
+const X_API_KEY: &str = "X-API-KEY";
+
 const PROJECT_ROUTE_V1: &str = "/api/v1/projects";
 const ORGANIZATION_ROUTE_V1: &str = "/api/v1/organizations";
 const APIKEY_ROUTE_V1: &str = "/api/v1/api_key";
 const UPDATES_ROUTE: &str = "/api/updates_check";
 
 #[derive(Debug)]
-pub struct HttpApiServer<U: AuthSystem> {
+pub struct HttpApiServer {
     address: String,
-    auth_service: U,
+    apikey: String,
 }
 
-impl<U: AuthSystem> HttpApiServer<U> {
-    pub fn new(address: String, auth_service: U) -> Self {
-        Self {
-            address,
-            auth_service,
-        }
-    }
-
-    pub async fn authenticate(&mut self) -> Result<AuthData, AuthError> {
-        if let Ok(auth_data) = self.auth_service.logged_in().await {
-            Ok(auth_data)
-        } else if let Ok(auth_data) = self.auth_service.refresh().await {
-            Ok(auth_data)
-        } else {
-            let (email, password) = crate::read_username_and_password_from_stdin();
-            self.auth_service.login(&email, &password).await
-        }
-    }
-    pub async fn logout(&mut self) -> Result<(), AuthError> {
-        self.auth_service.logout().await
+impl HttpApiServer {
+    pub async fn new(address: String, apikey: String) -> Self {
+        Self { address, apikey }
     }
 
     fn request(&self, path: &str, method: reqwest::Method) -> reqwest::RequestBuilder {
@@ -67,19 +51,21 @@ impl<U: AuthSystem> HttpApiServer<U> {
         method: reqwest::Method,
         query: Option<&[(&str, &String)]>,
     ) -> Result<reqwest::RequestBuilder, ApiServerError> {
-        let auth_data = self.authenticate().await?;
         let req = self
             .request(path, method)
             .query(&query)
-            .header(AUTHORIZATION, format!("Bearer {}", auth_data.token));
+            .header(X_API_KEY, &self.apikey);
 
         Ok(req)
     }
 }
 
-// Http
-impl<U: AuthSystem> HttpApiServer<U> {
-    pub async fn updates_check(&self) -> Result<LatestCliVersion, ApiServerError> {
+#[async_trait]
+impl ApiServer for HttpApiServer {
+    fn address(&self) -> &str {
+        &self.address
+    }
+    async fn updates_check(&self) -> Result<LatestCliVersion, ApiServerError> {
         let response = self
             .request(UPDATES_ROUTE, reqwest::Method::GET)
             .send()
@@ -95,7 +81,7 @@ impl<U: AuthSystem> HttpApiServer<U> {
         }
     }
 
-    pub async fn create(
+    async fn create(
         &mut self,
         fw_filepath: &str,
         fw_type: &str,
@@ -169,10 +155,7 @@ impl<U: AuthSystem> HttpApiServer<U> {
         }
     }
 
-    pub async fn overview(
-        &mut self,
-        project_id: &Uuid,
-    ) -> Result<serde_json::Value, ApiServerError> {
+    async fn overview(&mut self, project_id: &Uuid) -> Result<serde_json::Value, ApiServerError> {
         let path = format!("{}/{}/overview", PROJECT_ROUTE_V1, project_id).to_string();
 
         let response = self
@@ -189,11 +172,7 @@ impl<U: AuthSystem> HttpApiServer<U> {
         }
     }
 
-    pub async fn report(
-        &mut self,
-        project_id: &Uuid,
-        savepath: &Path,
-    ) -> Result<(), ApiServerError> {
+    async fn report(&mut self, project_id: &Uuid, savepath: &Path) -> Result<(), ApiServerError> {
         let path = format!("{}/{}/report", PROJECT_ROUTE_V1, project_id).to_string();
 
         let response = self
@@ -228,7 +207,7 @@ impl<U: AuthSystem> HttpApiServer<U> {
         }
     }
 
-    pub async fn analysis(
+    async fn analysis(
         &mut self,
         project_id: &Uuid,
         analysis: &Analysis,
@@ -254,7 +233,7 @@ impl<U: AuthSystem> HttpApiServer<U> {
         }
     }
 
-    pub async fn delete(&mut self, project_id: &Uuid) -> Result<(), ApiServerError> {
+    async fn delete(&mut self, project_id: &Uuid) -> Result<(), ApiServerError> {
         let path = format!("{}/{}", PROJECT_ROUTE_V1, project_id).to_string();
 
         let response = self
@@ -270,7 +249,7 @@ impl<U: AuthSystem> HttpApiServer<U> {
         }
     }
 
-    pub async fn list_projects(&mut self) -> Result<Vec<Project>, ApiServerError> {
+    async fn list_projects(&mut self) -> Result<Vec<Project>, ApiServerError> {
         let organizations = self.organization_list().await?;
 
         let mut projects: Vec<Project> = vec![];
@@ -295,7 +274,7 @@ impl<U: AuthSystem> HttpApiServer<U> {
         Ok(projects)
     }
 
-    pub async fn organization_list(&mut self) -> Result<Vec<OrganizationData>, ApiServerError> {
+    async fn organization_list(&mut self) -> Result<Vec<OrganizationData>, ApiServerError> {
         let response = self
             .authenticated_request(ORGANIZATION_ROUTE_V1, reqwest::Method::GET, None)
             .await?
@@ -311,7 +290,7 @@ impl<U: AuthSystem> HttpApiServer<U> {
         }
     }
 
-    pub async fn organization_create(
+    async fn organization_create(
         &mut self,
         name: &str,
         description: &str,
@@ -336,7 +315,7 @@ impl<U: AuthSystem> HttpApiServer<U> {
         }
     }
 
-    pub async fn organization_delete(&mut self, id: &Uuid) -> Result<(), ApiServerError> {
+    async fn organization_delete(&mut self, id: &Uuid) -> Result<(), ApiServerError> {
         let path = format!("{}/{}", ORGANIZATION_ROUTE_V1, id).to_string();
 
         let response = self
@@ -353,7 +332,7 @@ impl<U: AuthSystem> HttpApiServer<U> {
         }
     }
 
-    pub async fn apikey_create(&mut self) -> Result<ApiKeyData, ApiServerError> {
+    async fn apikey_create(&mut self) -> Result<ApiKeyData, ApiServerError> {
         let response = self
             .authenticated_request(APIKEY_ROUTE_V1, reqwest::Method::POST, None)
             .await?
@@ -373,7 +352,7 @@ impl<U: AuthSystem> HttpApiServer<U> {
         }
     }
 
-    pub async fn apikey_list(&mut self) -> Result<Option<ApiKeyData>, ApiServerError> {
+    async fn apikey_list(&mut self) -> Result<Option<ApiKeyData>, ApiServerError> {
         let response = self
             .authenticated_request(APIKEY_ROUTE_V1, reqwest::Method::GET, None)
             .await?
@@ -391,7 +370,7 @@ impl<U: AuthSystem> HttpApiServer<U> {
         }
     }
 
-    pub async fn apikey_delete(&mut self) -> Result<(), ApiServerError> {
+    async fn apikey_delete(&mut self) -> Result<(), ApiServerError> {
         let response = self
             .authenticated_request(APIKEY_ROUTE_V1, reqwest::Method::DELETE, None)
             .await?
@@ -404,101 +383,5 @@ impl<U: AuthSystem> HttpApiServer<U> {
             let body = response.text().await?;
             Err(ApiServerError::ApiError(body))
         }
-    }
-}
-
-#[async_trait(?Send)]
-impl<U: AuthSystem> ApiServer for HttpApiServer<U> {
-    fn address(&self) -> &str {
-        &self.address
-    }
-    async fn updates_check(&self) -> Result<LatestCliVersion, ApiServerError> {
-        self.updates_check().await
-    }
-
-    async fn create(
-        &mut self,
-        fw_filepath: &str,
-        fw_type: &str,
-        fw_subtype: &str,
-        name: &str,
-        description: Option<&str>,
-        organization: Option<&str>,
-    ) -> Result<Uuid, ApiServerError> {
-        self.create(
-            fw_filepath,
-            fw_type,
-            fw_subtype,
-            name,
-            description,
-            organization,
-        )
-        .await
-    }
-
-    async fn overview(&mut self, project_id: &Uuid) -> Result<serde_json::Value, ApiServerError> {
-        self.overview(project_id).await
-    }
-
-    async fn report(&mut self, project_id: &Uuid, savepath: &Path) -> Result<(), ApiServerError> {
-        self.report(project_id, savepath).await
-    }
-
-    async fn analysis(
-        &mut self,
-        project_id: &Uuid,
-        analysis: &Analysis,
-        page: i32,
-        per_page: i32,
-    ) -> Result<ProjectAnalysis, ApiServerError> {
-        self.analysis(project_id, analysis, page, per_page).await
-    }
-
-    async fn delete(&mut self, project_id: &Uuid) -> Result<(), ApiServerError> {
-        self.delete(project_id).await
-    }
-
-    async fn list_projects(&mut self) -> Result<Vec<Project>, ApiServerError> {
-        self.list_projects().await
-    }
-
-    async fn authenticate(&mut self) -> Result<AuthData, AuthError> {
-        self.authenticate().await
-    }
-
-    async fn login(&mut self) -> Result<(), AuthError> {
-        self.login().await
-    }
-
-    async fn logout(&mut self) -> Result<(), AuthError> {
-        self.logout().await
-    }
-
-    async fn apikey_create(&mut self) -> Result<ApiKeyData, ApiServerError> {
-        self.apikey_create().await
-    }
-
-    async fn apikey_list(&mut self) -> Result<Option<ApiKeyData>, ApiServerError> {
-        self.apikey_list().await
-    }
-
-    async fn apikey_delete(&mut self) -> Result<(), ApiServerError> {
-        self.apikey_delete().await
-    }
-
-    async fn organization_create(
-        &mut self,
-        name: &str,
-        description: &str,
-    ) -> Result<(), ApiServerError> {
-        self.organization_create(name, description).await
-    }
-
-    async fn organization_list(&mut self) -> Result<Vec<OrganizationData>, ApiServerError> {
-        self.organization_list().await
-    }
-
-    async fn organization_delete(&mut self, id: &Uuid) -> Result<(), ApiServerError> {
-        self.organization_delete(id).await
     }
 }

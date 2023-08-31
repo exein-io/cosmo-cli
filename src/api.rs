@@ -6,7 +6,6 @@ use uuid::Uuid;
 
 use crate::{
     cli::Analysis,
-    security::{AuthData, AuthError},
     services::{
         apikey_service::ApiKeyData,
         organization_service::OrganizationData,
@@ -30,13 +29,6 @@ pub enum ApiServerError {
     RequestError(String),
     ResponseError(String),
     ApiError(String),
-    AuthenticationError(AuthError),
-}
-
-impl From<AuthError> for ApiServerError {
-    fn from(err: AuthError) -> Self {
-        Self::AuthenticationError(err)
-    }
 }
 
 impl From<reqwest::Error> for ApiServerError {
@@ -54,16 +46,14 @@ impl Display for ApiServerError {
             }
             Self::RequestError(err) => write!(f, "Error with the request: {}", err),
             Self::ResponseError(err) => write!(f, "Error with the response: {}", err),
-            Self::AuthenticationError(err) => write!(f, "{}", err),
         }
     }
 }
 impl std::error::Error for ApiServerError {}
 
-#[async_trait(?Send)]
+#[async_trait]
 pub trait ApiServer {
     fn address(&self) -> &str;
-    async fn authenticate(&mut self) -> Result<AuthData, AuthError>;
     async fn updates_check(&self) -> Result<LatestCliVersion, ApiServerError>;
     async fn create(
         &mut self,
@@ -85,8 +75,6 @@ pub trait ApiServer {
     async fn delete(&mut self, project_id: &Uuid) -> Result<(), ApiServerError>;
     async fn report(&mut self, project_id: &Uuid, savepath: &Path) -> Result<(), ApiServerError>;
     async fn list_projects(&mut self) -> Result<Vec<Project>, ApiServerError>;
-    async fn login(&mut self) -> Result<(), AuthError>;
-    async fn logout(&mut self) -> Result<(), AuthError>;
     async fn organization_create(
         &mut self,
         name: &str,
