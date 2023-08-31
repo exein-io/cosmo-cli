@@ -19,8 +19,14 @@ use crate::{
 
 pub mod api;
 pub mod cli;
-pub mod security;
-pub mod services;
+
+mod services {
+    pub mod apikey_service;
+    pub mod organization_service;
+    pub mod project_service;
+}
+
+const COSMO_API_SERVER: &str = "https://cosmo-api.exein.io:443";
 
 pub fn version() -> &'static str {
     #[cfg(debug_assertions)]
@@ -61,7 +67,7 @@ and install it by running ./exein-analyzer-cli-installer.run in your terminal.
 }
 
 // TODO: hadle unwraps
-fn read_username_and_password_from_stdin() -> (String, String) {
+pub fn read_username_and_password_from_stdin() -> (String, String) {
     let stdin = io::stdin();
     let mut iterator = stdin.lock().lines();
     println!("If you haven't registered an account with Exein yet, visit hub.exein.io/signup to continue\n");
@@ -77,15 +83,6 @@ pub async fn run_cmd<U: ApiServer>(
     api_server: &mut U,
 ) -> Result<Box<dyn CommandOutput>, anyhow::Error> {
     // check_version(api_server).await?; //TODO
-
-    // Authentication
-    if let Command::Logout = cmd {
-        // Skip auth if logout command
-    } else {
-        log::debug!("Startup login");
-        let auth_data = api_server.authenticate().await?;
-        log::info!("Logged in as: {}", auth_data.username);
-    }
 
     let cmd_output: Box<dyn CommandOutput> = match cmd {
         Command::CreateProject {
@@ -127,10 +124,7 @@ pub async fn run_cmd<U: ApiServer>(
             Box::new(projects)
         }
         Command::Login => Box::new(()),
-        Command::Logout => {
-            api_server.logout().await?;
-            Box::new("Logout successfully")
-        }
+        Command::Logout => unreachable!(),
         Command::Overview { project_id } => {
             let overview = project_service::overview(api_server, project_id).await?;
             log::debug!("res:: {:#?}", overview);

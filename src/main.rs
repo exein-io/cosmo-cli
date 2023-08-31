@@ -1,18 +1,8 @@
-use std::{
-    env,
-    path::{Path, PathBuf},
-};
+use std::path::{Path, PathBuf};
 
-use cosmo_cli::{
-    api::HttpApiServer,
-    cli,
-    security::{firebase::Firebase, token_cacher::TokenCacher},
-};
+use cosmo_cli::{api::HttpApiServer, cli};
 use lazy_static::lazy_static;
 use log::LevelFilter;
-
-const FIREBASE_API_KEY: &str = "AIzaSyBbu0Q_aIz5g1jxA4f_1WR55sFaUmlnpxY";
-const COSMO_API_SERVER: &str = "https://cosmo-api.exein.io:443";
 
 /// Setup the logger given the `LevelFilter`.
 fn setup_logger(filter: LevelFilter) {
@@ -53,38 +43,19 @@ async fn main() {
         homepage: "https://cosmo.exein.io".into(),
     });
 
-    // Uses Firebase behind a token cache layer
-    let token_cacher = {
-        // Uses firebase api key from environment if present otherwise uses the default one.
-        // TIP: Use this environment variable for development
-        let firebase_api_key = env::var("COSMO_FIREBASE_API_KEY").unwrap_or_else(|err| {
-            const END_MSG: &str = "Using default Firebase API_KEY";
-            match err {
-                env::VarError::NotPresent => {
-                    log::debug!("No custom firebase api key found. {END_MSG}")
-                }
-                env::VarError::NotUnicode(_) => {
-                    log::warn!("Non unicode character found in custom firebase api key. {END_MSG}")
-                }
-            }
-            FIREBASE_API_KEY.into()
-        });
-        let firebase = Firebase::new(firebase_api_key, true);
+    // Authentication // Skip auth if logout command
+    // if let cli::Command::Logout = cli_opts.command {
+    //     if let Err(e) = std::fs::remove_file(token_cache_path()) {
+    //         if let std::io::ErrorKind::NotFound = e.kind() {
+    //             cli::report_error(&e.into());
+    //             std::process::exit(1)
+    //         }
+    //     }
+    //     cli::print_cmd_output(&"Logout successfully", cli_opts.output_mode);
+    //     std::process::exit(0)
+    // }
 
-        TokenCacher {
-            auth_service: firebase,
-            token_path: token_cache_path().to_path_buf(),
-        }
-    };
-
-    // Uses custom server provided in the command line if present
-    // otherwise uses the default one
-    let mut api_server = {
-        let api_server_address = cli_opts
-            .api_server
-            .unwrap_or_else(|| COSMO_API_SERVER.into());
-        HttpApiServer::new(api_server_address, token_cacher)
-    };
+    let mut api_server = HttpApiServer::new(cli_opts.api_server, cli_opts.api_key).await;
 
     // Run Command
     match cosmo_cli::run_cmd(cli_opts.command, &mut api_server).await {
