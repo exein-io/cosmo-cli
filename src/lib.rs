@@ -1,7 +1,4 @@
-use std::{
-    fs::File,
-    io::{self, BufRead, BufReader, Read, Write},
-};
+use std::{fs::File, io::{BufReader, Read}};
 
 use anyhow::{anyhow, bail, Context};
 use api::ApiServer;
@@ -64,18 +61,6 @@ and install it by running ./exein-analyzer-cli-installer.run in your terminal.
     }
 
     Ok(())
-}
-
-// TODO: hadle unwraps
-pub fn read_username_and_password_from_stdin() -> (String, String) {
-    let stdin = io::stdin();
-    let mut iterator = stdin.lock().lines();
-    println!("If you haven't registered an account with Exein yet, visit hub.exein.io/signup to continue\n");
-    print!("Email: ");
-    io::stdout().flush().unwrap();
-    let username = iterator.next().unwrap().unwrap();
-    let password = rpassword::prompt_password("Password: ").unwrap();
-    (username, password)
 }
 
 /// This function panics if cmd is [Command::Setup]
