@@ -41,7 +41,7 @@ impl HttpApiServer {
         let url = format!("{}{}", self.address, path);
 
         reqwest::Client::new()
-            .request(method, &url)
+            .request(method, url)
             .header(USER_AGENT, &*CLI_USER_AGENT)
     }
 
@@ -185,7 +185,7 @@ impl ApiServer for HttpApiServer {
 
         if status == reqwest::StatusCode::OK {
             let bytes = response.bytes().await?;
-            let mut f = File::create(&savepath).map_err(|err| {
+            let mut f = File::create(savepath).map_err(|err| {
                 ApiServerError::RequestError(format!(
                     "Error creating file to: {}. Reason: {}",
                     savepath.display(),

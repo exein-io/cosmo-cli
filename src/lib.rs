@@ -78,6 +78,7 @@ pub fn read_username_and_password_from_stdin() -> (String, String) {
     (username, password)
 }
 
+/// This function panics if cmd is [Command::Setup]
 pub async fn run_cmd<U: ApiServer>(
     cmd: Command,
     api_server: &mut U,
@@ -85,6 +86,9 @@ pub async fn run_cmd<U: ApiServer>(
     // check_version(api_server).await?; //TODO
 
     let cmd_output: Box<dyn CommandOutput> = match cmd {
+        Command::Setup => {
+            unreachable!("handled before")
+        }
         Command::CreateProject {
             fw_filepath,
             fw_type,
@@ -123,15 +127,13 @@ pub async fn run_cmd<U: ApiServer>(
 
             Box::new(projects)
         }
-        Command::Login => Box::new(()),
-        Command::Logout => unreachable!(),
         Command::Overview { project_id } => {
             let overview = project_service::overview(api_server, project_id).await?;
             log::debug!("res:: {:#?}", overview);
 
             let fw_type = overview["project"]["project_type"]
                 .as_str()
-                .context("Error extracting string")?;
+                .context("error extracting string")?;
             log::debug!("project type {}", fw_type);
             match fw_type {
                 "LINUX" => {
@@ -427,7 +429,7 @@ pub async fn run_cmd<U: ApiServer>(
                     Analysis::SecureBoot => {
                         impl CommandOutput for UefiSecureBoot {
                             fn text(&self) -> String {
-                                vec![
+                                [
                                     UefiSecureBootCerts::get_table_from_list(
                                         &self.certs.kek,
                                         "kek",

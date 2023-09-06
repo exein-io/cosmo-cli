@@ -28,9 +28,9 @@ impl OrganizationData {
             .map(|project| {
                 vec![
                     Cell::new(&project.name),
-                    Cell::new(&project.id),
+                    Cell::new(project.id),
                     Cell::new(&project.description),
-                    Cell::new(&project.built_in),
+                    Cell::new(project.built_in),
                 ]
             })
             .map(Row::from)
