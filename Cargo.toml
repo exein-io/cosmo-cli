@@ -29,7 +29,6 @@ lazy_static = "1.4.0"
 uuid = { version = "1.4.1", features = ["serde", "v4"] }
 semver = { version = "1.0.18", features = ["serde"] }
 chrono = { version = "0.4.27", features = ["serde"] }
-rpassword = "7.2.0"
 tokio = { version = "1.32.0", features = ["macros", "rt-multi-thread"] }
 env_logger = "0.10.0"
 dirs = "5.0.1"
