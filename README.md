@@ -21,15 +21,15 @@ cargo build --release
 
 | **Description**                                         | **Command**                                                                                                       |
 | ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Setup the api key                                       | `cosmo setup`                                                                                                     |
 | List personal projects                                  | `cosmo list`<br>`cosmo ls`                                                                                        |
 | List personal projects (output in json)                 | `cosmo list --output json`                                                                                        |
 | Create a new analysis [*](#supported-types)             | `cosmo create --file <FILE> --name <NAME> --type <TYPE> --subtype <SUBTYPE>`<br>`cosmo new --file <FILE> --name <NAME> --type <TYPE> --subtype <SUBTYPE>` |
 | View project results overview                           | `cosmo overview --id <PROJECT_ID>` <br>`cosmo show --id <PROJECT_ID>`                                             |
 | View analysis results[*](#supported-analysis)           | `cosmo analysis --id <PROJECT_ID> --analysis <ANALYSIS>`                                                          |
-| View analysis results (output in json)                  | `cosmo analysis --id <PROJECT_ID> --analysis <ANALYSIS> --output json`                                                          |
+| View analysis results (output in json)                  | `cosmo analysis --id <PROJECT_ID> --analysis <ANALYSIS> --output json`                                            |
 | View paginated analysis results[*](#supported-analysis) | `cosmo analysis --id <PROJECT_ID> --analysis <ANALYSIS> --page 1 --per-page 10`                                   |
 | Delete project                                          | `cosmo delete --id <PROJECT_ID>`<br>`cosmo rm --id <PROJECT_ID>`                                                  |
-| Log out                                                 | `cosmo logout`                                                                                                    |
 | Create an API key                                       | `cosmo apikey --action create`                                                                                    |
 | List API key                                            | `cosmo apikey --action list`                                                                                      |
 | Save PDF report                                         | `cosmo report --id <PROJECT_ID>`                                                                                  |
