@@ -14,7 +14,7 @@ pub enum OutputMode {
 #[derive(Debug, Clone)]
 pub struct CosmoCliOpts {
     pub api_server: String,
-    pub api_key: String,
+    pub api_key: Option<String>,
     pub log_level_filter: log::LevelFilter,
     pub output_mode: OutputMode,
     pub command: Command,
@@ -31,9 +31,9 @@ where
         /// Specify custom api server
         #[clap(long, default_value_t= COSMO_API_SERVER.to_string())]
         api_server: String,
-        // Api Key
+        /// Manually specify the api key
         #[clap(long)]
-        api_key: String,
+        api_key: Option<String>,
         /// Verbosity
         #[clap(flatten)]
         verbose: clap_verbosity_flag::Verbosity<clap_verbosity_flag::InfoLevel>,
@@ -230,6 +230,8 @@ impl fmt::Display for Analysis {
 
 #[derive(Debug, Clone, Subcommand)]
 pub enum Command {
+    /// Setup Api key
+    Setup,
     /// Create project
     #[clap(visible_alias = "new", visible_alias = "create")]
     CreateProject {
@@ -260,10 +262,6 @@ pub enum Command {
     /// List all projects
     #[clap(visible_alias = "ls")]
     List,
-    /// Login to Cosmo
-    Login,
-    /// Logout
-    Logout,
     /// Project overview
     #[clap(visible_alias = "show")]
     Overview {

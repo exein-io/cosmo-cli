@@ -11,7 +11,7 @@ For more info read the [docs](https://docs.exein.io/cosmo/get_started/cli).
 
 ## Build
 
-Requires Rust version 1.59 or higher.
+Requires a recent version of Rust.
   
 ```bash
 cargo build --release

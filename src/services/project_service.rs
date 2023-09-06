@@ -58,11 +58,11 @@ impl Project {
                     .unwrap_or_default();
                 vec![
                     Cell::new(&project.name),
-                    Cell::new(&project.id),
+                    Cell::new(project.id),
                     Cell::new(desc),
                     Cell::new(&project.original_name),
                     Cell::new(org),
-                    Cell::new(&project.score),
+                    Cell::new(project.score),
                     Cell::new(&project.project_type),
                     Cell::new(&project.project_subtype),
                 ]
@@ -209,15 +209,15 @@ impl LinuxHardeningAnalysis {
             .map(|project| {
                 vec![
                     Cell::new(&project.filename),
-                    Cell::new(&project.canary),
-                    Cell::new(&project.fortify),
-                    Cell::new(&project.nx),
+                    Cell::new(project.canary),
+                    Cell::new(project.fortify),
+                    Cell::new(project.nx),
                     Cell::new(&project.pie),
                     Cell::new(&project.relro),
-                    Cell::new(&project.execstack),
-                    Cell::new(&project.suid),
-                    Cell::new(&project.stripped),
-                    Cell::new(&project.score),
+                    Cell::new(project.execstack),
+                    Cell::new(project.suid),
+                    Cell::new(project.stripped),
+                    Cell::new(project.score),
                 ]
             })
             .map(Row::from)
@@ -364,7 +364,7 @@ impl LinuxCryptoAnalysis {
                     Cell::new(&project.filename),
                     Cell::new(&project.r#type),
                     Cell::new(&project.subtype),
-                    Cell::new(&project.pubsz),
+                    Cell::new(project.pubsz),
                 ]
             })
             .map(Row::from)
@@ -481,7 +481,7 @@ impl LinuxKernelAnalysis {
 
         let rows: Vec<Row> = list
             .iter()
-            .map(|project| vec![Cell::new(&project.name), Cell::new(&project.enabled)])
+            .map(|project| vec![Cell::new(&project.name), Cell::new(project.enabled)])
             .map(Row::from)
             .collect();
 
@@ -522,7 +522,7 @@ impl LinuxSoftwareBOMAnalysis {
                 vec![
                     Cell::new(&project.filename),
                     Cell::new(&project.resolve),
-                    Cell::new(&project.occurrences),
+                    Cell::new(project.occurrences),
                     Cell::new(lic),
                 ]
             })
@@ -698,7 +698,7 @@ impl UefiSurface {
                 vec![
                     Cell::new(&project.name),
                     Cell::new(&project.r#type),
-                    Cell::new(&project.guid),
+                    Cell::new(project.guid),
                 ]
             })
             .map(Row::from)
@@ -803,7 +803,7 @@ impl UefiSecurityScan {
                 vec![
                     Cell::new(&project.name),
                     Cell::new(&project.module),
-                    Cell::new(&project.guid),
+                    Cell::new(project.guid),
                 ]
             })
             .map(Row::from)
@@ -925,8 +925,8 @@ impl VxworksData {
             .map(|project| {
                 vec![
                     Cell::new(&project.name),
-                    Cell::new(&project.offset),
-                    Cell::new(&project.size),
+                    Cell::new(project.offset),
+                    Cell::new(project.size),
                 ]
             })
             .map(Row::from)
@@ -961,7 +961,7 @@ impl VxworksTask {
             .map(|project| {
                 vec![
                     Cell::new(&project.task_name),
-                    Cell::new(&project.task_addr),
+                    Cell::new(project.task_addr),
                     Cell::new(&project.fcn_name),
                 ]
             })
@@ -992,12 +992,7 @@ impl VxworksCapability {
 
         let rows: Vec<Row> = list
             .iter()
-            .map(|project| {
-                vec![
-                    Cell::new(&project.name),
-                    Cell::new(&project.caps.join(", ")),
-                ]
-            })
+            .map(|project| vec![Cell::new(&project.name), Cell::new(project.caps.join(", "))])
             .map(Row::from)
             .collect();
 
