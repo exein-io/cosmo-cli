@@ -20,6 +20,7 @@ pub struct Project {
     pub description: Option<String>,
     pub id: Uuid,
     pub name: String,
+    pub status: String,
     pub original_name: String,
     pub organization_name: Option<String>,
     pub score: f32,
@@ -37,10 +38,10 @@ impl Project {
             Cell::new("ID"),
             Cell::new("DESCRIPTION"),
             Cell::new("ORIGINAL NAME"),
-            Cell::new("ORGANIZATION NAME"),
             Cell::new("SCORE"),
             Cell::new("TYPE"),
             Cell::new("SUBTYPE"),
+            Cell::new("STATUS"),
         ]));
 
         let rows: Vec<Row> = list
@@ -51,20 +52,15 @@ impl Project {
                     .as_ref()
                     .map(|s| s.to_string())
                     .unwrap_or_default();
-                let org = project
-                    .organization_name
-                    .as_ref()
-                    .map(|s| s.to_string())
-                    .unwrap_or_default();
                 vec![
                     Cell::new(&project.name),
                     Cell::new(project.id),
                     Cell::new(desc),
                     Cell::new(&project.original_name),
-                    Cell::new(org),
                     Cell::new(project.score),
                     Cell::new(&project.project_type),
                     Cell::new(&project.project_subtype),
+                    Cell::new(&project.status),
                 ]
             })
             .map(Row::from)
@@ -121,7 +117,6 @@ pub struct LinuxProjectOverviewSeverity {
     pub low: u16,
     pub medium: u16,
     pub high: u16,
-    pub critical: Option<u16>,
 }
 
 impl LinuxProjectOverview {
