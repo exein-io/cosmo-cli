@@ -1,4 +1,7 @@
-use std::{fs::File, io::{BufReader, Read}};
+use std::{
+    fs::File,
+    io::{BufReader, Read},
+};
 
 use anyhow::{anyhow, bail, Context};
 use api::ApiServer;
