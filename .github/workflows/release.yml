@@ -4,6 +4,9 @@ on:
     tags:
       - '*'
 
+env:
+  TAG: ${{ github.event.ref }}
+
 jobs:
   vendored_archive:
     name: Vendored archive
@@ -13,10 +16,10 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Create release directory
-        run: rsync -rv --exclude=.git . ../cosmo-${{ env.REGISTRY_TAG }}
+        run: rsync -rv --exclude=.git . ../cosmo-${{ env.TAG }}
 
       - name: Cargo vendor
-        working-directory: ../cosmo-${{ env.REGISTRY_TAG }}
+        working-directory: ../cosmo-${{ env.TAG }}
         run: |
           mkdir ../vendor-cargo-home
           export CARGO_HOME=$(realpath ../vendor-cargo-home)
@@ -27,13 +30,13 @@ jobs:
         working-directory: ../
         id: create-archive
         run: |
-          tar cJf cosmo-vendored-${{ env.REGISTRY_TAG }}.tar.xz cosmo-${{ env.REGISTRY_TAG }}
-          echo "archive_file_name=$(realpath ./cosmo-vendored-${{ env.REGISTRY_TAG }}.tar.xz)" >> $GITHUB_OUTPUT
+          tar cJf cosmo-vendored-${{ env.TAG }}.tar.xz cosmo-${{ env.TAG }}
+          echo "archive_file_name=$(realpath ./cosmo-vendored-${{ env.TAG }}.tar.xz)" >> $GITHUB_OUTPUT
 
       - name: Upload archive
         uses: actions/upload-artifact@v3
         with:
-          name: binaries-${{ env.REGISTRY_TAG }}
+          name: binaries-${{ env.TAG }}
           path: ${{ steps.create-archive.outputs.archive_file_name }}
           if-no-files-found: error
           retention-days: 1
@@ -77,7 +80,7 @@ jobs:
       - name: Upload binary
         uses: actions/upload-artifact@v3
         with:
-          name: binaries-${{ env.REGISTRY_TAG }}
+          name: binaries-${{ env.TAG }}
           path: ${{ steps.rename_binary.outputs.binary_name }}
           if-no-files-found: error
           retention-days: 1
@@ -92,15 +95,15 @@ jobs:
       - name: Download binaries
         uses: actions/download-artifact@v3
         with:
-          name: binaries-${{ env.REGISTRY_TAG }}
+          name: binaries-${{ env.TAG }}
           path: /tmp/binaries
 
       - name: Release
         uses: ncipollo/release-action@v1
         with:
-          name: ${{ env.REGISTRY_TAG }}
+          name: ${{ env.TAG }}
           draft: true
-          tag: ${{ env.REGISTRY_TAG }}
+          tag: ${{ env.TAG }}
           artifacts: "/tmp/binaries/*"
           body: |
             <hr>  
