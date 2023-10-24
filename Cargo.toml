@@ -1,6 +1,6 @@
 [package]
 name = "cosmo-cli"
-version = "0.3.1"
+version = "0.4.0"
 description = "Easy Cosmo pipeline helper"
 authors = [
     "banditopazzo <banditopazzo@gmail.com>",
