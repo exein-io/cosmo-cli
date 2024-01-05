@@ -466,6 +466,12 @@ impl LinuxStaticCode {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct LinuxKernelAnalysis {
+    file: String,
+    features: Vec<LinuxKernelFeatures>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct LinuxKernelFeatures {
     name: String,
     enabled: bool,
 }
@@ -473,16 +479,20 @@ pub struct LinuxKernelAnalysis {
 impl LinuxKernelAnalysis {
     pub fn get_table_from_list(list: &[LinuxKernelAnalysis]) -> String {
         let mut table = Table::new();
-        table.add_row(Row::from(vec![Cell::new("FEATURE"), Cell::new("ENABLED")]));
+        table.add_row(Row::from(vec![
+            Cell::new("KERNEL"),
+            Cell::new("FEATURE"),
+            Cell::new("ENABLED"),
+        ]));
 
-        let rows: Vec<Row> = list
-            .iter()
-            .map(|project| vec![Cell::new(&project.name), Cell::new(project.enabled)])
-            .map(Row::from)
-            .collect();
-
-        for row in rows {
-            table.add_row(row);
+        for project in list {
+            for feature in &project.features {
+                table.add_row(Row::from(vec![
+                    Cell::new(&project.file),
+                    Cell::new(&feature.name),
+                    Cell::new(feature.enabled.to_string()),
+                ]));
+            }
         }
 
         table.to_string()
